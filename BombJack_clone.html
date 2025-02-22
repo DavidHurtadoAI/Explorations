@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <!-- Meta viewport para dispositivos móviles -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Un clon del BombJack por David &amp; Máquina</title>
+  <style>
+    body {
+      margin: 20px;
+      background: #ccc;
+      font-family: Arial, sans-serif;
+    }
+    /* Contenedor que envuelve el canvas: ocupa el 90% del ancho, máximo 500px */
+    #gameContainer {
+      width: 90%;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    /* El canvas se adapta al ancho del contenedor y mantiene la relación de aspecto */
+    canvas {
+      width: 100%;
+      height: auto;
+      border: 5px solid #333;
+      display: block;
+      box-sizing: border-box;
+    }
+    .slider-container {
+      text-align: center;
+      margin-top: 10px;
+    }
+    /* Controles táctiles para móviles */
+    #touchControls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    #touchControls button {
+      font-size: 6vw;
+      padding: 10px;
+      margin: 5px;
+      width: 20vw;
+      height: 20vw;
+      max-width: 80px;
+      max-height: 80px;
+      border: none;
+      border-radius: 10px;
+      background-color: #555;
+      color: white;
+    }
+    #touchControls button:active {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+  <!-- Contenedor para el canvas -->
+  <div id="gameContainer">
+    <!-- Canvas con resolución interna fija de 500x600 -->
+    <canvas id="gameCanvas" width="500" height="600"></canvas>
+  </div>
+  <div class="slider-container">
+    <label for="difficultySlider">Dificultad:</label>
+    <input type="range" id="difficultySlider" min="1" max="10" value="5">
+    <span id="difficultyValue">5</span>
+  </div>
+  <!-- Controles táctiles para móviles -->
+  <div id="touchControls">
+    <button id="btnLeft">←</button>
+    <button id="btnJump">↑</button>
+    <button id="btnRight">→</button>
+  </div>
+  <script>
+    // Resolución interna fija del juego (500x600)
+    const ORIGINAL_WIDTH = 500;
+    const ORIGINAL_HEIGHT = 600;
+    const container = document.getElementById('gameContainer');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Ajusta el tamaño visual del canvas al ancho del contenedor
+    function resizeCanvas() {
+      const containerWidth = container.clientWidth;
+      const newHeight = containerWidth * (ORIGINAL_HEIGHT / ORIGINAL_WIDTH);
+      canvas.style.width = containerWidth + "px";
+      canvas.style.height = newHeight + "px";
+    }
+    window.addEventListener('load', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas);
+
+    // --- Control para iniciar el juego ---
+    let gameStarted = false;
+
+    // --- Slider de dificultad ---
+    const difficultySlider = document.getElementById('difficultySlider');
+    const difficultyValueDisplay = document.getElementById('difficultyValue');
+    let sliderValue = parseInt(difficultySlider.value); // Valor por defecto: 5
+
+    // Función para obtener la "dificultad efectiva" a partir del slider.
+    // - Slider = 5 → efectividad = 2 (nivel intermedio)
+    // - Slider = 1 → efectividad = 1 (más fácil)
+    // - Slider = 10 → efectividad = 3 (más difícil)
+    function getEffectiveDiff(val) {
+      if (val <= 5) {
+        return 2 - (5 - val) / 4;
+      } else {
+        return 2 + (val - 5) / 5;
+      }
+    }
+
+    // Variables base según el slider (sin factor temporal)
+    let initialBombSpawnInterval; // Valor base para el intervalo (ms)
+    let initialBombLifetime;      // Valor base para el tiempo de vida (ms)
+    const minBombSpawnInterval = 300; // Límite inferior fijo
+
+    // Variables para aumentar la dificultad con el tiempo
+    let timeDifficultyFactor = 0; // Incrementa cada 10 segundos
+    let lastDifficultyIncreaseTime = Date.now();
+
+    // Actualiza los parámetros según el slider (sin factor temporal)
+    function updateDifficultyParameters() {
+      sliderValue = parseInt(difficultySlider.value);
+      difficultyValueDisplay.textContent = sliderValue;
+      const effectiveDiff = getEffectiveDiff(sliderValue);
+      // Interpolación lineal:
+      // Intervalo base: de 1800 ms (efectividad 1) a 900 ms (efectividad 3)
+      initialBombSpawnInterval = 1800 - 450 * (effectiveDiff - 1);
+      // Tiempo de vida base: de 6000 ms (efectividad 1) a 3500 ms (efectividad 3)
+      initialBombLifetime = 6000 - 1250 * (effectiveDiff - 1);
+    }
+    updateDifficultyParameters();
+    difficultySlider.addEventListener('input', () => {
+      updateDifficultyParameters();
+      // Reiniciamos el factor temporal si se cambia la dificultad manualmente
+      timeDifficultyFactor = 0;
+      lastDifficultyIncreaseTime = Date.now();
+    });
+
+    // --- Variables globales del juego ---
+    let score = 0;
+    let playerLives = 3;
+    let gameOver = false;
+    let gameOverTime = 0;
+    let startTime = Date.now();
+
+    // Definición del jugador
+    const player = {
+      x: 50,
+      y: 550,  // Posicionado sobre el suelo (suelo a y = 580)
+      width: 30,
+      height: 30,
+      dx: 0,
+      dy: 0,
+      speed: 3,
+      jumpForce: -16,  // Fuerza inicial del salto para un salto más alto
+      onGround: false
+    };
+
+    const gravity = 0.5;
+    const extraGravityBoost = 0.5; // Extra gravedad al soltar la tecla de salto
+
+    // Plataformas adaptadas a la resolución interna (500x600)
+    const platforms = [
+      { x: 0,   y: 580, width: 500, height: 20 },  // Suelo
+      { x: 50,  y: 450, width: 150, height: 20 },
+      { x: 300, y: 450, width: 150, height: 20 },
+      { x: 100, y: 350, width: 150, height: 20 },
+      { x: 250, y: 250, width: 150, height: 20 }
+    ];
+
+    // Array de bombas
+    let bombs = [];
+    const explosionDuration = 500;  // Duración de la animación de explosión (ms)
+    let lastBombSpawnTime = Date.now();
+
+    // Manejo del teclado (para controles de teclado y táctiles)
+    const keys = {};
+    document.addEventListener('keydown', (e) => {
+      // Evitar que la tecla de espacio haga scroll
+      if (e.key === " " || e.key === "Spacebar" || e.keyCode === 32) {
+        e.preventDefault();
+      }
+      keys[e.key] = true;
+    });
+    document.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+    // --- Controles táctiles ---
+    function addTouchControl(btnId, keyName) {
+      const btn = document.getElementById(btnId);
+      btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        keys[keyName] = true;
+      });
+      btn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        keys[keyName] = false;
+      });
+      btn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        keys[keyName] = true;
+      });
+      btn.addEventListener('mouseup', (e) => {
+        e.preventDefault();
+        keys[keyName] = false;
+      });
+      btn.addEventListener('mouseleave', (e) => {
+        e.preventDefault();
+        keys[keyName] = false;
+      });
+    }
+    addTouchControl("btnLeft", "ArrowLeft");
+    addTouchControl("btnRight", "ArrowRight");
+    addTouchControl("btnJump", "ArrowUp");
+    // (No se asigna botón para "abajo" ya que se desea esa función solo con teclado)
+
+    // Función básica de colisión (rectángulos)
+    function checkCollision(r1, r2) {
+      return r1.x < r2.x + r2.width &&
+             r1.x + r1.width > r2.x &&
+             r1.y < r2.y + r2.height &&
+             r1.y + r1.height > r2.y;
+    }
+
+    // Función para spawnear una nueva bomba
+    function spawnBomb() {
+      const platIndex = Math.floor(Math.random() * (platforms.length - 1)) + 1;
+      const plat = platforms[platIndex];
+      const bombSize = 20;
+      const bombX = plat.x + Math.random() * (plat.width - bombSize);
+      const bombY = plat.y - bombSize;
+      bombs.push({
+        x: bombX,
+        y: bombY,
+        size: bombSize,
+        spawnTime: Date.now(),
+        lifetime: bombLifetime,
+        collected: false,
+        exploding: false,
+        explosionTime: null
+      });
+    }
+
+    // Función para resetear el juego (antes de iniciar o tras Game Over)
+    function resetGame() {
+      score = 0;
+      playerLives = 3;
+      gameOver = false;
+      player.x = 50;
+      player.y = 550;
+      player.dx = 0;
+      player.dy = 0;
+      bombs = [];
+      lastBombSpawnTime = Date.now();
+      startTime = Date.now();
+      timeDifficultyFactor = 0;
+      lastDifficultyIncreaseTime = Date.now();
+      updateDifficultyParameters();
+      for (let i = 0; i < 2; i++) {
+        spawnBomb();
+      }
+    }
+
+    // Bucle de actualización del juego
+    function update() {
+      if (!gameStarted) return;
+      const now = Date.now();
+      if (gameOver) {
+        if (now - gameOverTime > 3000) {
+          resetGame();
+        }
+        return;
+      }
+      // Aumenta la dificultad cada 10 segundos
+      if (now - lastDifficultyIncreaseTime >= 10000) {
+        timeDifficultyFactor++;
+        lastDifficultyIncreaseTime = now;
+      }
+      const effectiveBombSpawnInterval = Math.max(minBombSpawnInterval, initialBombSpawnInterval - timeDifficultyFactor * 50);
+      const effectiveBombLifetime = Math.max(2500, initialBombLifetime - timeDifficultyFactor * 100);
+      bombSpawnInterval = effectiveBombSpawnInterval;
+      bombLifetime = effectiveBombLifetime;
+      
+      // Movimiento horizontal (teclado o controles táctiles)
+      if (keys['ArrowLeft'] || keys['a']) {
+        player.dx = -player.speed;
+      } else if (keys['ArrowRight'] || keys['d']) {
+        player.dx = player.speed;
+      } else {
+        player.dx = 0;
+      }
+      
+      // Salto: si se pulsa la tecla de salto y está en el suelo
+      if ((keys['ArrowUp'] || keys['w'] || keys[' ']) && player.onGround) {
+        player.dy = player.jumpForce;
+        player.onGround = false;
+      }
+      
+      const previousBottom = player.y - player.dy + player.height;
+      player.x += player.dx;
+      player.y += player.dy;
+      player.dy += gravity;
+      if (player.dy < 0 && !(keys['ArrowUp'] || keys['w'] || keys[' '])) {
+        player.dy += extraGravityBoost;
+      }
+      // La tecla "abajo" solo funciona si el jugador NO está en el suelo
+      const dropDown = keys['ArrowDown'] && !player.onGround;
+      
+      if (player.x < 0) player.x = 0;
+      if (player.x + player.width > ORIGINAL_WIDTH) player.x = ORIGINAL_WIDTH - player.width;
+      
+      // Colisiones con plataformas (aterriza solo si no se pulsa "abajo")
+      player.onGround = false;
+      for (const plat of platforms) {
+        const playerRect = { x: player.x, y: player.y, width: player.width, height: player.height };
+        const platRect = { x: plat.x, y: plat.y, width: plat.width, height: plat.height };
+        if (!dropDown && player.dy >= 0 && previousBottom <= plat.y && checkCollision(playerRect, platRect)) {
+          player.y = plat.y - player.height;
+          player.dy = 0;
+          player.onGround = true;
+        }
+      }
+      
+      if (player.y > ORIGINAL_HEIGHT) {
+        player.x = 50;
+        player.y = 550;
+        player.dy = 0;
+      }
+      
+      const nowTime = Date.now();
+      if (nowTime - lastBombSpawnTime > bombSpawnInterval) {
+        spawnBomb();
+        lastBombSpawnTime = nowTime;
+      }
+      
+      bombs.forEach(bomb => {
+        if (!bomb.collected && !bomb.exploding) {
+          if (nowTime - bomb.spawnTime > bomb.lifetime) {
+            bomb.exploding = true;
+            bomb.explosionTime = nowTime;
+            playerLives--;
+            if (playerLives <= 0) {
+              gameOver = true;
+              gameOverTime = nowTime;
+            }
+          } else {
+            const bombRect = { x: bomb.x, y: bomb.y, width: bomb.size, height: bomb.size };
+            const playerRect = { x: player.x, y: player.y, width: player.width, height: player.height };
+            if (checkCollision(playerRect, bombRect)) {
+              bomb.collected = true;
+              score += 100;
+            }
+          }
+        }
+      });
+      
+      bombs = bombs.filter(bomb => {
+        if (bomb.collected) return false;
+        if (bomb.exploding && nowTime - bomb.explosionTime > explosionDuration) return false;
+        return true;
+      });
+    }
+
+    // Función para dibujar todos los elementos
+    function draw() {
+      ctx.clearRect(0, 0, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
+      ctx.fillStyle = '#555';
+      platforms.forEach(plat => {
+        ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+      });
+      bombs.forEach(bomb => {
+        if (!bomb.exploding) {
+          ctx.fillStyle = 'red';
+          ctx.fillRect(bomb.x, bomb.y, bomb.size, bomb.size);
+          const timeLeft = Math.max(0, bomb.lifetime - (Date.now() - bomb.spawnTime));
+          const barWidth = bomb.size;
+          const barHeight = 3;
+          ctx.fillStyle = 'black';
+          ctx.fillRect(bomb.x, bomb.y - 6, barWidth, barHeight);
+          ctx.fillStyle = 'yellow';
+          ctx.fillRect(bomb.x, bomb.y - 6, (timeLeft / bomb.lifetime) * barWidth, barHeight);
+        } else {
+          const explosionProgress = (Date.now() - bomb.explosionTime) / explosionDuration;
+          const maxRadius = bomb.size * 2;
+          const radius = explosionProgress * maxRadius;
+          ctx.fillStyle = 'orange';
+          ctx.beginPath();
+          ctx.arc(bomb.x + bomb.size / 2, bomb.y + bomb.size / 2, radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+      ctx.fillStyle = 'blue';
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+      ctx.fillStyle = 'black';
+      ctx.font = "20px Arial";
+      ctx.textAlign = "left";
+      ctx.fillText("Score: " + score, 10, 30);
+      ctx.fillText("Vidas: " + playerLives, 10, 60);
+      
+      if (!gameStarted) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
+        ctx.fillStyle = 'white';
+        ctx.textAlign = "center";
+        const lines = [
+          "Un clon del BombJack",
+          "por David & Máquina",
+          "Flechas: Mover | Arriba: Saltar",
+          "Abajo: Bajar de plataforma (no en suelo)",
+          "Haz click para jugar"
+        ];
+        const startY = ORIGINAL_HEIGHT / 2 - 70;
+        const lineHeight = 30;
+        lines.forEach((line, index) => {
+          ctx.font = (index < 2) ? "28px Arial" : "20px Arial";
+          ctx.fillText(line, ORIGINAL_WIDTH / 2, startY + index * lineHeight);
+        });
+      }
+      
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0, 0, ORIGINAL_WIDTH, ORIGINAL_HEIGHT);
+        ctx.fillStyle = 'white';
+        ctx.font = "50px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("GAME OVER", ORIGINAL_WIDTH / 2, ORIGINAL_HEIGHT / 2);
+      }
+    }
+
+    // Bucle principal del juego
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Inicia el juego al hacer click en el canvas
+    canvas.addEventListener('click', () => {
+      if (!gameStarted) {
+        gameStarted = true;
+        resetGame();
+      }
+    });
+
+    gameLoop();
+  </script>
+</body>
+</html>
