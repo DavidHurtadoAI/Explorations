@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D City Builder</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { width: 100%; height: 100vh; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script>
+        // Escena
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Fondo cielo
+        scene.background = new THREE.Color(0x87CEEB);
+
+        // Iluminación
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 5);
+        scene.add(directionalLight);
+
+        // Plano base (tierra)
+        const groundGeometry = new THREE.PlaneGeometry(30, 30);
+        const groundMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x90EE90,
+            shininess: 0
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        scene.add(ground);
+
+        // Colores para edificios
+        const colors = [0xFF6B6B, 0x4ECDC4, 0x45B7D1, 0x96CEB4, 0xFFEEAD];
+
+        // Raycaster
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // Edificios
+        const buildings = [];
+
+        // Material para edificios con shading
+        function createBuildingMaterial(color) {
+            return new THREE.MeshPhongMaterial({
+                color: color,
+                shininess: 10,
+                flatShading: true
+            });
+        }
+
+        // Añadir edificio
+        function addBuilding(x, z) {
+            const height = Math.random() * 3 + 1;
+            const geometry = new THREE.BoxGeometry(0.9, height, 0.9);
+            
+            // Bordes
+            const edges = new THREE.EdgesGeometry(geometry);
+            const lines = new THREE.LineSegments(
+                edges, 
+                new THREE.LineBasicMaterial({ color: 0x333333 })
+            );
+            
+            const material = createBuildingMaterial(colors[Math.floor(Math.random() * colors.length)]);
+            const building = new THREE.Mesh(geometry, material);
+            building.position.set(x, height / 2, z);
+            
+            scene.add(building);
+            lines.position.copy(building.position);
+            scene.add(lines);
+            
+            buildings.push({ mesh: building, edges: lines });
+        }
+
+        // Control de cámara
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let cameraAngle = 0;
+        let cameraHeight = 5;
+        let cameraDistance = 10;
+
+        // Actualizar posición de cámara
+        function updateCameraPosition() {
+            camera.position.x = Math.sin(cameraAngle) * cameraDistance;
+            camera.position.z = Math.cos(cameraAngle) * cameraDistance;
+            camera.position.y = cameraHeight;
+            camera.lookAt(0, 0, 0);
+        }
+        updateCameraPosition();
+
+        // Eventos de ratón
+        window.addEventListener('mousedown', (e) => {
+            if (e.button === 0) { // Click izquierdo
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObject(ground);
+
+                if (intersects.length > 0) {
+                    const point = intersects[0].point;
+                    const x = Math.round(point.x);
+                    const z = Math.round(point.z);
+                    
+                    const exists = buildings.some(b => 
+                        Math.round(b.mesh.position.x) === x && 
+                        Math.round(b.mesh.position.z) === z
+                    );
+                    
+                    if (!exists) addBuilding(x, z);
+                }
+            } else if (e.button === 2) { // Click derecho
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                
+                // Rotación horizontal
+                cameraAngle -= deltaX * 0.005;
+                
+                // Movimiento vertical
+                cameraHeight = Math.max(1, Math.min(15, cameraHeight - deltaY * 0.05));
+                
+                updateCameraPosition();
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if (e.button === 2) isDragging = false;
+        });
+
+        window.addEventListener('wheel', (e) => {
+            cameraDistance = Math.max(5, Math.min(20, cameraDistance + e.deltaY * 0.02));
+            updateCameraPosition();
+        });
+
+        window.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Animación
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Redimensionar
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
