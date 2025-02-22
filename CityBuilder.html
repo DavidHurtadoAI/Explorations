@@ -162,4 +162,84 @@
 
                 // Zoom
                 const pinchDelta = currentPinchDistance - previousPinchDistance;
-                cameraDistance = Math.max(5, Math.min(20, camera
+                cameraDistance = Math.max(5, Math.min(20, cameraDistance - pinchDelta * 0.02));
+
+                updateCameraPosition();
+                previousTouchPosition = currentPosition;
+                previousPinchDistance = currentPinchDistance;
+            }
+        }, { passive: false });
+
+        window.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isRotating = false;
+        });
+
+        // Controles de ratón (para escritorio)
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        window.addEventListener('mousedown', (e) => {
+            if (e.button === 0) {
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObject(ground);
+
+                if (intersects.length > 0) {
+                    const point = intersects[0].point;
+                    const x = Math.round(point.x);
+                    const z = Math.round(point.z);
+                    
+                    const exists = buildings.some(b => 
+                        Math.round(b.mesh.position.x) === x && 
+                        Math.round(b.mesh.position.z) === z
+                    );
+                    
+                    if (!exists) addBuilding(x, z);
+                }
+            } else if (e.button === 2) {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                cameraAngle -= deltaX * 0.005;
+                cameraHeight = Math.max(1, Math.min(15, cameraHeight - deltaY * 0.05));
+                updateCameraPosition();
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if (e.button === 2) isDragging = false;
+        });
+
+        window.addEventListener('wheel', (e) => {
+            cameraDistance = Math.max(5, Math.min(20, cameraDistance + e.deltaY * 0.02));
+            updateCameraPosition();
+        });
+
+        window.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Animación
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Redimensionar
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
