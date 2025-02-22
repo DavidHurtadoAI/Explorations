@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>3D City Builder</title>
+    <title>3D City Builder Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { width: 100%; height: 100vh; }
@@ -27,7 +28,7 @@
         directionalLight.position.set(5, 10, 5);
         scene.add(directionalLight);
 
-        // Plano base (tierra)
+        // Plano base
         const groundGeometry = new THREE.PlaneGeometry(30, 30);
         const groundMaterial = new THREE.MeshPhongMaterial({ 
             color: 0x90EE90,
@@ -37,7 +38,7 @@
         ground.rotation.x = -Math.PI / 2;
         scene.add(ground);
 
-        // Colores para edificios
+        // Colores
         const colors = [0xFF6B6B, 0x4ECDC4, 0x45B7D1, 0x96CEB4, 0xFFEEAD];
 
         // Raycaster
@@ -47,7 +48,7 @@
         // Edificios
         const buildings = [];
 
-        // Material para edificios con shading
+        // Material para edificios
         function createBuildingMaterial(color) {
             return new THREE.MeshPhongMaterial({
                 color: color,
@@ -60,14 +61,11 @@
         function addBuilding(x, z) {
             const height = Math.random() * 3 + 1;
             const geometry = new THREE.BoxGeometry(0.9, height, 0.9);
-            
-            // Bordes
             const edges = new THREE.EdgesGeometry(geometry);
             const lines = new THREE.LineSegments(
                 edges, 
                 new THREE.LineBasicMaterial({ color: 0x333333 })
             );
-            
             const material = createBuildingMaterial(colors[Math.floor(Math.random() * colors.length)]);
             const building = new THREE.Mesh(geometry, material);
             building.position.set(x, height / 2, z);
@@ -80,13 +78,14 @@
         }
 
         // Control de cámara
-        let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
         let cameraAngle = 0;
         let cameraHeight = 5;
         let cameraDistance = 10;
+        let isRotating = false;
+        let isZooming = false;
+        let previousTouchPosition = { x: 0, y: 0 };
+        let previousPinchDistance = 0;
 
-        // Actualizar posición de cámara
         function updateCameraPosition() {
             camera.position.x = Math.sin(cameraAngle) * cameraDistance;
             camera.position.z = Math.cos(cameraAngle) * cameraDistance;
@@ -95,11 +94,21 @@
         }
         updateCameraPosition();
 
-        // Eventos de ratón
-        window.addEventListener('mousedown', (e) => {
-            if (e.button === 0) { // Click izquierdo
-                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        // Controles táctiles
+        function getTouchPosition(event) {
+            const touch = event.touches[0];
+            return {
+                x: touch.clientX,
+                y: touch.clientY
+            };
+        }
+
+        window.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (e.touches.length === 1) { // Un dedo: construir
+                const touch = getTouchPosition(e);
+                mouse.x = (touch.x / window.innerWidth) * 2 - 1;
+                mouse.y = -(touch.y / window.innerHeight) * 2 + 1;
 
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObject(ground);
@@ -116,52 +125,41 @@
                     
                     if (!exists) addBuilding(x, z);
                 }
-            } else if (e.button === 2) { // Click derecho
-                isDragging = true;
-                previousMousePosition = { x: e.clientX, y: e.clientY };
+            } else if (e.touches.length === 2) { // Dos dedos: rotar o zoom
+                isRotating = true;
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                previousTouchPosition = {
+                    x: (touch1.clientX + touch2.clientX) / 2,
+                    y: (touch1.clientY + touch2.clientY) / 2
+                };
+                previousPinchDistance = Math.hypot(
+                    touch1.clientX - touch2.clientX,
+                    touch1.clientY - touch2.clientY
+                );
             }
-        });
+        }, { passive: false });
 
-        window.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                const deltaX = e.clientX - previousMousePosition.x;
-                const deltaY = e.clientY - previousMousePosition.y;
-                
-                // Rotación horizontal
+        window.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (e.touches.length === 2 && isRotating) {
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const currentPosition = {
+                    x: (touch1.clientX + touch2.clientX) / 2,
+                    y: (touch1.clientY + touch2.clientY) / 2
+                };
+                const currentPinchDistance = Math.hypot(
+                    touch1.clientX - touch2.clientX,
+                    touch1.clientY - touch2.clientY
+                );
+
+                // Rotación y altura
+                const deltaX = currentPosition.x - previousTouchPosition.x;
+                const deltaY = currentPosition.y - previousTouchPosition.y;
                 cameraAngle -= deltaX * 0.005;
-                
-                // Movimiento vertical
                 cameraHeight = Math.max(1, Math.min(15, cameraHeight - deltaY * 0.05));
-                
-                updateCameraPosition();
-                previousMousePosition = { x: e.clientX, y: e.clientY };
-            }
-        });
 
-        window.addEventListener('mouseup', (e) => {
-            if (e.button === 2) isDragging = false;
-        });
-
-        window.addEventListener('wheel', (e) => {
-            cameraDistance = Math.max(5, Math.min(20, cameraDistance + e.deltaY * 0.02));
-            updateCameraPosition();
-        });
-
-        window.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        // Animación
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // Redimensionar
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
-</body>
-</html>
+                // Zoom
+                const pinchDelta = currentPinchDistance - previousPinchDistance;
+                cameraDistance = Math.max(5, Math.min(20, camera
