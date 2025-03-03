@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM - Consulta de Clientes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        h1, h2 {
+            margin-bottom: 10px;
+        }
+
+        /* Sección de filtros */
+        .filtros {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .filtros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Sección de lista de clientes */
+        .cliente-lista {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+
+        tr.selected {
+            background-color: #e3f2fd;
+        }
+
+        /* Sección de detalle de cliente */
+        .cliente-detalle {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid #3498db;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .detail-value {
+            font-size: 1.1em;
+        }
+
+        .historial-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #3498db;
+            background-color: #f8f9fa;
+        }
+
+        .historial-fecha {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .nodata {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sistema CRM</h1>
+        </header>
+
+        <!-- Sección de filtros -->
+        <section class="filtros">
+            <h2>Filtros de búsqueda</h2>
+            <div class="filtros-grid">
+                <div class="form-group">
+                    <label for="nombre">Nombre/Razón Social</label>
+                    <input type="text" id="nombre" placeholder="Buscar por nombre...">
+                </div>
+                <div class="form-group">
+                    <label for="documento">Documento/NIF</label>
+                    <input type="text" id="documento" placeholder="Buscar por documento...">
+                </div>
+                <div class="form-group">
+                    <label for="categoria">Categoría</label>
+                    <select id="categoria">
+                        <option value="">Todas las categorías</option>
+                        <option value="VIP">VIP</option>
+                        <option value="Regular">Regular</option>
+                        <option value="Nuevo">Nuevo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="estado">Estado</label>
+                    <select id="estado">
+                        <option value="">Todos los estados</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                        <option value="Pendiente">Pendiente</option>
+                    </select>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button id="btn-buscar">Buscar</button>
+                <button id="btn-limpiar" style="background-color: #95a5a6;">Limpiar filtros</button>
+            </div>
+        </section>
+
+        <!-- Sección de lista de clientes -->
+        <section class="cliente-lista">
+            <h2>Listado de Clientes</h2>
+            <table id="tabla-clientes">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre/Razón Social</th>
+                        <th>Documento/NIF</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Categoría</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se cargan con JavaScript -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Sección de detalle de cliente -->
+        <section class="cliente-detalle">
+            <h2>Detalle del Cliente</h2>
+            <div id="no-cliente-seleccionado" class="nodata">
+                Seleccione un cliente para ver sus detalles
+            </div>
+            <div id="detalle-contenido" style="display: none;">
+                <div class="tabs">
+                    <div class="tab active" data-tab="informacion">Información General</div>
+                    <div class="tab" data-tab="contactos">Contactos</div>
+                    <div class="tab" data-tab="historial">Historial</div>
+                </div>
+
+                <div class="tab-content active" id="tab-informacion">
+                    <div class="detail-grid">
+                        <div>
+                            <div class="detail-item">
+                                <div class="detail-label">Nombre/Razón Social</div>
+                                <div class="detail-value" id="detalle-nombre"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Documento/NIF</div>
+                                <div class="detail-value" id="detalle-documento"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Email</div>
+                                <div class="detail-value" id="detalle-email"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Teléfono</div>
+                                <div class="detail-value" id="detalle-telefono"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="detail-item">
+                                <div class="detail-label">Dirección</div>
+                                <div class="detail-value" id="detalle-direccion"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Ciudad</div>
+                                <div class="detail-value" id="detalle-ciudad"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Categoría</div>
+                                <div class="detail-value" id="detalle-categoria"></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Estado</div>
+                                <div class="detail-value" id="detalle-estado"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-contactos">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cargo</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contactos-lista">
+                            <!-- Se carga con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tab-content" id="tab-historial">
+                    <div id="historial-lista">
+                        <!-- Se carga con JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Datos de ejemplo para el CRM
+        const clientes = [
+            {
+                id: 1,
+                nombre: "Tecnología Avanzada S.L.",
+                documento: "B12345678",
+                email: "info@tecnologiaavanzada.com",
+                telefono: "912345678",
+                direccion: "Calle Gran Vía 123",
+                ciudad: "Madrid",
+                categoria: "VIP",
+                estado: "Activo",
+                contactos: [
+                    { nombre: "Juan Pérez", cargo: "Director General", telefono: "666111222", email: "jperez@tecnologiaavanzada.com" },
+                    { nombre: "María López", cargo: "Directora Comercial", telefono: "666333444", email: "mlopez@tecnologiaavanzada.com" }
+                ],
+                historial: [
+                    { fecha: "2025-02-15", descripcion: "Reunión presentación nuevo producto", usuario: "Carlos Ruiz" },
+                    { fecha: "2025-01-20", descripcion: "Renovación contrato anual", usuario: "Ana Martínez" },
+                    { fecha: "2024-12-10", descripcion: "Resolución incidencia técnica #2345", usuario: "Miguel Sánchez" }
+                ]
+            },
+            {
+                id: 2,
+                nombre: "Distribuciones Rápidas S.A.",
+                documento: "A87654321",
+                email: "contacto@distribucionesrapidas.es",
+                telefono: "934567890",
+                direccion: "Avenida Diagonal 456",
+                ciudad: "Barcelona",
+                categoria: "Regular",
+                estado: "Activo",
+                contactos: [
+                    { nombre: "Pedro González", cargo: "Gerente", telefono: "677888999", email: "pgonzalez@distribucionesrapidas.es" }
+                ],
+                historial: [
+                    { fecha: "2025-02-10", descripcion: "Ampliación servicios logísticos", usuario: "Carlos Ruiz" },
+                    { fecha: "2024-11-15", descripcion: "Solicitud presupuesto servicios 2025", usuario: "Ana Martínez" }
+                ]
+            },
+            {
+                id: 3,
+                nombre: "Consultores Financieros Asociados",
+                documento: "B55556666",
+                email: "info@consultoresfinancieros.com",
+                telefono: "954321098",
+                direccion: "Calle Sierpes, 78",
+                ciudad: "Sevilla",
+                categoria: "VIP",
+                estado: "Inactivo",
+                contactos: [
+                    { nombre: "Laura Jiménez", cargo: "Socia Directora", telefono: "655123456", email: "ljimenez@consultoresfinancieros.com" },
+                    { nombre: "Alberto Torres", cargo: "Director Financiero", telefono: "655654321", email: "atorres@consultoresfinancieros.com" }
+                ],
+                historial: [
+                    { fecha: "2025-01-05", descripcion: "Notificación cese temporal de servicios", usuario: "Miguel Sánchez" },
+                    { fecha: "2024-12-20", descripcion: "Recordatorio renovación pendiente", usuario: "Ana Martínez" },
+                    { fecha: "2024-10-15", descripcion: "Reclamación factura impagada #F2024-156", usuario: "Carlos Ruiz" }
+                ]
+            },
+            {
+                id: 4,
+                nombre: "Hostelería La Buena Mesa",
+                documento: "B33334444",
+                email: "reservas@labuenaresa.com",
+                telefono: "963214567",
+                direccion: "Paseo de la Alameda, 45",
+                ciudad: "Valencia",
+                categoria: "Nuevo",
+                estado: "Pendiente",
+                contactos: [
+                    { nombre: "Carmen Navarro", cargo: "Propietaria", telefono: "644555666", email: "cnavarro@labuenamese.com" }
+                ],
+                historial: [
+                    { fecha: "2025-02-20", descripcion: "Primera toma de contacto", usuario: "Ana Martínez" },
+                    { fecha: "2025-02-22", descripcion: "Envío documentación servicios", usuario: "Ana Martínez" }
+                ]
+            },
+            {
+                id: 5,
+                nombre: "Manufacturas del Norte",
+                documento: "A22223333",
+                email: "info@manufacturasnorte.com",
+                telefono: "944445555",
+                direccion: "Polígono Industrial Erandio, Nave 7",
+                ciudad: "Bilbao",
+                categoria: "Regular",
+                estado: "Activo",
+                contactos: [
+                    { nombre: "Iñaki Urrutia", cargo: "Director de Operaciones", telefono: "688777999", email: "iurrutia@manufacturasnorte.com" },
+                    { nombre: "Amaia Etxeberria", cargo: "Responsable Compras", telefono: "688666555", email: "aetxeberria@manufacturasnorte.com" }
+                ],
+                historial: [
+                    { fecha: "2025-02-18", descripcion: "Pedido mensual recibido #P-2025-028", usuario: "Miguel Sánchez" },
+                    { fecha: "2025-01-15", descripcion: "Renovación contrato anual", usuario: "Carlos Ruiz" },
+                    { fecha: "2024-12-05", descripcion: "Reunión planificación 2025", usuario: "Ana Martínez" }
+                ]
+            }
+        ];
+
+        // Función para cargar la tabla de clientes
+        function cargarTablaClientes(clientesFiltrados = clientes) {
+            const tbody = document.querySelector('#tabla-clientes tbody');
+            tbody.innerHTML = '';
+            
+            if (clientesFiltrados.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="7" class="nodata">No se encontraron resultados</td>`;
+                tbody.appendChild(tr);
+                return;
+            }
+
+            clientesFiltrados.forEach(cliente => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = cliente.id;
+                tr.innerHTML = `
+                    <td>${cliente.id}</td>
+                    <td>${cliente.nombre}</td>
+                    <td>${cliente.documento}</td>
+                    <td>${cliente.email}</td>
+                    <td>${cliente.telefono}</td>
+                    <td>${cliente.categoria}</td>
+                    <td>${cliente.estado}</td>
+                `;
+                tbody.appendChild(tr);
+                
+                // Agregar evento click a la fila
+                tr.addEventListener('click', function() {
+                    document.querySelectorAll('#tabla-clientes tbody tr').forEach(row => {
+                        row.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    
+                    // Cargar detalle del cliente
+                    cargarDetalleCliente(cliente.id);
+                });
+            });
+        }
+
+        // Función para cargar los detalles de un cliente
+        function cargarDetalleCliente(clienteId) {
+            const cliente = clientes.find(c => c.id === clienteId);
+            
+            if (!cliente) return;
+            
+            // Mostrar detalles y ocultar mensaje de "no seleccionado"
+            document.getElementById('no-cliente-seleccionado').style.display = 'none';
+            document.getElementById('detalle-contenido').style.display = 'block';
+            
+            // Cargar datos en la pestaña de información
+            document.getElementById('detalle-nombre').textContent = cliente.nombre;
+            document.getElementById('detalle-documento').textContent = cliente.documento;
+            document.getElementById('detalle-email').textContent = cliente.email;
+            document.getElementById('detalle-telefono').textContent = cliente.telefono;
+            document.getElementById('detalle-direccion').textContent = cliente.direccion;
+            document.getElementById('detalle-ciudad').textContent = cliente.ciudad;
+            document.getElementById('detalle-categoria').textContent = cliente.categoria;
+            document.getElementById('detalle-estado').textContent = cliente.estado;
+            
+            // Cargar contactos
+            const contactosLista = document.getElementById('contactos-lista');
+            contactosLista.innerHTML = '';
+            
+            if (cliente.contactos.length === 0) {
+                contactosLista.innerHTML = `<tr><td colspan="4" class="nodata">No hay contactos registrados</td></tr>`;
+            } else {
+                cliente.contactos.forEach(contacto => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${contacto.nombre}</td>
+                        <td>${contacto.cargo}</td>
+                        <td>${contacto.telefono}</td>
+                        <td>${contacto.email}</td>
+                    `;
+                    contactosLista.appendChild(tr);
+                });
+            }
+            
+            // Cargar historial
+            const historialLista = document.getElementById('historial-lista');
+            historialLista.innerHTML = '';
+            
+            if (cliente.historial.length === 0) {
+                historialLista.innerHTML = `<div class="nodata">No hay registros en el historial</div>`;
+            } else {
+                cliente.historial.forEach(registro => {
+                    const div = document.createElement('div');
+                    div.className = 'historial-item';
+                    div.innerHTML = `
+                        <div class="historial-fecha">${formatearFecha(registro.fecha)} - ${registro.usuario}</div>
+                        <div>${registro.descripcion}</div>
+                    `;
+                    historialLista.appendChild(div);
+                });
+            }
+        }
+
+        // Función para formatear fecha
+        function formatearFecha(fechaStr) {
+            const fecha = new Date(fechaStr);
+            return fecha.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Función para filtrar clientes
+        function filtrarClientes() {
+            const nombreFiltro = document.getElementById('nombre').value.toLowerCase();
+            const documentoFiltro = document.getElementById('documento').value.toLowerCase();
+            const categoriaFiltro = document.getElementById('categoria').value;
+            const estadoFiltro = document.getElementById('estado').value;
+            
+            const clientesFiltrados = clientes.filter(cliente => {
+                return (
+                    (nombreFiltro === '' || cliente.nombre.toLowerCase().includes(nombreFiltro)) &&
+                    (documentoFiltro === '' || cliente.documento.toLowerCase().includes(documentoFiltro)) &&
+                    (categoriaFiltro === '' || cliente.categoria === categoriaFiltro) &&
+                    (estadoFiltro === '' || cliente.estado === estadoFiltro)
+                );
+            });
+            
+            cargarTablaClientes(clientesFiltrados);
+            
+            // Resetear detalle si no hay clientes filtrados
+            if (clientesFiltrados.length === 0) {
+                document.getElementById('no-cliente-seleccionado').style.display = 'block';
+                document.getElementById('detalle-contenido').style.display = 'none';
+            }
+        }
+
+        // Manejo de pestañas en el detalle
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Activar pestaña
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Mostrar contenido de la pestaña
+                const tabId = this.dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`tab-${tabId}`).classList.add('active');
+            });
+        });
+
+        // Evento para el botón de búsqueda
+        document.getElementById('btn-buscar').addEventListener('click', filtrarClientes);
+
+        // Evento para el botón de limpiar filtros
+        document.getElementById('btn-limpiar').addEventListener('click', function() {
+            document.getElementById('nombre').value = '';
+            document.getElementById('documento').value = '';
+            document.getElementById('categoria').value = '';
+            document.getElementById('estado').value = '';
+            
+            cargarTablaClientes();
+        });
+
+        // Cargar la tabla de clientes al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarTablaClientes();
+        });
+    </script>
+</body>
+</html>
