@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación del Big Bang</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            display: flex;
+            gap: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+        }
+        button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        button:hover {
+            background-color: #666;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 2;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+        }
+        #time-display {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        #description {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+        input[type="range"] {
+            width: 100px;
+        }
+        .control-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #4a4a4a;
+            cursor: pointer;
+        }
+        .control-button:hover {
+            background-color: #666;
+        }
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #help {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 10px;
+            z-index: 2;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div class="loading-spinner"></div>
+        <div>Preparando simulación del Big Bang...</div>
+    </div>
+    
+    <canvas id="canvas"></canvas>
+    
+    <div id="info">
+        <div id="time-display">Tiempo: 0 segundos</div>
+        <div id="description">Esperando para iniciar la simulación del Big Bang...</div>
+    </div>
+    
+    <div id="help">
+        • Arrastrar: Mover cámara
+        <br>• Rueda: Zoom
+    </div>
+    
+    <div id="controls">
+        <button id="play-pause">
+            <svg id="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <svg id="pause-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+        </button>
+        <button id="restart">Reiniciar</button>
+        <div class="slider-container">
+            <span>Velocidad:</span>
+            <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1">
+            <span id="speed-value">1x</span>
+        </div>
+        <div class="slider-container">
+            <span>Partículas:</span>
+            <input type="range" id="particle-count" min="1000" max="10000" step="1000" value="5000">
+            <span id="particle-value">5000</span>
+        </div>
+    </div>
+    
+    <script>
+        // Variables de configuración
+        let config = {
+            numParticles: 5000,
+            initialRadius: 10,
+            expansionRate: 1,
+            particleSize: 2,
+            timeScale: 1,
+            maxTime: 100,
+            currentTime: 0
+        };
+        
+        // Variables de estado
+        let particles = [];
+        let isPlaying = false;
+        let lastTime = 0;
+        let camera = { x: 0, y: 0, zoom: 1 };
+        let isDragging = false;
+        let lastMousePos = { x: 0, y: 0 };
+        let descriptions = [
+            { time: 0, text: "El universo comenzó como un punto infinitamente caliente y denso." },
+            { time: 0.000001, text: "La era de Planck: Las fuerzas fundamentales aún no se han separado." },
+            { time: 0.01, text: "Las fuerzas fundamentales comienzan a separarse. Se forman quarks y gluones." },
+            { time: 1, text: "Los quarks se unen para formar protones y neutrones." },
+            { time: 10, text: "Nucleosíntesis: Se forman los primeros núcleos atómicos ligeros." },
+            { time: 20, text: "El universo continúa expandiéndose y enfriándose." },
+            { time: 30, text: "Formación de los átomos más simples en el universo primitivo." },
+            { time: 50, text: "Liberación de radiación cósmica de fondo." },
+            { time: 70, text: "Formación de las primeras grandes estructuras cósmicas." },
+            { time: 90, text: "Nacimiento de las primeras estrellas iluminando el universo." }
+        ];
+        
+        // Elementos DOM
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const playPauseBtn = document.getElementById('play-pause');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const restartBtn = document.getElementById('restart');
+        const speedSlider = document.getElementById('speed');
+        const speedValue = document.getElementById('speed-value');
+        const particleCountSlider = document.getElementById('particle-count');
+        const particleValue = document.getElementById('particle-value');
+        const timeDisplay = document.getElementById('time-display');
+        const descriptionDisplay = document.getElementById('description');
+        const loadingScreen = document.getElementById('loading');
+        
+        // Inicialización
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < config.numParticles; i++) {
+                // Distribuir partículas uniformemente en una esfera 3D
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                const r = config.initialRadius * Math.cbrt(Math.random());
+                
+                // Convertir coordenadas esféricas a cartesianas
+                const x = r * Math.sin(phi) * Math.cos(theta);
+                const y = r * Math.sin(phi) * Math.sin(theta);
+                const z = r * Math.cos(phi);
+                
+                // Determinar color basado en la posición
+                const hue = (phi / Math.PI) * 60 + 200;
+                const saturation = 80 + Math.random() * 20;
+                const lightness = 50 + Math.random() * 20;
+                
+                particles.push({
+                    x: x,
+                    y: y,
+                    z: z,
+                    size: 0.5 + Math.random() * 1.5,
+                    color: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+                    initialDist: Math.sqrt(x*x + y*y + z*z),
+                    vx: x * 0.01,
+                    vy: y * 0.01,
+                    vz: z * 0.01,
+                    type: Math.random() < 0.05 ? 'star' : 'particle'
+                });
+            }
+        }
+        
+        function startSimulation() {
+            loadingScreen.style.opacity = 0;
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 1000);
+            
+            isPlaying = true;
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'inline';
+            lastTime = performance.now();
+            animate();
+        }
+        
+        // Actualización y renderizado
+        function animate(currentTime = 0) {
+            if (!isPlaying) return;
+            
+            // Calcular delta time
+            const deltaTime = (currentTime - lastTime) / 1000; // en segundos
+            lastTime = currentTime;
+            
+            // Actualizar tiempo de simulación
+            config.currentTime += deltaTime * config.timeScale;
+            if (config.currentTime > config.maxTime) {
+                config.currentTime = config.maxTime;
+                isPlaying = false;
+                playIcon.style.display = 'inline';
+                pauseIcon.style.display = 'none';
+            }
+            
+            // Actualizar display de tiempo
+            timeDisplay.textContent = `Tiempo: ${config.currentTime.toFixed(2)} segundos`;
+            
+            // Actualizar descripción
+            updateDescription();
+            
+            // Calcular factor de expansión
+            const expansionFactor = Math.pow(1 + config.currentTime, 1.2) * config.expansionRate;
+            
+            // Limpiar canvas
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Ordenar partículas por profundidad para efecto 3D
+            particles.sort((a, b) => {
+                return (b.z * expansionFactor + camera.zoom * 1000) - (a.z * expansionFactor + camera.zoom * 1000);
+            });
+            
+            // Dibujar partículas
+            const centerX = canvas.width / 2 + camera.x;
+            const centerY = canvas.height / 2 + camera.y;
+            
+            // Efecto de resplandor
+            ctx.globalCompositeOperation = 'lighter';
+            
+            for (const p of particles) {
+                // Expandir posición
+                const currentX = p.x * expansionFactor;
+                const currentY = p.y * expansionFactor;
+                const currentZ = p.z * expansionFactor;
+                
+                // Ajustar por cámara y perspectiva
+                const scale = camera.zoom / (1 + currentZ * 0.001);
+                const screenX = centerX + currentX * scale;
+                const screenY = centerY + currentY * scale;
+                
+                // Calcular opacidad en función de Z y el tiempo
+                const distFactor = 1 / (1 + Math.abs(currentZ) * 0.01);
+                const timeFactor = Math.min(1, config.currentTime * 10);
+                const opacity = p.type === 'star' ? 0.9 : 0.7 * distFactor * timeFactor;
+                
+                // Dibujar partícula con resplandor
+                const particleSize = p.size * scale * config.particleSize;
+                if (p.type === 'star' && config.currentTime > 60) {
+                    // Estrellas con resplandor
+                    const grd = ctx.createRadialGradient(
+                        screenX, screenY, 0,
+                        screenX, screenY, particleSize * 2
+                    );
+                    grd.addColorStop(0, p.color.replace(')', `, ${opacity})`).replace('hsl', 'hsla'));
+                    grd.addColorStop(1, p.color.replace(')', `, 0)`).replace('hsl', 'hsla'));
+                    
+                    ctx.fillStyle = grd;
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY, particleSize * 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Partícula principal
+                ctx.fillStyle = p.color.replace(')', `, ${opacity})`).replace('hsl', 'hsla');
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, particleSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // Continuar animación
+            requestAnimationFrame(animate);
+        }
+        
+        function updateDescription() {
+            // Encontrar la descripción adecuada para el tiempo actual
+            let currentDesc = descriptions[0].text;
+            for (let i = descriptions.length - 1; i >= 0; i--) {
+                if (config.currentTime >= descriptions[i].time) {
+                    currentDesc = descriptions[i].text;
+                    break;
+                }
+            }
+            descriptionDisplay.textContent = currentDesc;
+        }
+        
+        // Eventos de UI
+        playPauseBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'inline';
+                lastTime = performance.now();
+                animate();
+            } else {
+                playIcon.style.display = 'inline';
+                pauseIcon.style.display = 'none';
+            }
+        });
+        
+        restartBtn.addEventListener('click', () => {
+            config.currentTime = 0;
+            createParticles();
+            camera = { x: 0, y: 0, zoom: 1 };
+            isPlaying = true;
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'inline';
+            lastTime = performance.now();
+            animate();
+        });
+        
+        speedSlider.addEventListener('input', () => {
+            config.timeScale = parseFloat(speedSlider.value);
+            speedValue.textContent = `${config.timeScale.toFixed(1)}x`;
+        });
+        
+        particleCountSlider.addEventListener('input', () => {
+            config.numParticles = parseInt(particleCountSlider.value);
+            particleValue.textContent = config.numParticles;
+            createParticles();
+        });
+        
+        // Eventos de ratón para navegación
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastMousePos = { x: e.clientX, y: e.clientY };
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const dx = e.clientX - lastMousePos.x;
+                const dy = e.clientY - lastMousePos.y;
+                camera.x += dx;
+                camera.y += dy;
+                lastMousePos = { x: e.clientX, y: e.clientY };
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+        
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomAmount = -e.deltaY * 0.001;
+            camera.zoom = Math.max(0.1, Math.min(5, camera.zoom + zoomAmount));
+        });
+        
+        window.addEventListener('resize', () => {
+            initCanvas();
+        });
+        
+        // Iniciar simulación
+        initCanvas();
+        createParticles();
+        
+        // Simular tiempo de carga
+        setTimeout(startSimulation, 1500);
+    </script>
+</body>
+</html>
