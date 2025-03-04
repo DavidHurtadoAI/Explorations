@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación del Big Bang</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        canvas { 
+            display: block; 
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            color: white;
+            text-shadow: 0 0 5px #000;
+        }
+        #controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 100;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h1>Simulación del Big Bang</h1>
+        <p>Navega con el mouse o pantalla táctil. Rueda del mouse para zoom.</p>
+    </div>
+    
+    <div id="controls">
+        <button id="reset">Reiniciar Simulación</button>
+        <button id="play-pause">Pausar</button>
+        <label for="speed">Velocidad de expansión:</label>
+        <input type="range" id="speed" class="slider" min="0.1" max="5" step="0.1" value="1">
+        <label for="particles">Partículas:</label>
+        <input type="range" id="particles" class="slider" min="5000" max="50000" step="5000" value="20000">
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Variables globales
+        let scene, camera, renderer, particles, galaxies = [];
+        let particleSystem, clock, controls;
+        let isPlaying = true;
+        let expansionSpeed = 1;
+        let particleCount = 20000;
+        let explosion = false;
+        let explosionTime = 0;
+        
+        // Inicializar la escena
+        function init() {
+            // Si scene ya existe, significa que se reinició la simulación
+            if (scene) {
+                while(scene.children.length > 0){ 
+                    scene.remove(scene.children[0]); 
+                }
+            } else {
+                // Crear escena nueva
+                scene = new THREE.Scene();
+                
+                // Configurar cámara
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+                camera.position.z = 100;
+                
+                // Configurar renderer
+                renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setClearColor(0x000000);
+                document.body.appendChild(renderer.domElement);
+                
+                // Manejar cambios de tamaño de ventana
+                window.addEventListener('resize', onWindowResize, false);
+                
+                // Inicializar control de cámara
+                setupControls();
+                
+                // Inicializar reloj para la animación
+                clock = new THREE.Clock();
+            }
+            
+            // Crear luz ambiente
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            
+            // Crear punto central luminoso
+            const pointLight = new THREE.PointLight(0xffffff, 2, 100);
+            pointLight.position.set(0, 0, 0);
+            scene.add(pointLight);
+            
+            // Crear efecto de destello en el centro
+            const sphereGeometry = new THREE.SphereGeometry(2, 32, 32);
+            const sphereMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.9
+            });
+            const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            scene.add(sphere);
+            
+            // Crear partículas
+            createParticles();
+            
+            // Reiniciar variables de control
+            explosion = false;
+            explosionTime = 0;
+            
+            // Iniciar animación
+            animate();
+        }
+        
+        // Crear sistema de partículas
+        function createParticles() {
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            const sizes = new Float32Array(particleCount);
+            const velocities = new Float32Array(particleCount * 3);
+            
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                positions[i3] = (Math.random() - 0.5) * 10;
+                positions[i3 + 1] = (Math.random() - 0.5) * 10;
+                positions[i3 + 2] = (Math.random() - 0.5) * 10;
+                
+                const length = Math.sqrt(
+                    positions[i3] * positions[i3] + 
+                    positions[i3 + 1] * positions[i3 + 1] + 
+                    positions[i3 + 2] * positions[i3 + 2]
+                );
+                
+                velocities[i3] = positions[i3] / length;
+                velocities[i3 + 1] = positions[i3 + 1] / length;
+                velocities[i3 + 2] = positions[i3 + 2] / length;
+                
+                colors[i3] = Math.random();
+                colors[i3 + 1] = Math.random() * 0.5;
+                colors[i3 + 2] = Math.random();
+                
+                sizes[i] = Math.random() * 2 + 0.5;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            const material = new THREE.PointsMaterial({
+                size: 1,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+            
+            particleSystem = new THREE.Points(geometry, material);
+            particleSystem.userData.velocities = velocities;
+            scene.add(particleSystem);
+            
+            createGalaxies();
+        }
+        
+        // Crear grupos de partículas para simular galaxias
+        function createGalaxies() {
+            const galaxyCount = 5;
+            
+            for (let g = 0; g < galaxyCount; g++) {
+                const galaxyPoints = 2000;
+                const galaxyGeometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(galaxyPoints * 3);
+                const colors = new Float32Array(galaxyPoints * 3);
+                const sizes = new Float32Array(galaxyPoints);
+                const velocities = new Float32Array(galaxyPoints * 3);
+                
+                const baseX = (Math.random() - 0.5) * 300;
+                const baseY = (Math.random() - 0.5) * 300;
+                const baseZ = (Math.random() - 0.5) * 300;
+                
+                const radius = 20 + Math.random() * 30;
+                const arms = Math.floor(Math.random() * 3) + 2;
+                
+                const hue = Math.random();
+                const colorObj = new THREE.Color().setHSL(hue, 0.9, 0.6);
+                
+                for (let i = 0; i < galaxyPoints; i++) {
+                    const i3 = i * 3;
+                    const angle = Math.random() * Math.PI * 2;
+                    const armOffset = (i % arms) * (Math.PI * 2 / arms);
+                    const dist = Math.random() * radius;
+                    
+                    positions[i3] = Math.cos(angle + armOffset) * dist;
+                    positions[i3 + 1] = (Math.random() - 0.5) * (radius * 0.2);
+                    positions[i3 + 2] = Math.sin(angle + armOffset) * dist;
+                    
+                    velocities[i3] = -positions[i3 + 2] / radius * 0.1;
+                    velocities[i3 + 1] = 0;
+                    velocities[i3 + 2] = positions[i3] / radius * 0.1;
+                    
+                    colors[i3] = colorObj.r + (Math.random() - 0.5) * 0.2;
+                    colors[i3 + 1] = colorObj.g + (Math.random() - 0.5) * 0.2;
+                    colors[i3 + 2] = colorObj.b + (Math.random() - 0.5) * 0.2;
+                    
+                    sizes[i] = Math.random() * 2 + 0.5;
+                }
+                
+                galaxyGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                galaxyGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                galaxyGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+                
+                const material = new THREE.PointsMaterial({
+                    size: 1,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.8,
+                    blending: THREE.AdditiveBlending
+                });
+                
+                const galaxySystem = new THREE.Points(galaxyGeometry, material);
+                galaxySystem.userData.velocities = velocities;
+                galaxySystem.userData.basePosition = {x: baseX, y: baseY, z: baseZ};
+                galaxySystem.userData.rotationSpeed = (Math.random() - 0.5) * 0.01;
+                galaxySystem.position.set(0, 0, 0);
+                
+                galaxies.push(galaxySystem);
+                scene.add(galaxySystem);
+            }
+        }
+        
+        // Configurar controles de cámara para navegación
+        function setupControls() {
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            
+            renderer.domElement.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }, false);
+            
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaMove = {
+                        x: e.clientX - previousMousePosition.x,
+                        y: e.clientY - previousMousePosition.y
+                    };
+                    
+                    camera.position.x = Math.cos(deltaMove.x * 0.01) * camera.position.z;
+                    camera.position.z = Math.sin(deltaMove.x * 0.01) * camera.position.z;
+                    camera.position.y += deltaMove.y * 0.1;
+                    
+                    camera.lookAt(scene.position);
+                    
+                    previousMousePosition = { x: e.clientX, y: e.clientY };
+                }
+            }, false);
+            
+            renderer.domElement.addEventListener('mouseup', () => {
+                isDragging = false;
+            }, false);
+            
+            renderer.domElement.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomSpeed = 0.1;
+                camera.position.x *= 1 + (e.deltaY * 0.001 * zoomSpeed);
+                camera.position.y *= 1 + (e.deltaY * 0.001 * zoomSpeed);
+                camera.position.z *= 1 + (e.deltaY * 0.001 * zoomSpeed);
+                camera.lookAt(scene.position);
+            }, false);
+            
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+            }, false);
+            
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                if (isDragging && e.touches.length === 1) {
+                    const deltaMove = {
+                        x: e.touches[0].clientX - previousMousePosition.x,
+                        y: e.touches[0].clientY - previousMousePosition.y
+                    };
+                    
+                    camera.position.x = Math.cos(deltaMove.x * 0.01) * camera.position.z;
+                    camera.position.z = Math.sin(deltaMove.x * 0.01) * camera.position.z;
+                    camera.position.y += deltaMove.y * 0.1;
+                    
+                    camera.lookAt(scene.position);
+                    
+                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+                
+                if (e.touches.length === 2) {
+                    const dist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    
+                    if (previousTouchDistance) {
+                        const delta = previousTouchDistance - dist;
+                        const zoomSpeed = 0.01;
+                        camera.position.x *= 1 + (delta * zoomSpeed);
+                        camera.position.y *= 1 + (delta * zoomSpeed);
+                        camera.position.z *= 1 + (delta * zoomSpeed);
+                        camera.lookAt(scene.position);
+                    }
+                    
+                    previousTouchDistance = dist;
+                }
+            }, false);
+            
+            let previousTouchDistance = 0;
+            
+            renderer.domElement.addEventListener('touchend', () => {
+                isDragging = false;
+                previousTouchDistance = 0;
+            }, false);
+            
+            // Botones de control
+            document.getElementById('reset').addEventListener('click', () => {
+                renderer.domElement.remove();
+                scene = null;
+                galaxies = [];
+                init();
+            });
+            
+            document.getElementById('play-pause').addEventListener('click', () => {
+                isPlaying = !isPlaying;
+                document.getElementById('play-pause').textContent = isPlaying ? 'Pausar' : 'Continuar';
+            });
+            
+            document.getElementById('speed').addEventListener('input', (e) => {
+                expansionSpeed = parseFloat(e.target.value);
+            });
+            
+            document.getElementById('particles').addEventListener('input', (e) => {
+                particleCount = parseInt(e.target.value);
+            });
+        }
+        
+        // Función de animación
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (isPlaying) {
+                const delta = clock.getDelta();
+                explosionTime += delta;
+                
+                if (explosionTime > 2 && !explosion) {
+                    explosion = true;
+                }
+                
+                if (explosion) {
+                    updateParticles(delta);
+                    updateGalaxies(delta);
+                }
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Actualizar posiciones de partículas
+        function updateParticles(delta) {
+            if (!particleSystem) return;
+            
+            const positions = particleSystem.geometry.attributes.position.array;
+            const velocities = particleSystem.userData.velocities;
+            const colors = particleSystem.geometry.attributes.color.array;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                positions[i3] += velocities[i3] * expansionSpeed * delta * 20;
+                positions[i3 + 1] += velocities[i3 + 1] * expansionSpeed * delta * 20;
+                positions[i3 + 2] += velocities[i3 + 2] * expansionSpeed * delta * 20;
+                
+                if (explosionTime > 5) {
+                    colors[i3] = Math.max(0, colors[i3] - 0.001);
+                    colors[i3 + 1] = Math.min(1, colors[i3 + 1] + 0.0005);
+                    colors[i3 + 2] = Math.min(1, colors[i3 + 2] + 0.0005);
+                }
+            }
+            
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+            particleSystem.geometry.attributes.color.needsUpdate = true;
+        }
+        
+        // Actualizar posiciones y rotaciones de galaxias
+        function updateGalaxies(delta) {
+            for (let g = 0; g < galaxies.length; g++) {
+                const galaxy = galaxies[g];
+                const positions = galaxy.geometry.attributes.position.array;
+                const velocities = galaxy.userData.velocities;
+                
+                if (explosionTime < 10) {
+                    const t = Math.min(1, (explosionTime - 2) / 8);
+                    const basePos = galaxy.userData.basePosition;
+                    
+                    galaxy.position.x = basePos.x * t;
+                    galaxy.position.y = basePos.y * t;
+                    galaxy.position.z = basePos.z * t;
+                }
+                
+                galaxy.rotation.y += galaxy.userData.rotationSpeed;
+                
+                const galaxyPoints = positions.length / 3;
+                for (let i = 0; i < galaxyPoints; i++) {
+                    const i3 = i * 3;
+                    positions[i3] += velocities[i3] * delta * 5;
+                    positions[i3 + 1] += velocities[i3 + 1] * delta * 5;
+                    positions[i3 + 2] += velocities[i3 + 2] * delta * 5;
+                }
+                
+                galaxy.geometry.attributes.position.needsUpdate = true;
+            }
+        }
+        
+        // Manejar cambios de tamaño de ventana
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // Iniciar la simulación
+        init();
+    </script>
+</body>
+</html>
