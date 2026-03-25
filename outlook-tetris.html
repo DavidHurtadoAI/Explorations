@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Outlook Calendar Tetris</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap');
+  :root{--ob:#0078d4;--od:#106ebe;--bg:#f3f2f1;--sb:#faf9f8;--br:#edebe9;--tx:#323130;--st:#605e5c;--rd:#d13438}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--tx);overflow:hidden;height:100vh;display:flex;flex-direction:column;user-select:none;-webkit-user-select:none}
+
+  /* Header */
+  .hdr{background:var(--ob);color:#fff;height:44px;display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.15);z-index:100}
+  .hdr .logo{font-size:15px;font-weight:600;white-space:nowrap}
+  .hdr .logo span{opacity:.8;font-weight:300}
+  .hdr .srch{background:rgba(255,255,255,.15);border:none;border-radius:4px;color:#fff;padding:5px 12px;font-size:12px;flex:1;max-width:260px;outline:none}
+  .hdr .srch::placeholder{color:rgba(255,255,255,.7)}
+  .hdr-r{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .hdr-r .bi{background:none;border:none;color:rgba(255,255,255,.9);cursor:pointer;font-size:13px;padding:4px 6px}
+  .av{width:28px;height:28px;border-radius:50%;background:#8764b8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+
+  .ml{display:flex;flex:1;overflow:hidden}
+
+  /* Sidebar */
+  .sb{width:210px;background:var(--sb);border-right:1px solid var(--br);padding:10px 0;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto}
+  .sb-b{display:flex;align-items:center;gap:8px;padding:7px 14px;border:none;background:none;font-size:12px;color:var(--tx);cursor:pointer;width:100%;text-align:left;font-family:inherit}
+  .sb-b:hover{background:#e1dfdd}.sb-b.act{background:#e1dfdd;font-weight:600}
+  .sb-b .ic{font-size:14px;width:18px;text-align:center}
+  .sb-d{height:1px;background:var(--br);margin:6px 0}
+  .mc{padding:6px 14px;font-size:10px}
+  .mc .mt{font-weight:600;margin-bottom:4px;font-size:11px}
+  .mc .g{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center}
+  .mc .dh{font-weight:600;color:var(--st);padding:1px}
+  .mc .d{padding:1px;color:var(--st);border-radius:50%;font-size:9px}
+  .mc .d.td{background:var(--ob);color:#fff;font-weight:600}
+  .ai-s{padding:8px 12px;margin:4px 10px;border-radius:6px;background:linear-gradient(135deg,#e1effa,#ece5f4);font-size:10px;border:1px solid #c7dff0;transition:opacity .3s}
+  .ai-s .ai-t{font-weight:700;color:var(--ob);margin-bottom:2px;font-size:11px}
+  .ai-s .ai-th{color:var(--st);font-style:italic;min-height:24px;line-height:1.3}
+  .ai-s.hidden{opacity:.3}
+  .sp{padding:10px 14px;margin-top:auto}
+  .sp h3{font-size:10px;color:var(--st);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+  .sr{display:flex;justify-content:space-between;padding:3px 0;font-size:11px}
+  .sr .lb{color:var(--st)}.sr .vl{font-weight:600;color:var(--ob)}
+
+  /* Content */
+  .cc{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .dhb{display:flex;align-items:center;padding:8px 16px;background:#fff;border-bottom:1px solid var(--br);gap:10px;flex-shrink:0;flex-wrap:wrap}
+  .tb{padding:4px 12px;border:1px solid var(--br);background:#fff;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--tx)}
+  .na{display:flex;gap:2px}
+  .na button{background:none;border:none;font-size:15px;cursor:pointer;padding:2px 6px;border-radius:4px;color:var(--st)}
+  .dt{font-size:16px;font-weight:600}.ds{font-size:11px;color:var(--st)}
+  .gc{display:flex;gap:6px;margin-left:auto;align-items:center;flex-wrap:wrap}
+  .gc button{padding:4px 12px;border:1px solid var(--br);background:#fff;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--tx);transition:all .15s}
+  .gc button:hover{background:var(--bg)}
+  .gc button.pri{background:var(--ob);color:#fff;border-color:var(--ob)}
+  .gc button.pri:hover{background:var(--od)}
+  .gc button.mode-active{background:#107c10;color:#fff;border-color:#107c10}
+  .sc{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--st)}
+  .sc input[type=range]{width:70px;accent-color:var(--ob)}
+
+  /* Game grid area */
+  .cgw{flex:1;display:flex;background:#fff;overflow:hidden;position:relative}
+  .tc{width:50px;flex-shrink:0;border-right:1px solid var(--br)}
+  .tsl{height:30px;display:flex;align-items:flex-start;justify-content:flex-end;padding-right:6px;font-size:9px;color:var(--st);transform:translateY(-5px)}
+  .ga{flex:1;position:relative;overflow:hidden}
+  canvas#gameCanvas{display:block;width:100%;height:100%}
+  .hl{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:1}
+  .hli{position:absolute;left:0;right:0;border-top:1px solid var(--br)}
+  .hli.hf{border-top:1px dashed #f0eeec}
+  .ctl{position:absolute;left:0;right:0;z-index:50;pointer-events:none}
+  .ctl::before{content:'';position:absolute;left:-4px;top:-3px;width:7px;height:7px;background:var(--rd);border-radius:50%}
+  .ctl::after{content:'';position:absolute;left:0;right:0;top:0;border-top:2px solid var(--rd)}
+
+  /* Right panel: next + dpad */
+  .np{width:200px;border-left:1px solid var(--br);background:var(--sb);padding:12px;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto}
+  .np h3{font-size:10px;color:var(--st);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+  .mk{border-radius:4px;padding:8px;margin-bottom:8px;font-size:10px;border-left:3px solid}
+  .mk .mkt{font-weight:600;margin-bottom:3px;font-size:11px}
+  .mk .mks{color:var(--st)}
+
+  /* ===== D-PAD CONTROLS ===== */
+  .dpad-wrapper{margin-top:auto;padding-top:12px}
+  .dpad-wrapper h3{font-size:10px;color:var(--st);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+  .dpad{display:grid;grid-template-columns:52px 52px 52px;grid-template-rows:46px 46px 46px;gap:3px;justify-content:center}
+  .dpad-btn{
+    border:1px solid var(--br);background:#fff;border-radius:6px;
+    font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    color:var(--tx);transition:background .1s,transform .05s;
+    touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  }
+  .dpad-btn:active{background:#deecf9;transform:scale(.92)}
+  .dpad-btn.up{grid-column:2;grid-row:1}
+  .dpad-btn.left{grid-column:1;grid-row:2}
+  .dpad-btn.center{grid-column:2;grid-row:2;background:var(--ob);color:#fff;font-size:11px;font-weight:600;letter-spacing:-.3px}
+  .dpad-btn.center:active{background:var(--od)}
+  .dpad-btn.right{grid-column:3;grid-row:2}
+  .dpad-btn.down{grid-column:2;grid-row:3}
+  .dpad-btn.hide{visibility:hidden}
+  .dpad-info{text-align:center;font-size:9px;color:var(--st);margin-top:6px}
+
+  .mode-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-left:6px;vertical-align:middle}
+  .mode-badge.ai{background:#e1effa;color:#0078d4}
+  .mode-badge.manual{background:#dff6dd;color:#107c10}
+
+  /* Overlay */
+  .ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
+  .ov.show{display:flex}
+  .ovc{background:#fff;border-radius:8px;padding:32px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,.3);max-width:360px;margin:16px}
+  .ovc h2{font-size:20px;margin-bottom:6px}
+  .ovc .sub{color:var(--st);margin-bottom:20px;font-size:13px}
+  .ovc .bs{font-size:44px;font-weight:700;color:var(--ob);margin-bottom:6px}
+  .ovc .sl{color:var(--st);font-size:11px;margin-bottom:20px}
+  .ovc button{padding:10px 28px;background:var(--ob);color:#fff;border:none;border-radius:4px;font-size:13px;cursor:pointer;font-weight:600;font-family:inherit}
+
+  .toast{position:fixed;bottom:16px;right:16px;background:#fff;border-radius:4px;padding:10px 16px;box-shadow:0 4px 20px rgba(0,0,0,.15);border-left:4px solid var(--ob);font-size:12px;transform:translateY(100px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:200;max-width:300px}
+  .toast.show{transform:translateY(0);opacity:1}
+  .toast .tt{font-weight:600;margin-bottom:2px}
+  .toast .tb{color:var(--st);font-size:11px}
+
+  @media(max-width:900px){.sb{display:none}}
+  @media(max-width:600px){
+    .np{width:160px;padding:8px}
+    .dpad{grid-template-columns:44px 44px 44px;grid-template-rows:40px 40px 40px}
+    .hdr .srch{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">📅 Calendar <span>Tetris</span> <span class="mode-badge ai" id="headerBadge">🤖 AI</span></div>
+  <input class="srch" placeholder="🔍 Search meetings to decline..." readonly>
+  <div class="hdr-r">
+    <button class="bi">🔔</button>
+    <button class="bi">⚙️</button>
+    <div class="av" id="avatarIcon">AI</div>
+  </div>
+</div>
+
+<div class="ml">
+  <div class="sb">
+    <button class="sb-b act"><span class="ic">📅</span> Calendar Tetris</button>
+    <button class="sb-b"><span class="ic">📧</span> Mail (847)</button>
+    <button class="sb-b"><span class="ic">👥</span> People</button>
+    <button class="sb-b"><span class="ic">✅</span> To Do (∞)</button>
+    <div class="sb-d"></div>
+    <div class="mc">
+      <div class="mt">Marzo 2026</div>
+      <div class="g">
+        <div class="dh">L</div><div class="dh">M</div><div class="dh">X</div><div class="dh">J</div><div class="dh">V</div><div class="dh">S</div><div class="dh">D</div>
+        <div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d">1</div>
+        <div class="d">2</div><div class="d">3</div><div class="d">4</div><div class="d">5</div><div class="d">6</div><div class="d">7</div><div class="d">8</div>
+        <div class="d">9</div><div class="d">10</div><div class="d">11</div><div class="d">12</div><div class="d">13</div><div class="d">14</div><div class="d">15</div>
+        <div class="d">16</div><div class="d">17</div><div class="d">18</div><div class="d">19</div><div class="d">20</div><div class="d">21</div><div class="d">22</div>
+        <div class="d">23</div><div class="d td">24</div><div class="d">25</div><div class="d">26</div><div class="d">27</div><div class="d">28</div><div class="d">29</div>
+        <div class="d">30</div><div class="d">31</div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div>
+      </div>
+    </div>
+    <div class="sb-d"></div>
+    <div class="ai-s" id="aiPanel">
+      <div class="ai-t">🤖 Copilot Auto-Scheduler</div>
+      <div class="ai-th" id="aiThought">Initializing meeting optimization...</div>
+    </div>
+    <div class="sp">
+      <h3>Meeting KPIs</h3>
+      <div class="sr"><span class="lb">Score</span><span class="vl" id="sScore">0</span></div>
+      <div class="sr"><span class="lb">Lines Cleared</span><span class="vl" id="sLines">0</span></div>
+      <div class="sr"><span class="lb">Level</span><span class="vl" id="sLevel">1</span></div>
+      <div class="sr"><span class="lb">Meetings Declined</span><span class="vl" id="sDeclined">0</span></div>
+    </div>
+  </div>
+
+  <div class="cc">
+    <div class="dhb">
+      <button class="tb">Today</button>
+      <div class="na"><button>‹</button><button>›</button></div>
+      <div>
+        <div class="dt">Martes, 24 de marzo</div>
+        <div class="ds">Week 13 — "Synergy Sprint" 🏃‍♂️</div>
+      </div>
+      <div class="gc">
+        <button onclick="toggleMode()" id="modeBtn">🤖 AI Mode</button>
+        <div class="sc" id="speedRow">
+          ⚡ <input type="range" min="1" max="10" value="5" id="speedSlider" oninput="updateSpeed(this.value)">
+          <span id="speedLabel">5x</span>
+        </div>
+        <button onclick="togglePause()" id="pauseBtn">⏸ Pause</button>
+        <button onclick="startGame()" class="pri">▶ New Day</button>
+      </div>
+    </div>
+
+    <div class="cgw">
+      <div class="tc" id="timeColumn"></div>
+      <div class="ga" id="gameArea">
+        <div class="hl" id="hourLines"></div>
+        <div class="ctl" id="timeLine" style="top:30%"></div>
+        <canvas id="gameCanvas"></canvas>
+      </div>
+
+      <!-- Right panel -->
+      <div class="np">
+        <h3>Up Next</h3>
+        <div id="nextContainer"></div>
+
+        <!-- D-PAD: always visible, active in manual mode -->
+        <div class="dpad-wrapper" id="dpadWrapper">
+          <h3 id="dpadTitle">Controls</h3>
+          <div class="dpad" id="dpad">
+            <button class="dpad-btn up" onclick="btnAction('rotate')">🔄</button>
+            <button class="dpad-btn left" onclick="btnAction('left')">◀</button>
+            <button class="dpad-btn center" onclick="btnAction('drop')">DROP</button>
+            <button class="dpad-btn right" onclick="btnAction('right')">▶</button>
+            <button class="dpad-btn down" onclick="btnAction('down')">▼</button>
+          </div>
+          <div class="dpad-info" id="dpadInfo">Switch to 🧑 Manual to play</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="gameOverlay">
+  <div class="ovc">
+    <h2>📅 Calendar Full</h2>
+    <div class="sub">No more meeting slots. Time to "Work From Home".</div>
+    <div class="bs" id="finalScore">0</div>
+    <div class="sl">meetings successfully synergized</div>
+    <button onclick="startGame()">📅 New Day</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="tt" id="toastT"></div>
+  <div class="tb" id="toastB"></div>
+</div>
+
+<script>
+// ===== DATA =====
+const TITLES=[
+  "Q4 Synergy Alignment","Cross-functional Standup","OKR Deep Dive",
+  "Strategy Offsite Prep","Stakeholder Sync","Sprint Retrospective",
+  "Pipeline Review","Innovation Workshop","Talent Calibration",
+  "Budget Reforecast","Customer 360 Review","North Star Metrics",
+  "Agile Transformation","Digital Roadmap","Brand Positioning",
+  "Go-To-Market Sync","Tech Debt Standup","Culture Committee",
+  "DEI Town Hall","Exec Skip-Level","Revenue Ops Sync",
+  "Capacity Planning","Incident Postmortem","Design Sprint Kickoff",
+  "Vendor Assessment","Board Prep Meeting","All-Hands Pre-Read",
+  "Quarterly Business Review","Migration Checkpoint","Enablement Session",
+  "1:1 (rescheduled x4)","Pre-Meeting Meeting","Meeting About Meetings",
+  "Alignment on Alignment","Sync to Unsync","Quick Chat (1hr)",
+  "FYI — Mandatory","Mandatory Fun","Thought Leadership",
+  "Circle Back Session","Bikeshedding Workshop","Low-Hanging Fruit Jam",
+  "Paradigm Shift Retro","Boil the Ocean Sprint","Move the Needle 1:1",
+  "Value-Add Check-in","Ping Me Offline Re:","Take This Offline",
+  "Double Click Review","Unpack the Learnings","Leverage Best Practices",
+  "Core Competency Audit","Action Item Follow-Up","Deliverable Deep-Dive",
+  "Bandwidth Check","Headcount Discussion","Reorg Announcement",
+  "Pizza Party Planning","Wellness Wednesday","Async Standup (Live)",
+  "Blocker Unblocking","Scope Creep Review","Ideation Thunderdome",
+  "Holistic Touchpoint","Synergy Brainjam","Impact Assessment Huddle",
+  "Sunset Planning","Rightsizing Discussion","Knowledge Transfer Ceremony",
+];
+const AI_THOUGHTS=[
+  "Optimizing calendar density...","Calculating synergy coefficient...",
+  "Aligning cross-functional blocks...","Declining meetings mentally...",
+  "Maximizing productivity theater...","Evaluating rotation for best fit...",
+  "This piece goes left. Trust the process.","Leveraging spatial awareness...",
+  "Shifting paradigm to the right...","Finding the gap in the schedule...",
+  "Running Monte Carlo on placements...","Reducing whitespace in calendar...",
+  "Calendar Jenga: expert mode...","Thinking 3 meetings ahead...",
+  "If I clear this row, lunch is free...","Strategic pivot to column 7...",
+  "Who scheduled this I-piece?","This L-block is a 'quick sync'...",
+  "Rotating for optimal alignment™...","Insert corporate buzzword here...",
+  "Moving fast and booking things...","Per my last rotation...",
+  "Circling back on this placement...","Let's take this offline... and left.",
+  "Hard-dropping for efficiency gains...","ROI: immeasurable.",
+  "Disrupting the calendar landscape...","Thought-leadering into place...",
+  "Proactively scheduling synergies...","Touching base with the grid...",
+  "Drilling down into row 15...","Net-new paradigm placement.",
+  "Boiling the ocean, one block at a time...",
+];
+const ORGANIZERS=["Michael S.","Jennifer L.","David K.","Sarah M.","James T.","HR Team","Product","Engineering","Leadership","Marketing","Nobody","A Bot","Your Manager's Manager","An Intern","Copilot"];
+const THEMES=[
+  {bg:'#e1effa',border:'#0078d4',text:'#004578'},
+  {bg:'#dff6dd',border:'#107c10',text:'#0b5a08'},
+  {bg:'#ece5f4',border:'#8764b8',text:'#5c3d8f'},
+  {bg:'#f9e8db',border:'#ca5010',text:'#8e3a0a'},
+  {bg:'#d6f2f2',border:'#038387',text:'#025c5f'},
+  {bg:'#f0dff5',border:'#881798',text:'#5c0f66'},
+  {bg:'#f9f0d6',border:'#986f0b',text:'#6b4e08'},
+];
+const COLS=10,ROWS=20;
+const SHAPES=[
+  [[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],
+  [[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]],
+];
+
+// ===== STATE =====
+let canvas,ctx,blockW,blockH;
+let board,boardInfo,cur,next;
+let score=0,linesCleared=0,level=1,declined=0;
+let gameOver=false,paused=false;
+let dropInterval=600,lastDrop=0,lastAiMove=0;
+let speedMul=5,animFrame;
+let aiTarget=null,aiStep=0;
+let mode='ai';
+
+// ===== INIT =====
+function init(){
+  canvas=document.getElementById('gameCanvas');
+  ctx=canvas.getContext('2d');
+  buildTimeCol();buildHourLines();resize();
+  window.addEventListener('resize',resize);
+  startGame();
+}
+
+// Global D-PAD handler - uses onclick="" same as togglePause/startGame
+function btnAction(action){
+  // Auto-switch to manual if in AI mode
+  if(mode==='ai'){
+    mode='manual';
+    applyModeUI();
+    // Reset the game for manual play
+    makeBoard();score=0;linesCleared=0;level=1;declined=0;dropInterval=600;gameOver=false;paused=false;
+    cur=null;next=null;aiTarget=null;aiStep=0;
+    document.getElementById('gameOverlay').classList.remove('show');
+    spawnNext();updateStats();render();
+    lastDrop=performance.now();
+    if(animFrame)cancelAnimationFrame(animFrame);loop(performance.now());
+    showToast('🧑 Manual Mode','Switched! Use the D-PAD buttons to play.');
+    return;
+  }
+  if(gameOver||paused||!cur)return;
+  if(action==='left')moveCur(-1);
+  else if(action==='right')moveCur(1);
+  else if(action==='down')softDrop();
+  else if(action==='rotate')rotateCur();
+  else if(action==='drop')hardDrop();
+  updateStats();render();
+}
+
+// ===== PIECE CONTROLS =====
+function moveCur(dir){if(!cur)return;if(!collides(cur.shape,cur.x+dir,cur.y))cur.x+=dir;}
+function softDrop(){if(!cur)return;if(!collides(cur.shape,cur.x,cur.y+1)){cur.y++;score+=1;}else place();}
+function hardDrop(){if(!cur)return;while(!collides(cur.shape,cur.x,cur.y+1)){cur.y++;score+=2;}place();updateStats();}
+function rotateCur(){
+  if(!cur)return;
+  const r=rotateShape(cur.shape);
+  for(const k of[0,-1,1,-2,2]){if(!collides(r,cur.x+k,cur.y)){cur.shape=r;cur.x+=k;return;}}
+}
+
+// ===== MODE =====
+function toggleMode(){
+  mode=mode==='ai'?'manual':'ai';
+  applyModeUI();startGame();
+}
+function applyModeUI(){
+  const btn=document.getElementById('modeBtn');
+  const badge=document.getElementById('headerBadge');
+  const avatar=document.getElementById('avatarIcon');
+  const aiP=document.getElementById('aiPanel');
+  const speedRow=document.getElementById('speedRow');
+  const dpadInfo=document.getElementById('dpadInfo');
+
+  if(mode==='ai'){
+    btn.textContent='🤖 AI Mode';btn.classList.remove('mode-active');
+    badge.className='mode-badge ai';badge.textContent='🤖 AI';
+    avatar.textContent='AI';aiP.classList.remove('hidden');
+    speedRow.style.display='flex';
+    dpadInfo.textContent='Switch to 🧑 Manual to play';
+  } else {
+    btn.textContent='🧑 Manual';btn.classList.add('mode-active');
+    badge.className='mode-badge manual';badge.textContent='🧑 MANUAL';
+    avatar.textContent='TU';aiP.classList.add('hidden');
+    speedRow.style.display='none';
+    dpadInfo.textContent='Use buttons above to play!';
+  }
+}
+
+// ===== GRID =====
+function resize(){
+  const a=document.getElementById('gameArea');
+  canvas.width=a.clientWidth;canvas.height=a.clientHeight;
+  blockW=canvas.width/COLS;blockH=canvas.height/ROWS;
+  render();
+}
+function buildTimeCol(){
+  const el=document.getElementById('timeColumn');el.innerHTML='';
+  for(let i=0;i<ROWS;i++){const d=document.createElement('div');d.className='tsl';d.textContent=i%2===0?`${8+Math.floor(i/2)}:00`:'';el.appendChild(d);}
+}
+function buildHourLines(){
+  const el=document.getElementById('hourLines');el.innerHTML='';
+  for(let i=0;i<ROWS;i++){const l=document.createElement('div');l.className='hli'+(i%2?' hf':'');l.style.top=`${(i/ROWS)*100}%`;el.appendChild(l);}
+}
+
+// ===== BOARD =====
+function makeBoard(){board=Array.from({length:ROWS},()=>Array(COLS).fill(0));boardInfo=Array.from({length:ROWS},()=>Array(COLS).fill(null));}
+function randMeeting(){return{title:TITLES[0|Math.random()*TITLES.length],org:ORGANIZERS[0|Math.random()*ORGANIZERS.length],theme:THEMES[0|Math.random()*THEMES.length]};}
+function makePiece(){const si=0|Math.random()*SHAPES.length;return{shape:SHAPES[si].map(r=>[...r]),x:Math.floor(COLS/2)-Math.floor(SHAPES[si][0].length/2),y:0,meeting:randMeeting()};}
+function collides(shape,px,py){return shape.some((row,dy)=>row.some((c,dx)=>{if(!c)return false;const nx=px+dx,ny=py+dy;return nx<0||nx>=COLS||ny>=ROWS||(ny>=0&&board[ny][nx]);}));}
+function place(){
+  if(!cur)return;
+  cur.shape.forEach((row,dy)=>row.forEach((c,dx)=>{if(c){const ny=cur.y+dy,nx=cur.x+dx;if(ny>=0&&ny<ROWS&&nx>=0&&nx<COLS){board[ny][nx]=1;boardInfo[ny][nx]=cur.meeting;}}}));
+  clearLines();spawnNext();
+}
+function clearLines(){
+  let cleared=0;
+  for(let r=ROWS-1;r>=0;r--){if(board[r].every(c=>c)){board.splice(r,1);boardInfo.splice(r,1);board.unshift(Array(COLS).fill(0));boardInfo.unshift(Array(COLS).fill(null));cleared++;declined++;r++;}}
+  if(cleared){
+    const pts=[0,100,300,500,800][cleared]*level;score+=pts;linesCleared+=cleared;level=Math.floor(linesCleared/5)+1;dropInterval=Math.max(80,600-(level-1)*50);updateStats();
+    const msgs=[["Meeting Declined! 🗑️",cleared+" removed"],["Inbox Zero Energy! ⚡","+"+pts+" pts"],["Calendar Bankruptcy! 💸","Temporary freedom"],["TETRIS! Full Detox! 🧘",cleared+" rows gone"]];
+    showToast(...msgs[Math.min(cleared-1,msgs.length-1)]);
+  }
+}
+function spawnNext(){
+  cur=next||makePiece();next=makePiece();aiTarget=null;aiStep=0;renderNext();
+  if(collides(cur.shape,cur.x,cur.y)){gameOver=true;document.getElementById('finalScore').textContent=score;document.getElementById('gameOverlay').classList.add('show');}
+}
+
+// ===== RENDER =====
+function drawBlock(x,y,m){
+  const px=x*blockW,py=y*blockH,t=m.theme;
+  ctx.fillStyle=t.bg;ctx.fillRect(px+1,py+1,blockW-2,blockH-2);
+  ctx.fillStyle=t.border;ctx.fillRect(px+1,py+1,3,blockH-2);
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.fillRect(px+4,py+1,blockW-5,1);
+  ctx.fillStyle=t.text;
+  const fs=Math.max(8,Math.min(11,blockW/3.2));
+  ctx.font=`600 ${fs}px "Segoe UI",sans-serif`;ctx.textBaseline='middle';
+  let title=m.title;const maxW=blockW-12;
+  while(ctx.measureText(title).width>maxW&&title.length>2)title=title.slice(0,-1);
+  if(title.length<m.title.length)title+='…';
+  ctx.fillText(title,px+7,py+blockH/2);
+}
+function drawGhost(){
+  if(!cur)return;let gy=cur.y;while(!collides(cur.shape,cur.x,gy+1))gy++;
+  if(gy===cur.y)return;
+  cur.shape.forEach((row,dy)=>row.forEach((c,dx)=>{if(c){const px=(cur.x+dx)*blockW,py=(gy+dy)*blockH;ctx.strokeStyle=cur.meeting.theme.border;ctx.globalAlpha=0.2;ctx.setLineDash([4,3]);ctx.strokeRect(px+2,py+2,blockW-4,blockH-4);ctx.setLineDash([]);ctx.globalAlpha=1;}}));
+}
+function render(){
+  if(!ctx)return;ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(board[r][c]&&boardInfo[r][c])drawBlock(c,r,boardInfo[r][c]);
+  drawGhost();
+  if(cur)cur.shape.forEach((row,dy)=>row.forEach((c,dx)=>{if(c)drawBlock(cur.x+dx,cur.y+dy,cur.meeting);}));
+}
+function renderNext(){
+  const el=document.getElementById('nextContainer');el.innerHTML='';if(!next)return;
+  const card=document.createElement('div');card.className='mk';card.style.background=next.meeting.theme.bg;card.style.borderColor=next.meeting.theme.border;
+  const blocks=next.shape.reduce((s,r)=>s+r.reduce((a,b)=>a+b,0),0);
+  card.innerHTML=`<div class="mkt" style="color:${next.meeting.theme.text}">${next.meeting.title}</div><div class="mks">By ${next.meeting.org}</div><div class="mks" style="margin-top:3px">${blocks*30}min · ${blocks} slots</div>`;
+  const cv=document.createElement('canvas');const sz=12;cv.width=next.shape[0].length*sz;cv.height=next.shape.length*sz;cv.style.marginTop='6px';cv.style.borderRadius='3px';
+  const mc=cv.getContext('2d');next.shape.forEach((row,dy)=>row.forEach((c,dx)=>{if(c){mc.fillStyle=next.meeting.theme.bg;mc.fillRect(dx*sz,dy*sz,sz,sz);mc.fillStyle=next.meeting.theme.border;mc.fillRect(dx*sz,dy*sz,2,sz);mc.strokeStyle=next.meeting.theme.border;mc.lineWidth=.5;mc.strokeRect(dx*sz,dy*sz,sz,sz);}}));
+  card.appendChild(cv);el.appendChild(card);
+}
+
+// ===== AI =====
+function rotateShape(s){const rows=s.length,cols=s[0].length;return Array.from({length:cols},(_,c)=>Array.from({length:rows},(_,r)=>s[rows-1-r][c]));}
+function evalBoard(b){
+  let sc=0;
+  for(let c=0;c<COLS;c++){for(let r=0;r<ROWS;r++){if(b[r][c]){sc-=(ROWS-r)*3;break;}}}
+  for(let r=0;r<ROWS;r++){if(b[r].every(v=>v))sc+=150;}
+  for(let c=0;c<COLS;c++){let f=false;for(let r=0;r<ROWS;r++){if(b[r][c])f=true;else if(f)sc-=40;}}
+  const h=[];for(let c=0;c<COLS;c++){let hi=0;for(let r=0;r<ROWS;r++){if(b[r][c]){hi=ROWS-r;break;}}h.push(hi);}
+  for(let i=0;i<h.length-1;i++)sc-=Math.abs(h[i]-h[i+1])*3;
+  for(let c=0;c<COLS;c++){const l=c>0?h[c-1]:ROWS,ri=c<COLS-1?h[c+1]:ROWS;if(l>h[c]&&ri>h[c])sc+=Math.min(l,ri)-h[c];}
+  return sc;
+}
+function findBest(){
+  let bestSc=-Infinity,bestX=cur.x,bestRot=0;let ts=cur.shape.map(r=>[...r]);
+  for(let rot=0;rot<4;rot++){const w=ts[0].length;
+    for(let x=-1;x<COLS-w+2;x++){let y=cur.y;if(collides(ts,x,y))continue;while(!collides(ts,x,y+1))y++;
+      const tb=board.map(r=>[...r]);let ok=true;ts.forEach((row,dy)=>row.forEach((c,dx)=>{if(c){const ny=y+dy,nx=x+dx;if(ny<0||ny>=ROWS||nx<0||nx>=COLS){ok=false;return;}tb[ny][nx]=1;}}));
+      if(!ok)continue;const s=evalBoard(tb);if(s>bestSc){bestSc=s;bestX=x;bestRot=rot;}}
+    ts=rotateShape(ts);}
+  return{x:bestX,rotation:bestRot};
+}
+function aiThink(){aiTarget=findBest();aiStep=1;document.getElementById('aiThought').textContent=AI_THOUGHTS[0|Math.random()*AI_THOUGHTS.length];}
+function aiAct(){
+  if(!cur||!aiTarget)return;
+  if(aiStep===1){if(aiTarget.rotation>0){const r=rotateShape(cur.shape);for(const k of[0,-1,1,-2,2]){if(!collides(r,cur.x+k,cur.y)){cur.shape=r;cur.x+=k;break;}}aiTarget.rotation--;return;}aiStep=2;}
+  if(aiStep===2){if(cur.x<aiTarget.x){if(!collides(cur.shape,cur.x+1,cur.y))cur.x++;}else if(cur.x>aiTarget.x){if(!collides(cur.shape,cur.x-1,cur.y))cur.x--;}if(cur.x===aiTarget.x||collides(cur.shape,cur.x+Math.sign(aiTarget.x-cur.x),cur.y))aiStep=3;return;}
+  if(aiStep===3){while(!collides(cur.shape,cur.x,cur.y+1)){cur.y++;score+=2;}place();updateStats();}
+}
+
+// ===== CONTROLS =====
+function updateStats(){document.getElementById('sScore').textContent=score;document.getElementById('sLines').textContent=linesCleared;document.getElementById('sLevel').textContent=level;document.getElementById('sDeclined').textContent=declined;}
+function updateSpeed(v){speedMul=parseInt(v);document.getElementById('speedLabel').textContent=v+'x';}
+function togglePause(){paused=!paused;document.getElementById('pauseBtn').textContent=paused?'▶ Resume':'⏸ Pause';if(!paused){lastDrop=performance.now();lastAiMove=performance.now();loop(performance.now());}}
+function showToast(t,b){const el=document.getElementById('toast');document.getElementById('toastT').textContent=t;document.getElementById('toastB').textContent=b;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
+function startGame(){
+  makeBoard();score=0;linesCleared=0;level=1;declined=0;dropInterval=600;gameOver=false;paused=false;
+  cur=null;next=null;aiTarget=null;aiStep=0;
+  document.getElementById('gameOverlay').classList.remove('show');
+  document.getElementById('pauseBtn').textContent='⏸ Pause';
+  applyModeUI();spawnNext();updateStats();render();
+  lastDrop=performance.now();lastAiMove=performance.now();
+  if(animFrame)cancelAnimationFrame(animFrame);loop(performance.now());
+  if(mode==='ai')showToast('Good morning! ☀️','Copilot is optimizing your calendar.');
+  else showToast('🧑 Manual Mode','Use the D-PAD buttons to schedule meetings!');
+}
+
+// ===== LOOP =====
+function loop(ts){
+  if(gameOver||paused)return;
+  if(mode==='ai'){
+    const aiInt=Math.max(20,150-speedMul*14),dropInt=Math.max(40,dropInterval/speedMul);
+    if(ts-lastAiMove>aiInt){if(cur){if(!aiTarget)aiThink();else aiAct();}lastAiMove=ts;render();}
+    if(ts-lastDrop>dropInt){if(cur){if(!collides(cur.shape,cur.x,cur.y+1))cur.y++;else{place();updateStats();}}lastDrop=ts;render();}
+  } else {
+    if(ts-lastDrop>dropInterval){if(cur){if(!collides(cur.shape,cur.x,cur.y+1))cur.y++;else{place();updateStats();}}lastDrop=ts;render();}
+  }
+  document.getElementById('timeLine').style.top=`${5+((ts/200)%1000)/1000*90}%`;
+  animFrame=requestAnimationFrame(loop);
+}
+
+window.addEventListener('load',init);
+</script>
+</body>
+</html>
