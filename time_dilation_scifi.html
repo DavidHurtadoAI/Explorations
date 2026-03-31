@@ -380,9 +380,10 @@ function setPreset(v) {
 
 slider.addEventListener('input', update);
 initStars();
-setPreset(0.1);
 update();
 animate();
+setTimeout(() => setPreset(0.1), 100);
+
 </script>
 
 <script>
