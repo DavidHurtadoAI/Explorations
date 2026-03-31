@@ -1,5 +1,4 @@
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -383,4 +382,14 @@ slider.addEventListener('input', update);
 initStars();
 update();
 animate();
+</script>
+
+<script>
+const font = new FontFace('Orbitron', 'url(https://fonts.gstatic.com/s/orbitron/v31/yMJRMIlzdpvBhQQL_Qq7dy0.woff2)');
+font.load().then(f => {
+  document.fonts.add(f);
+  document.querySelector('.sci-wrap').style.fontFamily = "'Orbitron', sans-serif";
+}).catch(() => {
+  console.log('No se pudo cargar Orbitron');
+});
 </script>
