@@ -1,0 +1,386 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --sci-cyan: #00e5ff;
+  --sci-cyan-dim: #006674;
+  --sci-magenta: #ff00e5;
+  --sci-magenta-dim: #74006a;
+  --sci-amber: #ffab00;
+  --sci-bg: #0a0e17;
+  --sci-bg2: #111827;
+  --sci-grid: rgba(0,229,255,0.06);
+  --sci-text: #c8d6e5;
+  --sci-text-bright: #e8f0fe;
+}
+body, html { background: transparent; }
+.sci-wrap {
+  background: var(--sci-bg);
+  border-radius: 12px;
+  padding: 24px;
+  font-family: 'Orbitron', var(--font-sans);
+  color: var(--sci-text);
+  position: relative;
+  overflow: hidden;
+}
+.sci-wrap::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, var(--sci-grid) 0px, var(--sci-grid) 1px, transparent 1px, transparent 40px),
+    repeating-linear-gradient(90deg, var(--sci-grid) 0px, var(--sci-grid) 1px, transparent 1px, transparent 40px);
+  pointer-events: none;
+}
+.sci-wrap::after {
+  content: '';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 60%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sci-cyan), transparent);
+}
+.title-bar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px; position: relative;
+}
+.title-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sci-cyan); }
+.title-bar h1 {
+  font-size: 13px; font-weight: 500; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--sci-cyan);
+}
+.title-bar .status {
+  margin-left: auto; font-size: 10px; letter-spacing: 2px;
+  color: var(--sci-amber); opacity: 0.8;
+}
+
+.main-display {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.clock-panel {
+  background: var(--sci-bg2);
+  border: 0.5px solid rgba(0,229,255,0.15);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  position: relative;
+}
+.clock-panel::before {
+  content: '';
+  position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sci-cyan), transparent);
+  opacity: 0.4;
+}
+.clock-panel.ship { border-color: rgba(255,0,229,0.2); }
+.clock-panel.ship::before { background: linear-gradient(90deg, transparent, var(--sci-magenta), transparent); }
+.clock-label {
+  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--sci-text); opacity: 0.6; margin-bottom: 8px;
+}
+.clock-value {
+  font-size: 28px; font-weight: 700; letter-spacing: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.clock-panel.earth .clock-value { color: var(--sci-cyan); }
+.clock-panel.ship .clock-value { color: var(--sci-magenta); }
+.clock-unit {
+  font-size: 9px; letter-spacing: 2px; color: var(--sci-text);
+  opacity: 0.5; margin-top: 4px;
+}
+
+.factor-display {
+  background: var(--sci-bg2);
+  border: 0.5px solid rgba(255,171,0,0.2);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+.factor-label { font-size: 9px; letter-spacing: 3px; color: var(--sci-amber); opacity: 0.7; }
+.factor-val { font-size: 22px; font-weight: 700; color: var(--sci-amber); margin: 6px 0; }
+.factor-sub { font-size: 10px; color: var(--sci-text); opacity: 0.5; letter-spacing: 1px; }
+
+.slider-section { margin-bottom: 20px; position: relative; }
+.slider-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 10px;
+}
+.slider-header .lbl { font-size: 9px; letter-spacing: 3px; color: var(--sci-text); opacity: 0.6; text-transform: uppercase; }
+.slider-header .val { font-size: 14px; font-weight: 500; color: var(--sci-cyan); letter-spacing: 1px; }
+.sci-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 4px;
+  background: var(--sci-bg2);
+  border-radius: 2px;
+  outline: none;
+  border: 0.5px solid rgba(0,229,255,0.1);
+}
+.sci-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--sci-bg);
+  border: 2px solid var(--sci-cyan);
+  cursor: pointer;
+}
+.sci-slider::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--sci-bg);
+  border: 2px solid var(--sci-cyan);
+  cursor: pointer;
+}
+
+.star-field {
+  position: relative;
+  height: 140px;
+  background: var(--sci-bg2);
+  border-radius: 8px;
+  border: 0.5px solid rgba(0,229,255,0.1);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.star-field .viewport-label {
+  position: absolute; top: 8px; left: 12px;
+  font-size: 8px; letter-spacing: 2px; color: var(--sci-cyan); opacity: 0.5;
+  text-transform: uppercase; z-index: 2;
+}
+.star {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  will-change: transform;
+}
+.ship-icon {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.journey-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.journey-card {
+  background: var(--sci-bg2);
+  border: 0.5px solid rgba(0,229,255,0.1);
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.journey-card:hover { border-color: rgba(0,229,255,0.4); }
+.journey-card.active { border-color: var(--sci-cyan); }
+.journey-dest { font-size: 9px; letter-spacing: 1px; color: var(--sci-text-bright); margin-bottom: 4px; }
+.journey-dist { font-size: 8px; color: var(--sci-text); opacity: 0.5; letter-spacing: 1px; }
+
+.formula-bar {
+  text-align: center;
+  padding: 10px;
+  font-size: 11px;
+  color: var(--sci-text);
+  opacity: 0.4;
+  letter-spacing: 1px;
+}
+</style>
+
+<div class="sci-wrap">
+  <div class="title-bar">
+    <div class="dot"></div>
+    <h1>Dilatacion temporal</h1>
+    <span class="status" id="status-text">EN ORBITA</span>
+  </div>
+
+  <div class="star-field" id="starfield">
+    <span class="viewport-label">Vista exterior</span>
+    <svg class="ship-icon" width="40" height="24" viewBox="0 0 40 24">
+      <path d="M2 12L14 4L38 12L14 20Z" fill="none" stroke="var(--sci-magenta)" stroke-width="1" opacity="0.8"/>
+      <path d="M14 8L38 12L14 16Z" fill="var(--sci-magenta)" opacity="0.25"/>
+      <line x1="2" y1="12" x2="0" y2="12" stroke="var(--sci-cyan)" stroke-width="1.5" opacity="0.6"/>
+    </svg>
+  </div>
+
+  <div class="slider-section">
+    <div class="slider-header">
+      <span class="lbl">Velocidad</span>
+      <span class="val" id="speed-display">0.00% c</span>
+    </div>
+    <input type="range" class="sci-slider" id="speed-slider" min="0" max="999999" value="0" step="1">
+  </div>
+
+  <div class="main-display">
+    <div class="clock-panel earth">
+      <div class="clock-label">Reloj terrestre</div>
+      <div class="clock-value" id="earth-time">10.00</div>
+      <div class="clock-unit">anos transcurridos</div>
+    </div>
+    <div class="clock-panel ship">
+      <div class="clock-label">Reloj de la nave</div>
+      <div class="clock-value" id="ship-time">10.00</div>
+      <div class="clock-unit">anos transcurridos</div>
+    </div>
+  </div>
+
+  <div class="factor-display">
+    <div class="factor-label">Factor de Lorentz (γ)</div>
+    <div class="factor-val" id="gamma-val">1.00</div>
+    <div class="factor-sub" id="gamma-sub">Sin dilatacion temporal</div>
+  </div>
+
+  <div style="font-size:9px;letter-spacing:2px;color:var(--sci-text);opacity:0.5;text-transform:uppercase;margin-bottom:8px;text-align:center;">Destinos preconfigurados</div>
+  <div class="journey-grid">
+    <div class="journey-card" onclick="setPreset(0.1)">
+      <div class="journey-dest">Marte</div>
+      <div class="journey-dist">10% c</div>
+    </div>
+    <div class="journey-card" onclick="setPreset(0.87)">
+      <div class="journey-dest">Alfa Centauri</div>
+      <div class="journey-dist">87% c</div>
+    </div>
+    <div class="journey-card" onclick="setPreset(0.9999)">
+      <div class="journey-dest">Andromeda</div>
+      <div class="journey-dist">99.99% c</div>
+    </div>
+  </div>
+
+  <div class="formula-bar">τ = t · √(1 − v²/c²)</div>
+</div>
+
+<script>
+const slider = document.getElementById('speed-slider');
+const speedDisp = document.getElementById('speed-display');
+const earthTime = document.getElementById('earth-time');
+const shipTime = document.getElementById('ship-time');
+const gammaVal = document.getElementById('gamma-val');
+const gammaSub = document.getElementById('gamma-sub');
+const statusText = document.getElementById('status-text');
+const starfield = document.getElementById('starfield');
+
+const EARTH_YEARS = 10;
+let stars = [];
+let animId;
+
+function initStars() {
+  stars.forEach(s => s.el.remove());
+  stars = [];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'star';
+    const size = Math.random() * 2 + 1;
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
+    el.style.top = Math.random() * 100 + '%';
+    el.style.left = Math.random() * 100 + '%';
+    el.style.opacity = Math.random() * 0.6 + 0.2;
+    starfield.appendChild(el);
+    stars.push({ el, x: parseFloat(el.style.left), baseOpacity: parseFloat(el.style.opacity), size });
+  }
+}
+
+function sliderToV(val) {
+  const t = val / 999999;
+  if (t < 0.5) return t * 2 * 0.9;
+  const t2 = (t - 0.5) * 2;
+  return 0.9 + t2 * t2 * 0.0999;
+}
+
+function updateStars(v) {
+  const speed = v * 8;
+  stars.forEach(s => {
+    s.x -= speed;
+    if (s.x < -5) s.x = 105;
+    s.el.style.left = s.x + '%';
+    if (v > 0.5) {
+      const streak = Math.min((v - 0.5) * 6, 1);
+      s.el.style.width = (s.size + streak * 20) + 'px';
+      s.el.style.height = Math.max(s.size * (1 - streak * 0.5), 0.5) + 'px';
+      s.el.style.borderRadius = streak > 0.3 ? '1px' : '50%';
+      s.el.style.opacity = Math.min(s.baseOpacity + streak * 0.4, 1);
+    } else {
+      s.el.style.width = s.size + 'px';
+      s.el.style.height = s.size + 'px';
+      s.el.style.borderRadius = '50%';
+      s.el.style.opacity = s.baseOpacity;
+    }
+  });
+}
+
+let currentV = 0;
+function animate() {
+  updateStars(currentV);
+  animId = requestAnimationFrame(animate);
+}
+
+function update() {
+  const v = sliderToV(parseInt(slider.value));
+  currentV = v;
+  const vPercent = (v * 100);
+
+  if (vPercent < 1) {
+    speedDisp.textContent = vPercent.toFixed(2) + '% c';
+  } else if (vPercent < 99) {
+    speedDisp.textContent = vPercent.toFixed(1) + '% c';
+  } else if (vPercent < 99.99) {
+    speedDisp.textContent = vPercent.toFixed(2) + '% c';
+  } else {
+    speedDisp.textContent = vPercent.toFixed(4) + '% c';
+  }
+
+  const gamma = 1 / Math.sqrt(1 - v * v);
+  const shipYears = EARTH_YEARS / gamma;
+
+  earthTime.textContent = EARTH_YEARS.toFixed(2);
+  shipTime.textContent = shipYears < 0.01 ? shipYears.toExponential(2) : shipYears.toFixed(2);
+  gammaVal.textContent = gamma > 9999 ? gamma.toExponential(2) : gamma.toFixed(2);
+
+  if (v < 0.01) {
+    gammaSub.textContent = 'Sin dilatacion temporal';
+    statusText.textContent = 'EN ORBITA';
+  } else if (v < 0.5) {
+    gammaSub.textContent = 'Efecto leve';
+    statusText.textContent = 'CRUCERO';
+  } else if (v < 0.9) {
+    const pct = Math.round((1 - 1/gamma) * 100);
+    gammaSub.textContent = 'El tiempo a bordo pasa ' + pct + '% mas lento';
+    statusText.textContent = 'VELOCIDAD ALTA';
+  } else if (v < 0.99) {
+    const pct = Math.round((1 - 1/gamma) * 100);
+    gammaSub.textContent = 'El tiempo a bordo pasa ' + pct + '% mas lento';
+    statusText.textContent = 'SUBLUMINICA';
+  } else {
+    const ratio = Math.round(gamma);
+    gammaSub.textContent = '1 ano a bordo = ~' + ratio + ' anos en Tierra';
+    statusText.textContent = 'CUASI-LUMINICA';
+  }
+
+  document.querySelectorAll('.journey-card').forEach(c => c.classList.remove('active'));
+}
+
+function setPreset(v) {
+  const target = v;
+  let low = 0, high = 999999;
+  for (let i = 0; i < 30; i++) {
+    const mid = Math.floor((low + high) / 2);
+    if (sliderToV(mid) < target) low = mid; else high = mid;
+  }
+  slider.value = Math.round((low + high) / 2);
+  update();
+
+  document.querySelectorAll('.journey-card').forEach(c => {
+    const dist = c.querySelector('.journey-dist').textContent;
+    const pct = parseFloat(dist) / 100;
+    if (Math.abs(pct - v) < 0.001) c.classList.add('active');
+  });
+}
+
+slider.addEventListener('input', update);
+initStars();
+update();
+animate();
+</script>
