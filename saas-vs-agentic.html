@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaaS vs Era Agéntica</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #fffcf0; }
+
+    @keyframes obsGlow {
+      0%,100% { box-shadow: 0 0 0 0 rgba(208,162,21,0.2); border-color: rgba(208,162,21,0.5); }
+      50%      { box-shadow: 0 0 12px 2px rgba(208,162,21,0.15); border-color: rgba(208,162,21,0.9); }
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform: translateY(12px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .obs-wrap  { animation: obsGlow 3s ease-in-out infinite; }
+    .detail    { animation: slideUp 0.22s ease; }
+    .layer-card {
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .layer-card:hover { transform: translateY(-3px); }
+    .layer-card.dim   { opacity: 0.45; }
+    .layer-card.lit   { transform: translateY(-3px); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const C = {
+      bg: "#fffcf0", bg2: "#f2f0e5", ui: "#e6e4d9", ui2: "#dad8ce",
+      tx: "#100f0f", tx2: "#6f6e69", tx3: "#b7b5ac",
+      or: "#da702c", or2: "#bc5215",
+      ye: "#d0a215", ye2: "#ad8301",
+      gr: "#879a39", gr2: "#66800b",
+      cy: "#3aa99f", cy2: "#24837b",
+      bl: "#4385be", bl2: "#205ea6",
+      pu: "#8b7ec8", pu2: "#5e409d",
+    }
+
+    const SAAS = [
+      {
+        id: "s-user", pair: "user",
+        title: "Usuario", sub: "Interacción discreta",
+        hint: "Clicks · Teclado · Formularios",
+        fill: C.gr, stroke: C.gr2,
+        body: "Navega una interfaz predefinida. Solo puede realizar las acciones que el desarrollador anticipó. Requiere formación específica por producto.",
+        pills: ["Formación requerida", "Acceso limitado", "Interfaz fija"],
+      },
+      {
+        id: "s-ui", pair: "ui",
+        title: "Interfaz de usuario", sub: "Controles discretos",
+        hint: "Botones · Menús · Tablas · Formularios",
+        fill: C.bl, stroke: C.bl2,
+        body: "No es un diseño arbitrario: es la representación visual de un sistema cuyo espacio de posibilidades está completamente delimitado. Un espacio infinito no puede representarse en botones.",
+        pills: ["Botones", "Formularios", "Menús desplegables", "Tablas"],
+      },
+      {
+        id: "s-logic", pair: "logic",
+        title: "Lógica de negocio", sub: "Determinista · Finita",
+        hint: "N funcionalidades pre-programadas",
+        fill: C.or, stroke: C.or2, badge: "FINITO",
+        body: "Conjunto finito de operaciones pre-programadas. Dado un input, el output es predecible y reproducible. Si una funcionalidad no está en el código, no existe. Se audita leyendo el código.",
+        pills: ["N funcionalidades fijas", "Comportamiento determinista", "Auditable por código", "Fuera del código: no existe"],
+      },
+      {
+        id: "s-data", pair: "data",
+        title: "Base de datos", sub: "Datos del negocio",
+        hint: "La única capa que persiste",
+        fill: C.cy2, stroke: "#1a5c54",
+        body: "La única capa que sobrevive cuando el software desaparece. El vendor lock-in opera aquí: datos atrapados en el formato del proveedor y procesos de negocio atrapados en la lógica propietaria.",
+        pills: ["Persistente", "Lock-in por formato", "CRUD"],
+      },
+    ]
+
+    const AGENTIC = [
+      {
+        id: "a-user", pair: "user",
+        title: "Usuario", sub: "Acceso ilimitado",
+        hint: "Texto · Voz · Imagen · Cualquier instrucción",
+        fill: C.gr, stroke: C.gr2,
+        body: "Puede formular cualquier instrucción en lenguaje natural. El límite ya no es el software sino los datos disponibles y la habilidad del usuario para articular lo que necesita.",
+        pills: ["Sin formación específica", "Acceso ilimitado", "Lenguaje natural"],
+      },
+      {
+        id: "a-ui", pair: "ui",
+        title: "Interfaz conversacional", sub: "Input natural · Output adaptado",
+        hint: "Texto · Voz · Artefactos · Acciones directas",
+        fill: C.pu, stroke: C.pu2,
+        body: "Input: texto, voz, multimodal. Output: lo que sea adecuado — lenguaje natural, visualizaciones, artefactos o acciones ejecutadas directamente sobre los datos.",
+        pills: ["Texto / Voz", "Multimodal", "Artefactos", "Acciones directas"],
+      },
+      {
+        id: "a-logic", pair: "logic",
+        title: "Capa de IA agéntica", sub: "No determinista · Infinita",
+        hint: "Cualquier instrucción sobre los datos",
+        fill: C.pu2, stroke: "#3d2875", badge: "INFINITO", hasObs: true,
+        body: "Funcionalidades infinitas: cualquier combinación de instrucción y datos es una funcionalidad posible. El comportamiento NO es predecible para un input dado. La lógica de negocio no existe como código: existe como comportamiento emergente de un modelo en ejecución.",
+        pills: ["Funcionalidades: ∞", "No determinista", "Comportamiento emergente", "No auditable por código"],
+      },
+      {
+        id: "a-data", pair: "data",
+        title: "Base de datos", sub: "El nuevo moat",
+        hint: "Semántica del dominio · Ventaja competitiva",
+        fill: C.cy2, stroke: "#1a5c54", isMoat: true,
+        body: "La capa que persiste y gana valor estratégico. Con la lógica en el agente, quien controla los datos controla el sistema. La semántica del dominio —definiciones precisas, relaciones bien modeladas— es ahora ventaja competitiva real.",
+        pills: ["El nuevo lock-in", "Semántica del dominio", "Moat estratégico"],
+      },
+    ]
+
+    const INSIGHTS = [
+      {
+        label: "Observabilidad", color: C.ye2, bg: "rgba(208,162,21,0.08)",
+        text: "Deja de ser función técnica y pasa a ser función de negocio. El CFO y el COO necesitan saber qué hacen los agentes.",
+      },
+      {
+        label: "El nuevo moat", color: C.cy2, bg: "rgba(36,131,123,0.08)",
+        text: "La ventaja competitiva se desplaza de funcionalidades a datos. Quien controla los datos con mejor semántica controla el sistema.",
+      },
+      {
+        label: "Disrupción del pricing", color: C.pu2, bg: "rgba(94,64,157,0.08)",
+        text: "El modelo por usuario o funcionalidad se rompe. El mercado apunta hacia modelos por outcome, pero medir el outcome es el siguiente problema.",
+      },
+    ]
+
+    function Card({ layer, selId, hovPair, onSelect, onHover }) {
+      const isSelected = selId === layer.id
+      const isPairLit = hovPair === layer.pair && selId !== layer.id
+      const isDim = hovPair && hovPair !== layer.pair && !isSelected
+
+      return (
+        <div
+          className={`layer-card${isDim ? " dim" : isPairLit ? " lit" : ""}`}
+          onClick={() => onSelect(layer.id)}
+          onMouseEnter={() => onHover(layer.pair)}
+          onMouseLeave={() => onHover(null)}
+          style={{
+            background: layer.fill, borderRadius: 10, padding: "14px 16px", marginBottom: 8,
+            border: `2px solid ${isSelected || isPairLit ? "rgba(255,255,255,0.6)" : layer.stroke}`,
+            boxShadow: isSelected ? `0 6px 24px ${layer.fill}55` : isPairLit ? `0 4px 16px ${layer.fill}44` : "0 1px 4px rgba(0,0,0,0.08)",
+            position: "relative",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ color: "#fff", fontWeight: 700, fontSize: 15, letterSpacing: "-0.01em" }}>{layer.title}</div>
+              <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, marginTop: 2 }}>{layer.sub}</div>
+            </div>
+            {layer.badge && (
+              <span style={{
+                background: "rgba(255,255,255,0.18)", color: "#fff", fontSize: 11, fontWeight: 800,
+                padding: "3px 9px", borderRadius: 20, letterSpacing: "0.06em", whiteSpace: "nowrap",
+                border: "1px solid rgba(255,255,255,0.25)",
+              }}>{layer.badge}</span>
+            )}
+          </div>
+          <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 12, marginTop: 7, fontStyle: "italic" }}>{layer.hint}</div>
+          {layer.isMoat && (
+            <div style={{ position: "absolute", top: 10, right: 10, fontSize: 16, opacity: 0.8 }}>🔐</div>
+          )}
+        </div>
+      )
+    }
+
+    function ObsWrap({ children }) {
+      return (
+        <div style={{ position: "relative", marginBottom: 8 }}>
+          <div className="obs-wrap" style={{
+            border: `2px dashed ${C.ye}`, borderRadius: 14,
+            padding: "30px 10px 10px", background: "rgba(208,162,21,0.04)",
+          }}>
+            <div style={{
+              position: "absolute", top: 0, left: 0, right: 0, padding: "6px 12px",
+              fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: C.ye2,
+              display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center",
+            }}>
+              <span>OBSERVABILIDAD</span>
+              <span style={{ fontWeight: 400, opacity: 0.7 }}>Trazabilidad · Linaje · Auditoría · Función de negocio</span>
+            </div>
+            {children}
+          </div>
+        </div>
+      )
+    }
+
+    function DetailPanel({ layer, onClose }) {
+      return (
+        <div className="detail" style={{ maxWidth: 900, margin: "4px auto 24px", padding: "0 32px" }}>
+          <div style={{
+            background: "#fff", border: `1px solid ${C.ui2}`, borderRadius: 12,
+            borderTop: `4px solid ${layer.fill}`, padding: "20px 24px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: C.tx }}>{layer.title}</div>
+                <div style={{ fontSize: 13, color: C.tx2, marginTop: 3 }}>{layer.sub}</div>
+              </div>
+              <button onClick={onClose} style={{
+                background: "none", border: "none", cursor: "pointer",
+                color: C.tx3, fontSize: 22, lineHeight: 1, padding: 0,
+              }}>×</button>
+            </div>
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: C.tx, margin: "14px 0 16px" }}>{layer.body}</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+              {layer.pills.map(p => (
+                <span key={p} style={{
+                  background: `${layer.fill}14`, color: layer.stroke, fontSize: 12,
+                  padding: "4px 12px", borderRadius: 20, fontWeight: 600,
+                  border: `1px solid ${layer.fill}33`,
+                }}>{p}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    function App() {
+      const [selId, setSelId] = useState(null)
+      const [hovPair, setHovPair] = useState(null)
+
+      const all = [...SAAS, ...AGENTIC]
+      const selLayer = all.find(l => l.id === selId)
+      const handleSelect = id => setSelId(selId === id ? null : id)
+
+      const renderLayers = (layers) => layers.map(layer => {
+        const card = (
+          <Card key={layer.id} layer={layer} selId={selId} hovPair={hovPair}
+            onSelect={handleSelect} onHover={setHovPair} />
+        )
+        return layer.hasObs ? <ObsWrap key={layer.id}>{card}</ObsWrap> : card
+      })
+
+      return (
+        <div style={{ background: C.bg, minHeight: "100vh", color: C.tx, fontFamily: "system-ui,-apple-system,sans-serif" }}>
+
+          <div style={{ padding: "32px 32px 0", maxWidth: 900, margin: "0 auto" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+              <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>SaaS Tradicional</h1>
+              <span style={{ color: C.tx3, fontSize: 18 }}>vs</span>
+              <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, letterSpacing: "-0.02em", color: C.pu2 }}>Era Agéntica</h1>
+            </div>
+            <p style={{ color: C.tx2, marginTop: 8, fontSize: 14, lineHeight: 1.6 }}>
+              La transición del software determinista a la inteligencia no determinista.
+              Haz clic en cualquier capa para ver el detalle. Pasa el cursor para comparar equivalentes.
+            </p>
+          </div>
+
+          <div style={{
+            display: "grid", gridTemplateColumns: "1fr 56px 1fr",
+            padding: "24px 32px 8px", maxWidth: 900, margin: "0 auto",
+          }}>
+            <div>
+              <div style={{
+                fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", color: C.or2,
+                marginBottom: 14, paddingBottom: 8, borderBottom: `2px solid ${C.or2}`,
+              }}>SAAS TRADICIONAL</div>
+              {renderLayers(SAAS)}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 36 }}>
+              <div style={{ width: 1, flex: 1, background: C.ui2 }} />
+            </div>
+            <div>
+              <div style={{
+                fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", color: C.pu2,
+                marginBottom: 14, paddingBottom: 8, borderBottom: `2px solid ${C.pu2}`,
+              }}>ERA AGÉNTICA</div>
+              {renderLayers(AGENTIC)}
+            </div>
+          </div>
+
+          <div style={{
+            maxWidth: 900, margin: "0 auto", padding: "0 32px",
+            display: "flex", justifyContent: "center", alignItems: "center",
+            gap: 8, fontSize: 12, color: C.cy2, fontWeight: 600, marginBottom: 8,
+          }}>
+            <div style={{ flex: 1, height: 1, background: C.cy2, opacity: 0.3 }} />
+            <span>↔ Los datos persisten en ambos modelos</span>
+            <div style={{ flex: 1, height: 1, background: C.cy2, opacity: 0.3 }} />
+          </div>
+
+          {selLayer && <DetailPanel layer={selLayer} onClose={() => setSelId(null)} />}
+
+          <div style={{ maxWidth: 900, margin: "0 auto", padding: "8px 32px 40px" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: C.tx3, marginBottom: 12 }}>
+              LO QUE CAMBIA
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+              {INSIGHTS.map(ins => (
+                <div key={ins.label} style={{
+                  background: ins.bg, border: `1px solid ${ins.color}33`,
+                  borderRadius: 10, padding: "14px 16px", borderLeft: `3px solid ${ins.color}`,
+                }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: ins.color, marginBottom: 6, letterSpacing: "0.02em" }}>
+                    {ins.label}
+                  </div>
+                  <div style={{ fontSize: 13, color: C.tx2, lineHeight: 1.55 }}>{ins.text}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      )
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'))
+    root.render(<App />)
+  </script>
+</body>
+</html>
