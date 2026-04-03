@@ -15,12 +15,12 @@
       0%,100% { box-shadow: 0 0 0 0 rgba(208,162,21,0.2); border-color: rgba(208,162,21,0.5); }
       50%      { box-shadow: 0 0 12px 2px rgba(208,162,21,0.15); border-color: rgba(208,162,21,0.9); }
     }
-    @keyframes slideUp {
-      from { opacity:0; transform: translateY(12px); }
-      to   { opacity:1; transform: translateY(0); }
+    @keyframes slideIn {
+      from { opacity:0; transform: translateY(8px) scale(0.97); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
     }
     .obs-wrap  { animation: obsGlow 3s ease-in-out infinite; }
-    .detail    { animation: slideUp 0.22s ease; }
+    .detail    { animation: slideIn 0.18s ease; }
     .layer-card {
       transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
       cursor: pointer;
@@ -35,7 +35,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState } = React;
+    const { useState, useEffect, useRef } = React;
 
     const C = {
       bg: "#fffcf0", bg2: "#f2f0e5", ui: "#e6e4d9", ui2: "#dad8ce",
@@ -133,7 +133,7 @@
       },
     ]
 
-    function Card({ layer, selId, hovPair, onSelect, onHover }) {
+    function Card({ layer, selId, hovPair, onSelect, onHover, onLeave }) {
       const isSelected = selId === layer.id
       const isPairLit = hovPair === layer.pair && selId !== layer.id
       const isDim = hovPair && hovPair !== layer.pair && !isSelected
@@ -143,7 +143,7 @@
           className={`layer-card${isDim ? " dim" : isPairLit ? " lit" : ""}`}
           onClick={() => onSelect(layer.id)}
           onMouseEnter={() => onHover(layer.pair)}
-          onMouseLeave={() => onHover(null)}
+          onMouseLeave={() => { onHover(null); if (isSelected) onLeave(layer.id) }}
           style={{
             background: layer.fill, borderRadius: 10, padding: "14px 16px", marginBottom: 8,
             border: `2px solid ${isSelected || isPairLit ? "rgba(255,255,255,0.6)" : layer.stroke}`,
@@ -193,30 +193,63 @@
       )
     }
 
-    function DetailPanel({ layer, onClose }) {
+    function DetailPanel({ layer, mousePos, onClose }) {
+      const panelRef = useRef(null)
+      const [pos, setPos] = useState({ x: 0, y: 0 })
+
+      useEffect(() => {
+        if (!panelRef.current) return
+        const pw = panelRef.current.offsetWidth || 340
+        const ph = panelRef.current.offsetHeight || 220
+        const vw = window.innerWidth
+        const vh = window.innerHeight
+        const gap = 18
+
+        let x = mousePos.x + gap
+        let y = mousePos.y + gap
+
+        if (x + pw > vw - 12) x = mousePos.x - pw - gap
+        if (y + ph > vh - 12) y = mousePos.y - ph - gap
+        if (x < 8) x = 8
+        if (y < 8) y = 8
+
+        setPos({ x, y })
+      }, [mousePos, layer])
+
       return (
-        <div className="detail" style={{ maxWidth: 900, margin: "4px auto 24px", padding: "0 32px" }}>
+        <div
+          ref={panelRef}
+          className="detail"
+          style={{
+            position: "fixed",
+            left: pos.x,
+            top: pos.y,
+            width: 340,
+            zIndex: 1000,
+            pointerEvents: "auto",
+          }}
+        >
           <div style={{
             background: "#fff", border: `1px solid ${C.ui2}`, borderRadius: 12,
-            borderTop: `4px solid ${layer.fill}`, padding: "20px 24px",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+            borderTop: `4px solid ${layer.fill}`, padding: "18px 20px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: C.tx }}>{layer.title}</div>
-                <div style={{ fontSize: 13, color: C.tx2, marginTop: 3 }}>{layer.sub}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: C.tx }}>{layer.title}</div>
+                <div style={{ fontSize: 12, color: C.tx2, marginTop: 2 }}>{layer.sub}</div>
               </div>
               <button onClick={onClose} style={{
                 background: "none", border: "none", cursor: "pointer",
-                color: C.tx3, fontSize: 22, lineHeight: 1, padding: 0,
+                color: C.tx3, fontSize: 20, lineHeight: 1, padding: "0 0 0 8px",
               }}>×</button>
             </div>
-            <p style={{ fontSize: 14, lineHeight: 1.7, color: C.tx, margin: "14px 0 16px" }}>{layer.body}</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+            <p style={{ fontSize: 13, lineHeight: 1.65, color: C.tx, margin: "12px 0 14px" }}>{layer.body}</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {layer.pills.map(p => (
                 <span key={p} style={{
-                  background: `${layer.fill}14`, color: layer.stroke, fontSize: 12,
-                  padding: "4px 12px", borderRadius: 20, fontWeight: 600,
+                  background: `${layer.fill}14`, color: layer.stroke, fontSize: 11,
+                  padding: "3px 10px", borderRadius: 20, fontWeight: 600,
                   border: `1px solid ${layer.fill}33`,
                 }}>{p}</span>
               ))}
@@ -229,6 +262,13 @@
     function App() {
       const [selId, setSelId] = useState(null)
       const [hovPair, setHovPair] = useState(null)
+      const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+
+      useEffect(() => {
+        const handleMove = e => setMousePos({ x: e.clientX, y: e.clientY })
+        window.addEventListener("mousemove", handleMove)
+        return () => window.removeEventListener("mousemove", handleMove)
+      }, [])
 
       const all = [...SAAS, ...AGENTIC]
       const selLayer = all.find(l => l.id === selId)
@@ -237,7 +277,7 @@
       const renderLayers = (layers) => layers.map(layer => {
         const card = (
           <Card key={layer.id} layer={layer} selId={selId} hovPair={hovPair}
-            onSelect={handleSelect} onHover={setHovPair} />
+            onSelect={handleSelect} onHover={setHovPair} onLeave={() => setSelId(null)} />
         )
         return layer.hasObs ? <ObsWrap key={layer.id}>{card}</ObsWrap> : card
       })
@@ -290,7 +330,7 @@
             <div style={{ flex: 1, height: 1, background: C.cy2, opacity: 0.3 }} />
           </div>
 
-          {selLayer && <DetailPanel layer={selLayer} onClose={() => setSelId(null)} />}
+          {selLayer && <DetailPanel layer={selLayer} mousePos={mousePos} onClose={() => setSelId(null)} />}
 
           <div style={{ maxWidth: 900, margin: "0 auto", padding: "8px 32px 40px" }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: C.tx3, marginBottom: 12 }}>
