@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Framework: Mapeo de IA en la Cadena de Producción</title>
+<style>
+*{margin:0;box-sizing:border-box}
+:root{--phase-0:#185FA5;--phase-1:#854F0B;--phase-2:#534AB7;--phase-3:#993C1D;--phase-4:#0F6E56;--bg0:#E6F1FB;--bg1:#FAEEDA;--bg2:#EEEDFE;--bg3:#FAECE7;--bg4:#E1F5EE;--color-text-primary:#1e1e1e;--color-text-secondary:#666;--color-background-primary:#fff;--color-background-secondary:#f5f5f4;--color-border-tertiary:rgba(0,0,0,0.15);--color-border-secondary:rgba(0,0,0,0.3);--color-border-primary:rgba(0,0,0,0.4);--color-background-danger:#fef2f2;--color-background-info:#eff6ff;--color-background-success:#f0fdf4;--border-radius-md:8px;--border-radius-lg:12px;--font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{font-family:var(--font-sans);color:var(--color-text-primary);line-height:1.7;max-width:720px;margin:0 auto;padding:24px 16px}
+@media(prefers-color-scheme:dark){:root{--color-text-primary:#e5e5e5;--color-text-secondary:#a0a0a0;--color-background-primary:#1e1e1e;--color-background-secondary:#2a2a2a;--color-border-tertiary:rgba(255,255,255,0.15);--color-border-secondary:rgba(255,255,255,0.3);--color-border-primary:rgba(255,255,255,0.4);--color-background-danger:#2a1515;--color-background-info:#151f2a;--color-background-success:#152a1a}}
+.nav{display:flex;gap:4px;overflow-x:auto;padding:0 0 12px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.nav button{background:none;border:none;padding:8px 14px;font:inherit;font-size:13px;font-weight:400;color:var(--color-text-secondary);cursor:pointer;border-radius:var(--border-radius-md);white-space:nowrap;transition:all .2s}
+.nav button:hover{background:var(--color-background-secondary)}
+.nav button.active{font-weight:500;color:var(--color-text-primary);background:var(--color-background-secondary)}
+.nav button .pip{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle;opacity:.7}
+.phase{display:none;padding:20px 0 0;animation:fadeIn .35s ease}
+.phase.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.phase-head{font-size:18px;font-weight:500;margin:0 0 4px}
+.phase-sub{font-size:14px;color:var(--color-text-secondary);margin:0 0 20px}
+.card-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0}
+.card{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:16px;font-size:14px}
+.card-label{font-size:12px;color:var(--color-text-secondary);margin:0 0 6px}
+.card-title{font-weight:500;margin:0 0 6px;font-size:15px}
+.card-body{color:var(--color-text-secondary);font-size:13px;line-height:1.5}
+.q-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.q-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;font-size:13px;border-left:3px solid var(--color-border-secondary)}
+.q-card strong{font-weight:500;display:block;margin-bottom:2px;font-size:14px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0;font-size:13px;color:var(--color-text-secondary)}
+.legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.pat-tabs{display:flex;gap:6px;margin:0 0 16px}
+.pat-tabs button{flex:1;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 8px;font:inherit;font-size:13px;cursor:pointer;transition:all .2s;color:var(--color-text-secondary)}
+.pat-tabs button:hover{border-color:var(--color-border-secondary)}
+.pat-tabs button.active{font-weight:500;color:var(--color-text-primary);border-color:var(--color-border-primary);background:var(--color-background-primary)}
+.pat-tabs button .pnum{font-weight:500;font-size:11px;display:block;margin-bottom:2px;opacity:.6}
+.pattern-view{display:none;animation:fadeIn .3s ease}
+.pattern-view.active{display:block}
+.chain-wrap{position:relative;margin:20px 0;min-height:120px}
+.chain-toggle{display:flex;gap:0;margin:0 0 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:2px;width:fit-content}
+.chain-toggle button{background:none;border:none;padding:6px 16px;font:inherit;font-size:13px;cursor:pointer;border-radius:6px;color:var(--color-text-secondary);transition:all .2s}
+.chain-toggle button.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;box-shadow:0 0 0 0.5px var(--color-border-tertiary)}
+.chain-svg{width:100%;display:none}
+.chain-svg.active{display:block;animation:fadeIn .4s ease}
+.insight-box{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px;margin:16px 0;font-size:14px;border-left:3px solid}
+.insight-box.warn{border-color:#E24B4A;background:var(--color-background-danger)}
+.insight-box.info{border-color:#185FA5;background:var(--color-background-info)}
+.insight-box.tip{border-color:#0F6E56;background:var(--color-background-success)}
+.insight-box p{margin:0;line-height:1.5}
+.insight-box .ib-title{font-weight:500;font-size:13px;margin-bottom:4px}
+.step-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:16px 0}
+.step-card{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px;text-align:center}
+.step-card .step-num{font-size:22px;font-weight:500;color:var(--color-text-secondary);opacity:.4}
+.step-card .step-title{font-size:14px;font-weight:500;margin:6px 0 4px}
+.step-card .step-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.4}
+.anti-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.anti-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;border-left:3px solid #E24B4A}
+.anti-card .anti-name{font-weight:500;font-size:14px;margin-bottom:4px}
+.anti-card .anti-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.4}
+</style>
+</head>
+<body>
+
+<h1 style="font-size:20px;font-weight:500;margin:0 0 4px">Mapeo de IA en la cadena de producción</h1>
+<p style="font-size:14px;color:var(--color-text-secondary);margin:0 0 20px">Framework de workshop — proceso completo</p>
+
+<nav class="nav" id="nav">
+  <button data-phase="0" class="active"><span class="pip" style="background:var(--phase-0)"></span>Preparación</button>
+  <button data-phase="1"><span class="pip" style="background:var(--phase-1)"></span>Diagnóstico</button>
+  <button data-phase="2"><span class="pip" style="background:var(--phase-2)"></span>Patrones</button>
+  <button data-phase="3"><span class="pip" style="background:var(--phase-3)"></span>Rediseño</button>
+  <button data-phase="4"><span class="pip" style="background:var(--phase-4)"></span>Ejecución</button>
+</nav>
+
+<div class="phase active" id="phase-0">
+  <p class="phase-head" style="color:var(--phase-0)">Fase 0 — Preparación</p>
+  <p class="phase-sub">Pre-workshop. Cada participante trae 3 entregables.</p>
+  <div class="card-row">
+    <div class="card"><div class="card-label">Entregable 1</div><div class="card-title">Mapa de cadena actual</div><div class="card-body">Secuencia de tareas desde input hasta output al cliente. Cada caja = tarea. Debajo = quién la ejecuta. Flechas = flujo.</div></div>
+    <div class="card"><div class="card-label">Entregable 2</div><div class="card-title">Inventario de herramientas IA</div><div class="card-body">Qué herramientas de IA ya usa el equipo y para qué tarea concreta. Sin esto no sabes desde dónde partes.</div></div>
+    <div class="card"><div class="card-label">Entregable 3</div><div class="card-title">3 frustraciones operativas</div><div class="card-body">Dónde se pierde tiempo, dónde hay cuellos de botella, dónde dependes de una persona que no escala.</div></div>
+  </div>
+  <div class="insight-box info"><p class="ib-title">Formato del mapa</p><p>Diagrama lineal. No hace falta que sea bonito — tiene que ser honesto. Lo importante es que refleje quién hace qué realmente, no el organigrama ideal.</p></div>
+</div>
+
+<div class="phase" id="phase-1">
+  <p class="phase-head" style="color:var(--phase-1)">Fase 1 — Diagnóstico</p>
+  <p class="phase-sub">90 min · Individual + grupo de 4-6 personas</p>
+  <p style="font-size:14px;font-weight:500;margin:0 0 8px">Ejercicio 1.1 — Radiografía de la cadena</p>
+  <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">Cada participante presenta su mapa. El grupo interroga con 4 preguntas:</p>
+  <div class="q-grid">
+    <div class="q-card"><strong>Humanos-pegamento</strong>¿Hay personas cuyo trabajo principal es mover datos entre sistemas? Sacar de Excel, meter en CRM, reconciliar manualmente.</div>
+    <div class="q-card"><strong>Secuencias bloqueantes</strong>¿Hay tareas que solo avanzan cuando la anterior termina al 100%? Ciclos largos donde el feedback tarda semanas.</div>
+    <div class="q-card"><strong>Especialista bottleneck</strong>¿Hay una persona cuya agenda condiciona la velocidad de toda la cadena? Todo pasa por su revisión.</div>
+    <div class="q-card"><strong>Tareas repetitivas</strong>¿Hay tareas que siguen un patrón con variaciones menores? Propuestas, informes, clasificaciones con reglas conocidas.</div>
+  </div>
+  <p style="font-size:14px;font-weight:500;margin:16px 0 8px">Ejercicio 1.2 — Mapa de calor de oportunidad</p>
+  <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 8px">Sobre el mapa de cada participante, marcar cada tarea:</p>
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#E24B4A"></span>Cuello de botella</span>
+    <span><span class="legend-dot" style="background:#EF9F27"></span>Pegamento humano</span>
+    <span><span class="legend-dot" style="background:#378ADD"></span>Tarea repetitiva</span>
+    <span><span class="legend-dot" style="background:#22c55e"></span>Ya usa IA</span>
+  </div>
+  <div class="insight-box tip"><p class="ib-title">Output de esta fase</p><p>Mapa anotado con patrones visibles. Los puntos rojos y amarillos son candidatos principales — no por ser fáciles de automatizar, sino por su impacto en la cadena completa.</p></div>
+</div>
+
+<div class="phase" id="phase-2">
+  <p class="phase-head" style="color:var(--phase-2)">Fase 2 — Patrones de reorganización</p>
+  <p class="phase-sub">120 min · Presentación de caso + análisis en grupo</p>
+  <div class="pat-tabs" id="patTabs">
+    <button class="active" data-pat="p1"><span class="pnum">P1</span>Compresión de cadena</button>
+    <button data-pat="p2"><span class="pnum">P2</span>Exploración paralela</button>
+    <button data-pat="p3"><span class="pnum">P3</span>Eliminar pegamento</button>
+    <button data-pat="p4"><span class="pnum">P4</span>Reordenar modelo</button>
+  </div>
+
+  <div class="pattern-view active" id="p1">
+    <p style="font-size:14px;color:var(--color-text-secondary);line-height:1.6;margin:0 0 12px">Una cadena larga de especialistas se comprime. La IA ejecuta varios pasos, una sola persona orquesta el ciclo completo. Aparecen tareas nuevas: supervisión de calidad de outputs de IA.</p>
+    <div class="chain-toggle" id="tog-p1"><button class="active" data-v="before">Antes</button><button data-v="after">Después</button></div>
+    <div class="chain-wrap">
+      <svg class="chain-svg active" data-chain="p1-before" viewBox="0 0 680 140" width="100%">
+        <defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        <g><rect x="10" y="20" width="72" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#3C3489" x="46" y="38" text-anchor="middle" dominant-baseline="central">Feedback</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="46" y="78" text-anchor="middle">Soporte</text></g>
+        <line x1="82" y1="42" x2="95" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a1)"/>
+        <g><rect x="96" y="20" width="72" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#3C3489" x="132" y="38" text-anchor="middle" dominant-baseline="central">Priorizar</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="132" y="78" text-anchor="middle">PM</text></g>
+        <line x1="168" y1="42" x2="181" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a1)"/>
+        <g><rect x="182" y="20" width="72" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#3C3489" x="218" y="38" text-anchor="middle" dominant-baseline="central">Spec</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="218" y="78" text-anchor="middle">PM</text></g>
+        <line x1="254" y1="42" x2="267" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a1)"/>
+        <g><rect x="268" y="20" width="72" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#3C3489" x="304" y="38" text-anchor="middle" dominant-baseline="central">Diseño</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="304" y="78" text-anchor="middle">Diseñador</text></g>
+        <line x1="340" y1="42" x2="353" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a1)"/>
+        <g><rect x="354" y="20" width="72" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#3C3489" x="390" y="38" text-anchor="middle" dominant-baseline="central">Código</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="390" y="78" text-anchor="middle">Ingeniero</text></g>
+        <line x1="426" y1="42" x2="439" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a1)"/>
+        <g><rect x="440" y="20" width="72" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#3C3489" x="476" y="38" text-anchor="middle" dominant-baseline="central">QA</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="476" y="78" text-anchor="middle">QA</text></g>
+        <line x1="512" y1="42" x2="525" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a1)"/>
+        <g><rect x="526" y="20" width="72" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#3C3489" x="562" y="38" text-anchor="middle" dominant-baseline="central">Test A/B</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="562" y="78" text-anchor="middle">Data</text></g>
+        <line x1="598" y1="42" x2="611" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a1)"/>
+        <g><rect x="612" y="20" width="58" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#3C3489" x="641" y="38" text-anchor="middle" dominant-baseline="central">Deploy</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="641" y="78" text-anchor="middle">Eng</text></g>
+        <text font-family="var(--font-sans)" font-size="11" fill="#666" x="340" y="114" text-anchor="middle">8 pasos · 6 roles distintos · ciclos trimestrales</text>
+      </svg>
+      <svg class="chain-svg" data-chain="p1-after" viewBox="0 0 680 140" width="100%">
+        <defs><marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        <g><rect x="40" y="20" width="120" height="44" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#633806" x="100" y="38" text-anchor="middle" dominant-baseline="central">IA detecta patrones</text><text font-family="var(--font-sans)" font-size="10" fill="#854F0B" x="100" y="78" text-anchor="middle">IA</text></g>
+        <line x1="160" y1="42" x2="183" y2="42" stroke="#854F0B" stroke-width="0.5" marker-end="url(#a2)"/>
+        <g><rect x="184" y="20" width="110" height="44" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#085041" x="239" y="38" text-anchor="middle" dominant-baseline="central">Desarrollar evals</text><text font-family="var(--font-sans)" font-size="10" fill="#0F6E56" x="239" y="78" text-anchor="middle">PM (nuevo)</text></g>
+        <line x1="294" y1="42" x2="317" y2="42" stroke="#854F0B" stroke-width="0.5" marker-end="url(#a2)"/>
+        <g><rect x="318" y="20" width="120" height="44" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#633806" x="378" y="38" text-anchor="middle" dominant-baseline="central">IA genera variantes</text><text font-family="var(--font-sans)" font-size="10" fill="#854F0B" x="378" y="78" text-anchor="middle">IA</text></g>
+        <line x1="438" y1="42" x2="461" y2="42" stroke="#854F0B" stroke-width="0.5" marker-end="url(#a2)"/>
+        <g><rect x="462" y="20" width="90" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="12" font-weight="500" fill="#3C3489" x="507" y="38" text-anchor="middle" dominant-baseline="central">Test + deploy</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="507" y="78" text-anchor="middle">PM + Eng</text></g>
+        <text font-family="var(--font-sans)" font-size="11" fill="#666" x="310" y="114" text-anchor="middle">4 pasos · 1 PM orquesta · ciclos continuos · tarea nueva: evals</text>
+      </svg>
+    </div>
+    <div class="insight-box info"><p class="ib-title">Señal para aplicar</p><p>Tu mapa tiene una cadena larga de especialistas donde cada handoff introduce latencia.</p></div>
+    <div class="insight-box tip"><p class="ib-title">Pregunta clave</p><p>¿Qué tareas nuevas aparecen cuando comprimes la cadena?</p></div>
+  </div>
+
+  <div class="pattern-view" id="p2">
+    <p style="font-size:14px;color:var(--color-text-secondary);line-height:1.6;margin:0 0 12px">En vez de apostar secuencialmente por una sola opción, la IA permite explorar múltiples opciones simultáneamente a coste cercano a cero. El cuello de botella se desplaza de "construir" a "conseguir feedback".</p>
+    <div class="chain-toggle" id="tog-p2"><button class="active" data-v="before">Antes</button><button data-v="after">Después</button></div>
+    <div class="chain-wrap">
+      <svg class="chain-svg active" data-chain="p2-before" viewBox="0 0 680 120" width="100%">
+        <defs><marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        <g><rect x="20" y="20" width="90" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#3C3489" x="65" y="38" text-anchor="middle" dominant-baseline="central">Elegir stack</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="65" y="78" text-anchor="middle">CTO</text></g>
+        <line x1="110" y1="42" x2="129" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a3)"/>
+        <g><rect x="130" y="20" width="100" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#3C3489" x="180" y="38" text-anchor="middle" dominant-baseline="central">Contratar equipo</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="180" y="78" text-anchor="middle">Founder</text></g>
+        <line x1="230" y1="42" x2="249" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a3)"/>
+        <g><rect x="250" y="20" width="120" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#3C3489" x="310" y="38" text-anchor="middle" dominant-baseline="central">Construir (meses)</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="310" y="78" text-anchor="middle">Equipo eng.</text></g>
+        <line x1="370" y1="42" x2="389" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a3)"/>
+        <g><rect x="390" y="20" width="80" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#3C3489" x="430" y="38" text-anchor="middle" dominant-baseline="central">Testear</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="430" y="78" text-anchor="middle">Equipo</text></g>
+        <line x1="470" y1="42" x2="489" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a3)"/>
+        <g><rect x="490" y="20" width="140" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#3C3489" x="560" y="38" text-anchor="middle" dominant-baseline="central">Pivotar o continuar</text><text font-family="var(--font-sans)" font-size="10" fill="#534AB7" x="560" y="78" text-anchor="middle">Founder</text></g>
+        <text font-family="var(--font-sans)" font-size="11" fill="#666" x="340" y="108" text-anchor="middle">Apuesta secuencial · una sola opción · meses de compromiso</text>
+      </svg>
+      <svg class="chain-svg" data-chain="p2-after" viewBox="0 0 680 190" width="100%">
+        <defs><marker id="a4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        <g><rect x="20" y="50" width="100" height="44" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#633806" x="70" y="68" text-anchor="middle" dominant-baseline="central">PRD con IA</text><text font-family="var(--font-sans)" font-size="10" fill="#854F0B" x="70" y="108" text-anchor="middle">Founder + IA</text></g>
+        <line x1="120" y1="52" x2="149" y2="22" stroke="#854F0B" stroke-width="0.5" marker-end="url(#a4)"/>
+        <line x1="120" y1="72" x2="149" y2="72" stroke="#854F0B" stroke-width="0.5" marker-end="url(#a4)"/>
+        <line x1="120" y1="92" x2="149" y2="122" stroke="#854F0B" stroke-width="0.5" marker-end="url(#a4)"/>
+        <g><rect x="150" y="4" width="90" height="36" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#633806" x="195" y="22" text-anchor="middle" dominant-baseline="central">Tool A</text></g>
+        <g><rect x="150" y="54" width="90" height="36" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#633806" x="195" y="72" text-anchor="middle" dominant-baseline="central">Tool B</text></g>
+        <g><rect x="150" y="104" width="90" height="36" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#633806" x="195" y="122" text-anchor="middle" dominant-baseline="central">Tool C</text></g>
+        <text font-family="var(--font-sans)" font-size="10" fill="#854F0B" x="195" y="156" text-anchor="middle">Simultáneo · IA</text>
+        <line x1="240" y1="22" x2="269" y2="52" stroke="#854F0B" stroke-width="0.5" marker-end="url(#a4)"/>
+        <line x1="240" y1="72" x2="269" y2="62" stroke="#854F0B" stroke-width="0.5" marker-end="url(#a4)"/>
+        <line x1="240" y1="122" x2="269" y2="72" stroke="#854F0B" stroke-width="0.5" marker-end="url(#a4)"/>
+        <g><rect x="270" y="42" width="120" height="44" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#085041" x="330" y="60" text-anchor="middle" dominant-baseline="central">Test con cliente</text><text font-family="var(--font-sans)" font-size="10" fill="#0F6E56" x="330" y="100" text-anchor="middle">Founder</text></g>
+        <line x1="390" y1="64" x2="419" y2="64" stroke="#0F6E56" stroke-width="0.5" marker-end="url(#a4)"/>
+        <g><rect x="420" y="42" width="120" height="44" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#633806" x="480" y="60" text-anchor="middle" dominant-baseline="central">Iterar en vivo</text><text font-family="var(--font-sans)" font-size="10" fill="#854F0B" x="480" y="100" text-anchor="middle">Founder + IA</text></g>
+        <line x1="540" y1="64" x2="569" y2="64" stroke="#0F6E56" stroke-width="0.5" marker-end="url(#a4)"/>
+        <g><rect x="570" y="42" width="90" height="44" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#085041" x="615" y="60" text-anchor="middle" dominant-baseline="central">Test again</text><text font-family="var(--font-sans)" font-size="10" fill="#0F6E56" x="615" y="100" text-anchor="middle">Founder</text></g>
+        <text font-family="var(--font-sans)" font-size="11" fill="#666" x="400" y="175" text-anchor="middle">3 prototipos simultáneos · feedback en minutos · iteración en vivo</text>
+      </svg>
+    </div>
+    <div class="insight-box info"><p class="ib-title">Señal para aplicar</p><p>Tu proceso actual te obliga a comprometerte con una opción antes de tener información suficiente.</p></div>
+    <div class="insight-box tip"><p class="ib-title">Pregunta clave</p><p>Si construir costara casi cero, ¿qué explorarías que hoy descartas por costoso?</p></div>
+  </div>
+
+  <div class="pattern-view" id="p3">
+    <p style="font-size:14px;color:var(--color-text-secondary);line-height:1.6;margin:0 0 12px">En muchos procesos, los humanos no añaden juicio experto — sirven de puente entre sistemas que no hablan entre sí. La IA reemplaza esa función de conexión, automatizando la cadena completa end-to-end.</p>
+    <div class="chain-toggle" id="tog-p3"><button class="active" data-v="before">Antes</button><button data-v="after">Después</button></div>
+    <div class="chain-wrap">
+      <svg class="chain-svg active" data-chain="p3-before" viewBox="0 0 680 120" width="100%">
+        <defs><marker id="a5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        <g><rect x="4" y="20" width="68" height="44" rx="6" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#0C447C" x="38" y="42" text-anchor="middle" dominant-baseline="central">Excel</text></g>
+        <line x1="72" y1="42" x2="83" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a5)"/>
+        <g><rect x="84" y="20" width="68" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#3C3489" x="118" y="42" text-anchor="middle" dominant-baseline="central">Persona</text></g>
+        <line x1="152" y1="42" x2="163" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a5)"/>
+        <g><rect x="164" y="20" width="68" height="44" rx="6" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#0C447C" x="198" y="42" text-anchor="middle" dominant-baseline="central">Contable</text></g>
+        <line x1="232" y1="42" x2="243" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a5)"/>
+        <g><rect x="244" y="20" width="68" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#3C3489" x="278" y="42" text-anchor="middle" dominant-baseline="central">Persona</text></g>
+        <line x1="312" y1="42" x2="323" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a5)"/>
+        <g><rect x="324" y="20" width="68" height="44" rx="6" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#0C447C" x="358" y="42" text-anchor="middle" dominant-baseline="central">Banco</text></g>
+        <line x1="392" y1="42" x2="403" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a5)"/>
+        <g><rect x="404" y="20" width="68" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#3C3489" x="438" y="42" text-anchor="middle" dominant-baseline="central">Persona</text></g>
+        <line x1="472" y1="42" x2="483" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a5)"/>
+        <g><rect x="484" y="20" width="68" height="44" rx="6" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#0C447C" x="518" y="42" text-anchor="middle" dominant-baseline="central">Email</text></g>
+        <line x1="552" y1="42" x2="563" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a5)"/>
+        <g><rect x="564" y="20" width="100" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#3C3489" x="614" y="42" text-anchor="middle" dominant-baseline="central">Persona envía</text></g>
+        <text font-family="var(--font-sans)" font-size="11" fill="#666" x="340" y="100" text-anchor="middle">Software y humanos alternándose · la persona es pegamento entre sistemas</text>
+      </svg>
+      <svg class="chain-svg" data-chain="p3-after" viewBox="0 0 680 120" width="100%">
+        <defs><marker id="a6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        <rect x="20" y="10" width="530" height="64" rx="10" fill="none" stroke="#0F6E56" stroke-width="1" stroke-dasharray="4 3"/>
+        <text font-family="var(--font-sans)" font-size="10" fill="#0F6E56" x="285" y="84" text-anchor="middle">Cadena completamente automatizada</text>
+        <g><rect x="30" y="20" width="70" height="44" rx="6" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#0C447C" x="65" y="42" text-anchor="middle" dominant-baseline="central">Excel</text></g>
+        <line x1="100" y1="42" x2="115" y2="42" stroke="#0F6E56" stroke-width="0.5" marker-end="url(#a6)"/>
+        <g><rect x="116" y="20" width="90" height="44" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#633806" x="161" y="42" text-anchor="middle" dominant-baseline="central">IA reconcilia</text></g>
+        <line x1="206" y1="42" x2="221" y2="42" stroke="#0F6E56" stroke-width="0.5" marker-end="url(#a6)"/>
+        <g><rect x="222" y="20" width="70" height="44" rx="6" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#0C447C" x="257" y="42" text-anchor="middle" dominant-baseline="central">Banco</text></g>
+        <line x1="292" y1="42" x2="307" y2="42" stroke="#0F6E56" stroke-width="0.5" marker-end="url(#a6)"/>
+        <g><rect x="308" y="20" width="90" height="44" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#633806" x="353" y="42" text-anchor="middle" dominant-baseline="central">IA empareja</text></g>
+        <line x1="398" y1="42" x2="413" y2="42" stroke="#0F6E56" stroke-width="0.5" marker-end="url(#a6)"/>
+        <g><rect x="414" y="20" width="126" height="44" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#633806" x="477" y="42" text-anchor="middle" dominant-baseline="central">IA envía emails</text></g>
+        <line x1="550" y1="42" x2="575" y2="42" stroke="#E24B4A" stroke-width="0.5" marker-end="url(#a6)"/>
+        <g><rect x="576" y="20" width="90" height="44" rx="6" fill="#FCEBEB" stroke="#A32D2D" stroke-width="1"/><text font-family="var(--font-sans)" font-size="10" font-weight="500" fill="#791F1F" x="621" y="36" text-anchor="middle" dominant-baseline="central">Excepciones</text><text font-family="var(--font-sans)" font-size="9" fill="#A32D2D" x="621" y="52" text-anchor="middle" dominant-baseline="central">Especialista</text></g>
+        <text font-family="var(--font-sans)" font-size="11" fill="#666" x="400" y="108" text-anchor="middle">Humano solo interviene en excepciones con juicio experto real</text>
+      </svg>
+    </div>
+    <div class="insight-box warn"><p class="ib-title">Advertencia crítica</p><p>La automatización parcial de este patrón no funciona. Si automatizas 5 de 8 pasos pero dejas 3 manuales, el proceso no mejora. Es todo o nada.</p></div>
+    <div class="insight-box tip"><p class="ib-title">Pregunta clave</p><p>Si automatizas toda la cadena, ¿qué rol queda para el humano?</p></div>
+  </div>
+
+  <div class="pattern-view" id="p4">
+    <p style="font-size:14px;color:var(--color-text-secondary);line-height:1.6;margin:0 0 12px">La IA no solo cambia cómo haces las cosas, sino en qué orden tiene sentido hacerlas. Si los costes de producción caen drásticamente, la secuencia óptima cambia entera.</p>
+    <div class="chain-toggle" id="tog-p4"><button class="active" data-v="before">Antes</button><button data-v="after">Después</button></div>
+    <div class="chain-wrap">
+      <svg class="chain-svg active" data-chain="p4-before" viewBox="0 0 680 120" width="100%">
+        <defs><marker id="a7" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        <g><rect x="10" y="20" width="100" height="44" rx="6" fill="#FCEBEB" stroke="#A32D2D" stroke-width="1"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#791F1F" x="60" y="42" text-anchor="middle" dominant-baseline="central">Levantar capital</text></g>
+        <line x1="110" y1="42" x2="127" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a7)"/>
+        <g><rect x="128" y="20" width="100" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#3C3489" x="178" y="42" text-anchor="middle" dominant-baseline="central">Contratar</text></g>
+        <line x1="228" y1="42" x2="245" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a7)"/>
+        <g><rect x="246" y="20" width="100" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#3C3489" x="296" y="42" text-anchor="middle" dominant-baseline="central">Construir</text></g>
+        <line x1="346" y1="42" x2="363" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a7)"/>
+        <g><rect x="364" y="20" width="80" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#3C3489" x="404" y="42" text-anchor="middle" dominant-baseline="central">Vender</text></g>
+        <line x1="444" y1="42" x2="461" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a7)"/>
+        <g><rect x="462" y="20" width="90" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#3C3489" x="507" y="42" text-anchor="middle" dominant-baseline="central">Escalar</text></g>
+        <text font-family="var(--font-sans)" font-size="11" fill="#666" x="300" y="100" text-anchor="middle">Capital primero · todo se compromete antes de generar un euro</text>
+      </svg>
+      <svg class="chain-svg" data-chain="p4-after" viewBox="0 0 680 120" width="100%">
+        <defs><marker id="a8" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        <g><rect x="10" y="20" width="90" height="44" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#085041" x="55" y="42" text-anchor="middle" dominant-baseline="central">Vender ya</text></g>
+        <line x1="100" y1="42" x2="117" y2="42" stroke="#0F6E56" stroke-width="0.5" marker-end="url(#a8)"/>
+        <g><rect x="118" y="20" width="110" height="44" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#085041" x="173" y="42" text-anchor="middle" dominant-baseline="central">Hacer el trabajo</text></g>
+        <line x1="228" y1="42" x2="245" y2="42" stroke="#854F0B" stroke-width="0.5" marker-end="url(#a8)"/>
+        <g><rect x="246" y="20" width="120" height="44" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#633806" x="306" y="42" text-anchor="middle" dominant-baseline="central">IA automatiza</text></g>
+        <line x1="366" y1="42" x2="383" y2="42" stroke="#854F0B" stroke-width="0.5" marker-end="url(#a8)"/>
+        <g><rect x="384" y="20" width="110" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#3C3489" x="439" y="42" text-anchor="middle" dominant-baseline="central">Contratar + IA</text></g>
+        <line x1="494" y1="42" x2="511" y2="42" stroke="#534AB7" stroke-width="0.5" marker-end="url(#a8)"/>
+        <g><rect x="512" y="20" width="80" height="44" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#3C3489" x="552" y="42" text-anchor="middle" dominant-baseline="central">Escalar</text></g>
+        <line x1="592" y1="42" x2="606" y2="42" stroke="#A32D2D" stroke-width="0.5" marker-end="url(#a8)"/>
+        <g><rect x="607" y="20" width="66" height="44" rx="6" fill="#FCEBEB" stroke="#A32D2D" stroke-width="1" stroke-dasharray="3 2"/><text font-family="var(--font-sans)" font-size="11" font-weight="500" fill="#791F1F" x="640" y="36" text-anchor="middle" dominant-baseline="central">Capital</text><text font-family="var(--font-sans)" font-size="9" fill="#A32D2D" x="640" y="52" text-anchor="middle" dominant-baseline="central">(opcional)</text></g>
+        <text font-family="var(--font-sans)" font-size="11" fill="#666" x="340" y="100" text-anchor="middle">Ingresos primero · capital pasa de primer paso a último y opcional</text>
+      </svg>
+    </div>
+    <div class="insight-box info"><p class="ib-title">Señal para aplicar</p><p>Tu secuencia actual asume costes que IA puede eliminar. Si repiensas qué necesita capital humano y qué no, el orden óptimo cambia.</p></div>
+    <div class="insight-box tip"><p class="ib-title">Pregunta clave</p><p>Si la IA reduce 10x el coste de [X], ¿sigue teniendo sentido hacer las cosas en este orden?</p></div>
+  </div>
+</div>
+
+<div class="phase" id="phase-3">
+  <p class="phase-head" style="color:var(--phase-3)">Fase 3 — Rediseño</p>
+  <p class="phase-sub">120 min · Individual + feedback de pares + iteración</p>
+  <div class="step-row">
+    <div class="step-card"><div class="step-num">3.1</div><div class="step-title">Aplicar patrones</div><div class="step-desc">Dibujar cadena DESPUÉS: qué desaparece, qué aparece, dónde va el nuevo bottleneck, qué cambia en el equipo</div></div>
+    <div class="step-card"><div class="step-num">3.2</div><div class="step-title">Stress-test por pares</div><div class="step-desc">El grupo cuestiona: ¿dónde se queda corto? ¿qué complementariedades faltan? ¿hay un patrón que no ves?</div></div>
+    <div class="step-card"><div class="step-num">3.3</div><div class="step-title">Priorización</div><div class="step-desc">Matriz: impacto en cadena completa × complejidad de implementación. Hacer primero lo de alto impacto + baja complejidad</div></div>
+  </div>
+  <div class="insight-box warn"><p class="ib-title">Ojo con la métrica</p><p>Impacto en cadena completa ≠ impacto en tarea individual. Desbloquear un bottleneck que retrasa 3 semanas un ciclo completo > ahorrar 2h/semana en una tarea.</p></div>
+  <p style="font-size:14px;font-weight:500;margin:20px 0 8px">Preguntas del stress-test</p>
+  <div class="q-grid">
+    <div class="q-card"><strong>¿Dónde se queda corto?</strong>Has automatizado la generación pero el comité de aprobación sigue reuniéndose mensualmente.</div>
+    <div class="q-card"><strong>¿Qué complementariedades faltan?</strong>Si aceleras producto pero no cambias cómo recoges feedback, construirás lo incorrecto más rápido.</div>
+    <div class="q-card"><strong>¿Hay un patrón que no ves?</strong>Tu cadena tiene 4 personas sirviendo de pegamento. Eso es Patrón 3 puro.</div>
+    <div class="q-card"><strong>¿Qué pasa en los bordes?</strong>Has rediseñado el proceso interno pero ¿el bottleneck está ahora en el cliente?</div>
+  </div>
+</div>
+
+<div class="phase" id="phase-4">
+  <p class="phase-head" style="color:var(--phase-4)">Fase 4 — Plan de ejecución</p>
+  <p class="phase-sub">60 min · Compromiso público</p>
+  <div class="step-row">
+    <div class="step-card"><div class="step-num">1</div><div class="step-title">Caso semana 1</div><div class="step-desc">El de menor fricción, para generar momentum rápido</div></div>
+    <div class="step-card"><div class="step-num">4</div><div class="step-title">Caso semana 4</div><div class="step-desc">Alto impacto, requiere reorganización real del proceso</div></div>
+    <div class="step-card"><div class="step-num">M</div><div class="step-title">Métricas</div><div class="step-desc">De cadena completa: tiempo ciclo end-to-end, throughput, coste/output</div></div>
+    <div class="step-card"><div class="step-num">-</div><div class="step-title">Dejar de hacer</div><div class="step-desc">¿Qué proceso actual ya no tiene sentido si el rediseño funciona?</div></div>
+    <div class="step-card"><div class="step-num">@</div><div class="step-title">Stakeholders</div><div class="step-desc">El rediseño afecta a personas que no están en la sala. Planificar la conversación.</div></div>
+  </div>
+  <div class="insight-box info"><p class="ib-title">Principio central del framework</p><p>El cuello de botella no es el acceso a la tecnología. Es el descubrimiento: saber dónde desplegar IA dentro del proceso productivo y cómo reorganizar el resto.</p></div>
+  <p style="font-size:14px;font-weight:500;margin:20px 0 8px">Antipatrones a vigilar</p>
+  <div class="anti-grid">
+    <div class="anti-card"><div class="anti-name">El chatbot solitario</div><div class="anti-desc">IA en un solo punto de contacto sin cambiar nada más. Mejora marginal, cero impacto en cadena.</div></div>
+    <div class="anti-card"><div class="anti-name">Construir lo incorrecto más rápido</div><div class="anti-desc">Acelerar desarrollo sin cambiar cómo se descubre qué necesita el cliente.</div></div>
+    <div class="anti-card"><div class="anti-name">Automatización parcial</div><div class="anti-desc">5 de 8 pasos automatizados. Los 3 manuales se convierten en el nuevo bottleneck concentrado.</div></div>
+    <div class="anti-card"><div class="anti-name">La lista de tareas suelta</div><div class="anti-desc">20 tareas donde IA podría ayudar sin analizar cómo se conectan en la cadena productiva.</div></div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.nav button').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.phase').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('phase-'+btn.dataset.phase).classList.add('active');
+  };
+});
+document.querySelectorAll('.pat-tabs button').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.pat-tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.pattern-view').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.pat).classList.add('active');
+  };
+});
+document.querySelectorAll('.chain-toggle').forEach(tog=>{
+  tog.querySelectorAll('button').forEach(btn=>{
+    btn.onclick=()=>{
+      tog.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const wrap=tog.nextElementSibling;
+      wrap.querySelectorAll('.chain-svg').forEach(s=>s.classList.remove('active'));
+      const suffix=btn.dataset.v;
+      const patId=tog.id.replace('tog-','');
+      wrap.querySelector('[data-chain="'+patId+'-'+suffix+'"]').classList.add('active');
+    };
+  });
+});
+</script>
+</body>
+</html>
