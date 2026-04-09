@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico de Inteligencia Organizacional · David Hurtado</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --paper:    #FFFCF0;
+    --black:    #100F0F;
+    --base-50:  #F2F0E5;
+    --base-100: #E6E4D9;
+    --base-200: #CECDC3;
+    --base-300: #B7B5AC;
+    --base-400: #9F9D96;
+    --base-600: #6F6E69;
+    --red:      #AF3029;
+    --orange:   #BC5215;
+    --yellow:   #AD8301;
+    --green:    #66800B;
+    --cyan:     #24837B;
+    --blue:     #205EA6;
+    --magenta:  #A02F6F;
+    --bg:       var(--paper);
+    --surface:  var(--base-50);
+    --surface2: var(--base-100);
+    --border:   var(--base-200);
+    --text:     var(--black);
+    --text-dim: var(--base-600);
+    --text-muted: var(--base-400);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 3px; background: var(--surface2); z-index: 200;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    transition: width 0.5s ease;
+  }
+
+  /* ── NAV ── */
+  .nav {
+    position: fixed; top: 3px; left: 0; right: 0;
+    padding: 0.85rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 100;
+    background: rgba(255,252,240,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand { font-size: 0.8rem; font-weight: 600; color: var(--text-dim); }
+  .nav-dots { display: flex; gap: 5px; align-items: center; }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--border); transition: all 0.3s;
+  }
+  .dot.current { background: var(--blue); transform: scale(1.3); }
+  .dot.done { background: var(--green); }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none; opacity: 0;
+    min-height: 100vh; padding: 84px 1.5rem 3rem;
+    max-width: 680px; margin: 0 auto;
+    flex-direction: column; justify-content: center;
+    animation: fadeUp 0.35s ease forwards;
+  }
+  .screen.active { display: flex; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── INTRO ── */
+  .eyebrow {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--blue); margin-bottom: 1.1rem;
+  }
+  .intro-title {
+    font-size: clamp(1.7rem, 4vw, 2.6rem); font-weight: 700;
+    line-height: 1.15; letter-spacing: -0.02em;
+    margin-bottom: 1.2rem;
+  }
+  .intro-body {
+    font-size: 0.97rem; color: var(--text-dim); line-height: 1.72;
+    margin-bottom: 1.25rem; max-width: 560px;
+  }
+  .thesis {
+    background: rgba(32,94,166,0.07);
+    border-left: 3px solid var(--blue);
+    padding: 1rem 1.2rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 2rem;
+    font-size: 0.94rem; font-style: italic;
+    color: var(--text); line-height: 1.65;
+  }
+  .meta { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* ── DIMENSION SCREEN ── */
+  .dim-step {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 0.4rem;
+  }
+  .dim-title {
+    font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em;
+    line-height: 1.2; margin-bottom: 0.75rem;
+  }
+  .dim-def {
+    font-size: 0.88rem; color: var(--text-dim); line-height: 1.65;
+    padding-left: 1rem; border-left: 2px solid var(--border);
+    margin-bottom: 0.65rem;
+  }
+  .dim-mech {
+    font-size: 0.85rem; color: var(--text-dim); line-height: 1.6;
+    margin-bottom: 1.75rem;
+  }
+  .levels-label {
+    font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.09em; color: var(--text-muted); margin-bottom: 0.65rem;
+  }
+  .levels-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.55rem; margin-bottom: 1.75rem;
+  }
+  @media (max-width: 480px) { .levels-grid { grid-template-columns: 1fr; } }
+
+  .lvl-btn {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 0.8rem 0.95rem;
+    cursor: pointer; text-align: left; font-family: inherit;
+    transition: all 0.22s ease; position: relative;
+  }
+  .lvl-btn:hover { border-color: var(--base-300); background: var(--surface2); }
+  .lvl-btn.selected {
+    border-color: var(--accent); background: var(--accent-dim);
+  }
+  .lvl-btn .lname {
+    font-size: 0.86rem; font-weight: 600; color: var(--text);
+    margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.4rem;
+  }
+  .sig {
+    font-size: 0.66rem; padding: 0.1rem 0.4rem;
+    border-radius: 4px; font-weight: 700; white-space: nowrap;
+  }
+  .lvl-btn .ldesc { font-size: 0.78rem; color: var(--text-dim); line-height: 1.45; }
+
+  /* ── BUTTONS ── */
+  .btn-row { display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    border-radius: 9px; padding: 0.75rem 1.4rem;
+    font-size: 0.87rem; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: all 0.2s; border: none;
+  }
+  .btn-primary { background: var(--black); color: #fff; }
+  .btn-primary:hover { opacity: 0.82; }
+  .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-secondary {
+    background: transparent; color: var(--text-dim);
+    border: 1.5px solid var(--border) !important; border: none;
+  }
+  .btn-secondary:hover { border-color: var(--base-300) !important; color: var(--text); }
+
+  /* ── RESULTS ── */
+  .results-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.35rem; }
+  .results-sub { font-size: 0.87rem; color: var(--text-dim); margin-bottom: 2rem; }
+
+  .score-block {
+    display: flex; align-items: center; gap: 1.5rem;
+    margin-bottom: 2rem; flex-wrap: wrap;
+  }
+  .score-ring {
+    width: 88px; height: 88px; border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border: 3px solid; flex-shrink: 0;
+  }
+  .score-pct { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+  .score-lbl { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-top: 2px; }
+  .verdict { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .verdict-detail { font-size: 0.86rem; color: var(--text-dim); line-height: 1.6; max-width: 380px; }
+
+  .radar-panel {
+    display: flex; gap: 1.75rem; align-items: flex-start;
+    margin-bottom: 2rem; flex-wrap: wrap;
+  }
+  #resultSvg { width: 260px; height: 260px; flex-shrink: 0; }
+
+  .bars { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 0.65rem; }
+  .bar-row { display: flex; align-items: center; gap: 0.65rem; font-size: 0.82rem; }
+  .bar-name { flex: 1; font-weight: 500; }
+  .bar-track { width: 72px; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s 0.3s ease; }
+  .bar-level { font-size: 0.72rem; font-weight: 600; width: 78px; text-align: right; }
+
+  .next-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.35rem; margin-bottom: 1.75rem;
+  }
+  .next-box h3 {
+    font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.09em; color: var(--text-muted); margin-bottom: 0.9rem;
+  }
+  .ns-item { display: flex; gap: 0.65rem; margin-bottom: 0.75rem; align-items: flex-start; }
+  .ns-item:last-child { margin-bottom: 0; }
+  .ns-num {
+    width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.68rem; font-weight: 700; margin-top: 0.15rem;
+  }
+  .ns-text { font-size: 0.85rem; color: var(--text); line-height: 1.55; }
+  .ns-text strong { font-weight: 600; }
+  .ns-divider { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="pFill" style="width:0%"></div></div>
+
+<nav class="nav">
+  <span class="nav-brand">Diagnóstico · Inteligencia Organizacional</span>
+  <div class="nav-dots" id="navDots"></div>
+</nav>
+
+<!-- INTRO -->
+<div class="screen active" id="s0">
+  <div class="eyebrow">David Hurtado · Abril 2026</div>
+  <h1 class="intro-title">¿Está midiendo bien<br>la inteligencia de su organización?</h1>
+  <p class="intro-body">La mayoría de las empresas evalúan la IA en horas ahorradas. Es comprensible: las horas son fáciles de contar. El problema es que son lo menos interesante que está sucediendo.</p>
+  <div class="thesis">La IA no solo acelera trabajo. Añade capacidad cognitiva. Si solo medimos velocidad, estamos observando el fenómeno equivocado.</div>
+  <p class="intro-body">Este diagnóstico evalúa dónde se sitúa su organización en cinco dimensiones de inteligencia que van más allá de la productividad. Seleccione el nivel que mejor describe la realidad actual, no la aspiracional.</p>
+  <div class="btn-row" style="margin-top:0.5rem">
+    <button class="btn btn-primary" onclick="goTo(1)">
+      Empezar
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="meta">5 dimensiones · ~3 minutos</span>
+  </div>
+</div>
+
+<!-- RESULTS (placeholder, populated by JS) -->
+<div class="screen" id="s6">
+  <div class="eyebrow">Resultados del diagnóstico</div>
+  <h2 class="results-title">Tu organización en perspectiva</h2>
+  <p class="results-sub">Basado en las cinco dimensiones de inteligencia organizacional</p>
+  <div id="scoreBlock" class="score-block"></div>
+  <div class="radar-panel">
+    <svg id="resultSvg" viewBox="0 0 260 260"></svg>
+    <div class="bars" id="barsEl"></div>
+  </div>
+  <div class="next-box" id="nextBox"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="restart()">Repetir diagnóstico</button>
+    <button class="btn btn-secondary" onclick="window.print()">Imprimir</button>
+  </div>
+</div>
+
+<script>
+/* ── DATA ── */
+const DIMS = [
+  {
+    name: "Amplitud de perspectivas", short: "Perspectivas",
+    color: "#205EA6", dim: "rgba(32,94,166,0.09)",
+    def: "Número y diversidad de alternativas genuinas exploradas antes de comprometerse con una dirección. No alternativas de formalismo, sino opciones evaluadas, comparadas y descartadas con justificación.",
+    mech: "Un equipo que usa IA para ampliar su campo de análisis explora más caminos antes de decidir. Un equipo que usa IA para acelerar se queda con la primera opción aceptable. La diferencia está en el espacio de posibilidades recorrido, no en el resultado final.",
+    levels: [
+      { name:"Opción única",          desc:"Se presenta una sola opción sin alternativas" },
+      { name:"Variantes",             desc:"Se presentan variantes del mismo camino, no enfoques distintos" },
+      { name:"Alternativas genuinas", desc:"Se exploran enfoques genuinamente diferentes con criterio" },
+      { name:"Exploración sistemática",desc:"Se mapea el espacio de opciones antes de comprometerse" }
+    ]
+  },
+  {
+    name: "Calidad de supuestos", short: "Supuestos",
+    color: "#24837B", dim: "rgba(36,131,123,0.09)",
+    def: "Grado en que los entregables hacen visibles las condiciones que deben cumplirse para que el análisis sea válido. Un supuesto es una creencia no verificada que sustenta el razonamiento.",
+    mech: "La IA produce respuestas fluidas con confianza aparente, enmascarando supuestos débiles. Un profesional con criterio identifica esos supuestos y los expone. La pregunta clave: ¿qué invalidaría esta conclusión?",
+    levels: [
+      { name:"Ausente",    desc:"No se mencionan supuestos en los entregables" },
+      { name:"Genérico",   desc:"«Asumimos condiciones normales de mercado»" },
+      { name:"Específico", desc:"«Asumimos CAC por debajo de 45 €»" },
+      { name:"Crítico",    desc:"«Si el CAC supera 60 €, el modelo es inviable»" }
+    ]
+  },
+  {
+    name: "Profundidad del diagnóstico", short: "Diagnóstico",
+    color: "#BC5215", dim: "rgba(188,82,21,0.09)",
+    def: "Esfuerzo dedicado a entender y formular el problema antes de proponer una solución. Se mide por la ratio entre análisis del problema y propuesta de acción.",
+    mech: "La IA reduce el coste de producir soluciones, lo que genera un sesgo: la tendencia a saltarse la fase de diagnóstico. En problemas complejos, la calidad de la solución está directamente limitada por la calidad del diagnóstico.",
+    levels: [
+      { name:"Reactivo",    desc:"Va directo a la solución sin diagnóstico previo" },
+      { name:"Descriptivo", desc:"Describe el problema sin analizarlo ni descomponerlo" },
+      { name:"Analítico",   desc:"Descompone causas y variables antes de proponer" },
+      { name:"Crítico",     desc:"Cuestiona la propia formulación del problema" }
+    ]
+  },
+  {
+    name: "Presencia de contraargumentos", short: "Contraargum.",
+    color: "#A02F6F", dim: "rgba(160,47,111,0.09)",
+    def: "Grado en que el equipo considera activamente las razones por las que su propia propuesta podría ser incorrecta, incompleta o subóptimal.",
+    mech: "La IA amplifica el sesgo de confirmación: respuestas fluidas con confianza que facilitan creer sin cuestionar. Un buen uso de la IA implica pedirle que ataque la propuesta como adversario intelectual, sin riesgo interpersonal.",
+    levels: [
+      { name:"Ausente",     desc:"No se consideran objeciones en el análisis" },
+      { name:"Periférico",  desc:"Objeciones menores que no amenazan la tesis central" },
+      { name:"Central",     desc:"Se atacan los puntos fuertes de la propia propuesta" },
+      { name:"Pre-mortem",  desc:"Ejercicio sistemático de pensamiento inverso" }
+    ]
+  },
+  {
+    name: "Precisión en la formulación", short: "Formulación",
+    color: "#66800B", dim: "rgba(102,128,11,0.09)",
+    def: "Capacidad de definir con exactitud qué se está intentando resolver antes de buscar soluciones. Incluye acotar el alcance, identificar variables relevantes y separar el problema real del síntoma.",
+    mech: "La calidad de cualquier solución está limitada por la calidad de la pregunta. Un proxy directo: los equipos que formulan bien sus problemas escriben mejores prompts y obtienen mejores resultados de la IA.",
+    levels: [
+      { name:"Difuso",       desc:"«Tenemos un problema con las ventas»" },
+      { name:"Descriptivo",  desc:"«Las ventas enterprise cayeron un 15% en Q1»" },
+      { name:"Causal",       desc:"«La caída coincide con el cambio de pricing; hipótesis...»" },
+      { name:"Estructural",  desc:"«El problema no es el pricing, es que ventas no tiene playbook adaptado»" }
+    ]
+  }
+];
+
+const SIG = {
+  1: { bg:"rgba(175,48,41,0.1)",   fg:"#AF3029", lbl:"Bajo" },
+  2: { bg:"rgba(173,131,1,0.12)",  fg:"#AD8301", lbl:"Medio" },
+  3: { bg:"rgba(36,131,123,0.12)", fg:"#24837B", lbl:"Alto" },
+  4: { bg:"rgba(102,128,11,0.12)", fg:"#66800B", lbl:"Excelente" }
+};
+
+let scores = [0,0,0,0,0];
+let current = 0;
+
+/* ── INIT ── */
+function init() {
+  buildNavDots();
+  buildDimScreens();
+  updateUI();
+}
+
+function buildNavDots() {
+  const c = document.getElementById('navDots');
+  for (let i = 0; i < 5; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot'; d.id = `dot${i}`;
+    c.appendChild(d);
+  }
+}
+
+function buildDimScreens() {
+  const ref = document.getElementById('s6');
+  DIMS.forEach((dim, i) => {
+    const sc = document.createElement('div');
+    sc.className = 'screen'; sc.id = `s${i+1}`;
+    sc.innerHTML = `
+      <div class="dim-step" style="color:${dim.color}">Dimensión ${i+1} de 5</div>
+      <h2 class="dim-title" style="color:${dim.color}">${dim.name}</h2>
+      <p class="dim-def">${dim.def}</p>
+      <p class="dim-mech">${dim.mech}</p>
+      <p class="levels-label">¿En qué nivel se encuentra su organización?</p>
+      <div class="levels-grid">
+        ${dim.levels.map((lvl, li) => `
+          <button class="lvl-btn" id="b${i}_${li}"
+            onclick="pick(${i},${li+1})"
+            style="--accent:${dim.color};--accent-dim:${dim.dim}">
+            <div class="lname">
+              ${lvl.name}
+              <span class="sig" style="background:${SIG[li+1].bg};color:${SIG[li+1].fg}">${SIG[li+1].lbl}</span>
+            </div>
+            <div class="ldesc">${lvl.desc}</div>
+          </button>`).join('')}
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goTo(${i})">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M13 8H3M7 12L3 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Anterior
+        </button>
+        <button class="btn btn-primary" id="nb${i}" onclick="goTo(${i+2})" disabled>
+          ${i===4?'Ver resultados':'Siguiente'}
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>`;
+    ref.before(sc);
+  });
+}
+
+/* ── NAVIGATION ── */
+function goTo(idx) {
+  if (idx === 6) {
+    const missing = scores.indexOf(0);
+    if (missing !== -1) { goTo(missing+1); return; }
+    renderResults();
+  }
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const sc = document.getElementById(`s${idx}`);
+  sc.classList.add('active');
+  current = idx;
+  updateUI();
+  window.scrollTo({ top: 0 });
+}
+
+function updateUI() {
+  // progress
+  const pct = current === 0 ? 0 : current === 6 ? 100 : (current/5)*100;
+  document.getElementById('pFill').style.width = pct + '%';
+  // dots
+  for (let i = 0; i < 5; i++) {
+    const d = document.getElementById(`dot${i}`);
+    d.className = 'dot';
+    if (i+1 === current) d.classList.add('current');
+    else if (i+1 < current || (current===6)) d.classList.add('done');
+  }
+}
+
+/* ── SELECTION ── */
+function pick(dimIdx, level) {
+  scores[dimIdx] = level;
+  for (let li = 0; li < 4; li++) {
+    document.getElementById(`b${dimIdx}_${li}`)
+      .classList.toggle('selected', li+1 === level);
+  }
+  const nb = document.getElementById(`nb${dimIdx}`);
+  if (nb) nb.disabled = false;
+}
+
+/* ── RESULTS ── */
+function renderResults() {
+  const total = scores.reduce((a,b)=>a+b,0);
+  const pct = Math.round((total/20)*100);
+  let verdict, detail, vcolor;
+
+  if (pct <= 30)      { verdict="Estadio inicial";    vcolor="#AF3029"; detail="La organización usa IA principalmente para acelerar tareas. La dimensión cognitiva queda fuera del sistema de métricas."; }
+  else if (pct <= 55) { verdict="Adopción parcial";   vcolor="#AD8301"; detail="Hay conciencia de que la velocidad no es suficiente, pero aún no existen mecanismos sistemáticos para medir calidad cognitiva."; }
+  else if (pct <= 75) { verdict="Madurez emergente";  vcolor="#24837B"; detail="Algunas dimensiones funcionan bien, otras necesitan trabajo. La organización va en la dirección correcta."; }
+  else                { verdict="Inteligencia medible"; vcolor="#66800B"; detail="La organización tiene herramientas y cultura para observar cómo razona, no solo cuánto produce. Mantener el rigor es el siguiente reto."; }
+
+  document.getElementById('scoreBlock').innerHTML = `
+    <div class="score-ring" style="border-color:${vcolor};color:${vcolor}">
+      <span class="score-pct">${pct}%</span>
+      <span class="score-lbl">Índice</span>
+    </div>
+    <div>
+      <div class="verdict" style="color:${vcolor}">${verdict}</div>
+      <div class="verdict-detail">${detail}</div>
+    </div>`;
+
+  buildRadar();
+  buildBars();
+  buildNextSteps();
+}
+
+function buildRadar() {
+  const svg = document.getElementById('resultSvg');
+  svg.innerHTML = '';
+  const cx=130, cy=130, R=95, n=5;
+  const angles = DIMS.map((_,i)=>(Math.PI*2*i/n) - Math.PI/2);
+
+  // grid
+  [1,2,3,4].forEach(r=>{
+    const rad = R*r/4;
+    const pts = angles.map(a=>`${cx+rad*Math.cos(a)},${cy+rad*Math.sin(a)}`).join(' ');
+    svg.innerHTML += `<polygon points="${pts}" fill="none" stroke="#CECDC3" stroke-width="0.7"/>`;
+  });
+  angles.forEach((a,i)=>{
+    svg.innerHTML += `<line x1="${cx}" y1="${cy}" x2="${cx+R*Math.cos(a)}" y2="${cy+R*Math.sin(a)}" stroke="#CECDC3" stroke-width="0.7"/>`;
+    const lx=cx+(R+18)*Math.cos(a), ly=cy+(R+18)*Math.sin(a);
+    const anchor = Math.abs(Math.cos(a))<0.15 ? 'middle' : Math.cos(a)>0 ? 'start' : 'end';
+    svg.innerHTML += `<text x="${lx}" y="${ly}" fill="${DIMS[i].color}" font-size="8.5" font-family="Inter,sans-serif" font-weight="600" text-anchor="${anchor}" dominant-baseline="middle">${DIMS[i].short}</text>`;
+  });
+
+  // shape
+  const pts = angles.map((a,i)=>{
+    const r = R*(scores[i]/4);
+    return `${cx+r*Math.cos(a)},${cy+r*Math.sin(a)}`;
+  }).join(' ');
+  svg.innerHTML += `<polygon points="${pts}" fill="rgba(32,94,166,0.13)" stroke="#205EA6" stroke-width="1.8"/>`;
+  angles.forEach((a,i)=>{
+    const r = R*(scores[i]/4);
+    svg.innerHTML += `<circle cx="${cx+r*Math.cos(a)}" cy="${cy+r*Math.sin(a)}" r="4" fill="${DIMS[i].color}"/>`;
+  });
+}
+
+function buildBars() {
+  document.getElementById('barsEl').innerHTML = DIMS.map((dim,i)=>{
+    const s=scores[i], sig=SIG[s];
+    return `<div class="bar-row">
+      <span class="bar-name">${dim.short}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(s/4)*100}%;background:${dim.color}"></div></div>
+      <span class="bar-level" style="color:${sig.fg}">${dim.levels[s-1].name}</span>
+    </div>`;
+  }).join('');
+}
+
+function buildNextSteps() {
+  const sorted = scores.map((s,i)=>({s,i})).sort((a,b)=>a.s-b.s);
+  const low = sorted.slice(0,2);
+  const items = low.map((item,n)=>{
+    const dim=DIMS[item.i], s=item.s;
+    const next = s < 4 ? dim.levels[s] : null;
+    return `<div class="ns-item">
+      <div class="ns-num" style="background:${dim.dim};color:${dim.color}">${n+1}</div>
+      <div class="ns-text">
+        <strong>${dim.name}</strong> — actualmente en "${dim.levels[s-1].name}".
+        ${next ? `El siguiente nivel implica: "${next.desc}".` : 'Ya en nivel máximo.'}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('nextBox').innerHTML = `
+    <h3>Por dónde empezar</h3>
+    ${items}
+    <hr class="ns-divider">
+    <div class="ns-item">
+      <div class="ns-num" style="background:rgba(32,94,166,0.08);color:#205EA6">→</div>
+      <div class="ns-text" style="color:var(--text-dim)">Orden de implementación recomendado: diagnóstico → contraargumentos → perspectivas → supuestos → formulación.</div>
+    </div>`;
+}
+
+function restart() {
+  scores=[0,0,0,0,0];
+  DIMS.forEach((_,i)=>{
+    for(let li=0;li<4;li++) document.getElementById(`b${i}_${li}`).classList.remove('selected');
+    const nb=document.getElementById(`nb${i}`); if(nb) nb.disabled=true;
+  });
+  goTo(0);
+}
+
+init();
+</script>
+</body>
+</html>

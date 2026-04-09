@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Métricas de Inteligencia Organizacional</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    /* Flexoki Light */
+    --paper: #FFFCF0;
+    --black: #100F0F;
+    --base-50: #F2F0E5;
+    --base-100: #E6E4D9;
+    --base-150: #DAD8CE;
+    --base-200: #CECDC3;
+    --base-300: #B7B5AC;
+    --base-400: #9F9D96;
+    --base-500: #878580;
+    --base-600: #6F6E69;
+    --base-700: #575653;
+    --base-800: #403E3C;
+    --base-900: #282726;
+
+    --red: #AF3029;
+    --orange: #BC5215;
+    --yellow: #AD8301;
+    --green: #66800B;
+    --cyan: #24837B;
+    --blue: #205EA6;
+    --purple: #5E409D;
+    --magenta: #A02F6F;
+
+    /* Semantic */
+    --bg: var(--paper);
+    --surface: var(--base-50);
+    --surface2: var(--base-100);
+    --border: var(--base-200);
+    --text: var(--black);
+    --text-dim: var(--base-600);
+    --text-muted: var(--base-400);
+
+    --accent1: var(--blue);
+    --accent1-dim: rgba(32,94,166,0.1);
+    --accent2: var(--cyan);
+    --accent2-dim: rgba(36,131,123,0.1);
+    --accent3: var(--orange);
+    --accent3-dim: rgba(188,82,21,0.1);
+    --accent4: var(--magenta);
+    --accent4-dim: rgba(160,47,111,0.1);
+    --accent5: var(--green);
+    --accent5-dim: rgba(102,128,11,0.1);
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(32,94,166,0.06) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    max-width: 800px;
+    margin-bottom: 1.5rem;
+    color: var(--black);
+  }
+
+  .hero p {
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    max-width: 600px;
+    margin-bottom: 2.5rem;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    animation: bounce 2s infinite;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .scroll-hint svg { width: 24px; height: 24px; stroke: var(--text-muted); }
+
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+
+  /* ─── PROBLEM SECTION ─── */
+  .problem-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 6rem 2rem 4rem;
+  }
+
+  .problem-section h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    color: var(--orange);
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  @media (max-width: 640px) { .problem-grid { grid-template-columns: 1fr; } }
+
+  .problem-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+  }
+
+  .problem-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .problem-card .icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .problem-card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--orange);
+  }
+
+  .problem-card p {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+
+  .thesis-box {
+    background: var(--accent1-dim);
+    border: 1px solid rgba(32,94,166,0.2);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 2rem;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: all 0.6s ease;
+  }
+
+  .thesis-box.visible { opacity: 1; transform: scale(1); }
+
+  .thesis-box p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* ─── RADAR SECTION ─── */
+  .radar-section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+
+  .radar-section h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--black);
+  }
+
+  .radar-section > p {
+    color: var(--text-dim);
+    margin-bottom: 3rem;
+    font-size: 0.95rem;
+  }
+
+  .radar-container {
+    display: flex;
+    gap: 3rem;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .radar-chart {
+    position: relative;
+    width: 420px;
+    height: 420px;
+    flex-shrink: 0;
+  }
+
+  .radar-chart svg { width: 100%; height: 100%; }
+
+  .radar-info {
+    flex: 1;
+    min-width: 280px;
+    max-width: 480px;
+    text-align: left;
+  }
+
+  .metric-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .metric-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.9rem;
+  }
+
+  .metric-btn:hover { border-color: var(--base-300); background: var(--surface2); }
+
+  .metric-btn.active { border-color: var(--current-accent, var(--blue)); background: var(--current-accent-dim, var(--accent1-dim)); }
+
+  .metric-btn .num {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .metric-btn .label { font-weight: 500; }
+
+  /* ─── DETAIL PANEL ─── */
+  .detail-panel {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+
+  .detail-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    display: none;
+  }
+
+  .detail-card.active { display: block; animation: fadeSlide 0.4s ease; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .detail-card h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .detail-card .definition {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    border-left: 3px solid var(--current-accent, var(--blue));
+    padding-left: 1rem;
+  }
+
+  .detail-section {
+    margin-bottom: 2rem;
+  }
+
+  .detail-section h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .detail-section ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .detail-section li {
+    font-size: 0.9rem;
+    color: var(--text);
+    padding-left: 1.25rem;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .detail-section li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--current-accent, var(--blue));
+  }
+
+  /* ─── MATURITY TABLE ─── */
+  .maturity-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  .maturity-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .maturity-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    line-height: 1.45;
+  }
+
+  .maturity-table tr:last-child td { border-bottom: none; }
+
+  .level-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  /* ─── IMPLEMENTATION ─── */
+  .impl-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+  }
+
+  .impl-section h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--black);
+  }
+
+  .impl-section > p {
+    color: var(--text-dim);
+    margin-bottom: 3rem;
+    font-size: 0.95rem;
+  }
+
+  .impl-timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .impl-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--orange), var(--magenta), var(--blue), var(--cyan), var(--green));
+  }
+
+  .impl-step {
+    position: relative;
+    margin-bottom: 2rem;
+    padding-left: 1.5rem;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.5s ease;
+  }
+
+  .impl-step.visible { opacity: 1; transform: translateX(0); }
+
+  .impl-step::before {
+    content: '';
+    position: absolute;
+    left: -2.35rem;
+    top: 0.3rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--step-color, var(--blue));
+    background: var(--bg);
+  }
+
+  .impl-step h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .impl-step .difficulty {
+    font-size: 0.78rem;
+    font-weight: 500;
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+
+  .impl-step p {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* ─── CONDITIONS ─── */
+  .conditions-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  .conditions-section h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    color: var(--black);
+  }
+
+  .conditions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  @media (max-width: 640px) { .conditions-grid { grid-template-columns: 1fr; } }
+
+  .condition-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: all 0.5s ease;
+  }
+
+  .condition-card.visible { opacity: 1; transform: translateY(0); }
+
+  .condition-card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--cyan);
+  }
+
+  .condition-card p {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Métricas de inteligencia organizacional</h1>
+  <p>Cinco dimensiones para medir lo que realmente importa en un proyecto de adopción de IA. Más allá del ahorro de horas.</p>
+  <div class="scroll-hint">
+    <span>Explora</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem-section">
+  <h2>El problema de base</h2>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="icon">&#9201;</div>
+      <h3>Solo se miden horas</h3>
+      <p>Las organizaciones evalúan la IA casi exclusivamente en ahorro de tiempo: horas ahorradas por empleado a la semana.</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">&#128065;</div>
+      <h3>Lo invisible no se mide</h3>
+      <p>No existe tradición organizativa para medir la calidad del trabajo intelectual de forma sistemática.</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">&#9888;</div>
+      <h3>Se optimiza lo cómodo</h3>
+      <p>Como no sabemos medir inteligencia, medimos horas. Se optimiza lo conocido, no lo que más valor aporta.</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">&#128200;</div>
+      <h3>Productividad sin criterio</h3>
+      <p>Se puede producir más y pensar peor. Las métricas de productividad no capturan si la organización razona mejor o peor.</p>
+    </div>
+  </div>
+  <div class="thesis-box">
+    <p>La IA no solo acelera trabajo. Añade capacidad cognitiva. Si solo medimos velocidad, estamos observando el fenómeno equivocado.</p>
+  </div>
+</section>
+
+<!-- RADAR + SELECTORS -->
+<section class="radar-section">
+  <h2>Las cinco dimensiones</h2>
+  <p>Cada métrica captura un aspecto diferente de la calidad intelectual del trabajo. Selecciona una para explorarla.</p>
+  <div class="radar-container">
+    <div class="radar-chart">
+      <svg viewBox="0 0 420 420" id="radarSvg"></svg>
+    </div>
+    <div class="radar-info">
+      <div class="metric-selector" id="metricSelector"></div>
+    </div>
+  </div>
+</section>
+
+<!-- DETAIL -->
+<section class="detail-panel" id="detailPanel"></section>
+
+<!-- IMPLEMENTATION -->
+<section class="impl-section">
+  <h2>Orden de implementación</h2>
+  <p>De menor a mayor dificultad. Empieza por lo observable en documentos existentes.</p>
+  <div class="impl-timeline" id="implTimeline"></div>
+</section>
+
+<!-- CONDITIONS -->
+<section class="conditions-section">
+  <h2>Condiciones organizativas necesarias</h2>
+  <div class="conditions-grid" id="conditionsGrid"></div>
+</section>
+
+<footer class="footer">
+  David Hurtado &middot; Métricas de Inteligencia Organizacional &middot; Abril 2026
+</footer>
+
+<script>
+const METRICS = [
+  {
+    id: 1,
+    name: "Amplitud de perspectivas",
+    short: "Perspectivas",
+    color: "#205EA6",
+    colorDim: "rgba(32,94,166,0.1)",
+    definition: "Número y diversidad de alternativas genuinas exploradas antes de comprometerse con una dirección. No alternativas de formalismo, sino opciones evaluadas, comparadas y descartadas con justificación.",
+    mechanism: [
+      "Un equipo que usa IA para ampliar su campo de análisis explora más caminos antes de decidir.",
+      "Un equipo que usa IA para acelerar se queda con la primera opción aceptable.",
+      "La diferencia no está en el resultado final, sino en el espacio de posibilidades recorrido."
+    ],
+    indicators: [
+      "Número de alternativas evaluadas por decisión",
+      "Opciones descartadas con justificación explícita",
+      "Diversidad de enfoques (no variantes del mismo camino)",
+      "Evolución temporal pre y post adopción de IA"
+    ],
+    risks: [
+      "Confundir cantidad de opciones con calidad de exploración.",
+      "Gamificación: presentar opciones sin haberlas evaluado.",
+      "Requiere criterio del evaluador para distinguir alternativas genuinas de relleno."
+    ],
+    copilot: "Se manifiesta en cómo se formula la petición. Un profesional maduro pide varias opciones antes de elegir. Un uso superficial acepta la primera respuesta.",
+    levels: [
+      { level: "Opción única", desc: "Se presenta una sola opción sin alternativas", signal: "low" },
+      { level: "Variantes", desc: "Se presentan variantes del mismo camino", signal: "mid" },
+      { level: "Alternativas", desc: "Se exploran enfoques genuinamente diferentes", signal: "high" },
+      { level: "Exploración sistemática", desc: "Se mapea el espacio de opciones con criterio", signal: "top" }
+    ]
+  },
+  {
+    id: 2,
+    name: "Calidad de supuestos",
+    short: "Supuestos",
+    color: "#24837B",
+    colorDim: "rgba(36,131,123,0.1)",
+    definition: "Grado en que un entregable hace visibles las condiciones que deben cumplirse para que el análisis sea válido. Un supuesto es una creencia no verificada que sustenta el razonamiento. Explicitarlos es un indicador de madurez analítica.",
+    mechanism: [
+      "Todo razonamiento se apoya en premisas. Cuando permanecen ocultas, el razonamiento parece más robusto de lo que es.",
+      "La IA produce respuestas fluidas que asumen contexto sin hacerlo explícito.",
+      "Un profesional con criterio identifica esos supuestos y los expone."
+    ],
+    indicators: [
+      "Presencia de sección de supuestos en entregables clave",
+      "¿Son específicos, falsables y relevantes?",
+      "Frecuencia con que se cuestiona un supuesto propio",
+      "Capacidad de responder: ¿qué invalidaría esta conclusión?"
+    ],
+    risks: [
+      "Confundir disclaimers genéricos con supuestos reales.",
+      "La IA puede generar supuestos que parecen rigurosos pero son genéricos.",
+      "Riesgo de parálisis analítica si se convierte en requisito excesivamente formal."
+    ],
+    copilot: "La IA tiende a producir respuestas que asumen contexto sin hacerlo explícito. El profesional competente identifica y expone esos supuestos ocultos.",
+    levels: [
+      { level: "Ausente", desc: "No se mencionan supuestos", signal: "low" },
+      { level: "Genérico", desc: "\"Asumimos condiciones normales de mercado\"", signal: "mid" },
+      { level: "Específico", desc: "\"Asumimos CAC por debajo de 45\u20ac\"", signal: "high" },
+      { level: "Crítico", desc: "\"Si el CAC supera 60\u20ac, el modelo es inviable\"", signal: "top" }
+    ]
+  },
+  {
+    id: 3,
+    name: "Profundidad del diagnóstico",
+    short: "Diagnóstico",
+    color: "#BC5215",
+    colorDim: "rgba(188,82,21,0.1)",
+    definition: "Grado en que un equipo dedica esfuerzo a entender y formular el problema antes de proponer una solución. Se mide por la ratio entre análisis del problema y propuesta de acción.",
+    mechanism: [
+      "La IA reduce el coste de producir soluciones. Esto genera un sesgo: se tiende a saltar la fase de diagnóstico.",
+      "Un equipo que usa IA para mejorar comprensión invierte en formular mejor la pregunta.",
+      "La profundidad del diagnóstico es proporcional a la calidad de la solución en problemas complejos."
+    ],
+    indicators: [
+      "Ratio diagnóstico/solución en documentos de trabajo",
+      "Formulación explícita del problema antes de la primera recomendación",
+      "Número de preguntas formuladas antes de la primera propuesta",
+      "Capacidad de reformular el problema cuando aparece información nueva"
+    ],
+    risks: [
+      "Un diagnóstico largo no es automáticamente bueno. Extensión sin precisión es relleno.",
+      "La IA puede generar análisis aparentemente profundos pero genéricos.",
+      "Riesgo de medir extensión textual en lugar de calidad analítica."
+    ],
+    copilot: "En Copilot: un uso maduro reformula la petición varias veces antes de generar la solución. Un uso superficial va directo al output.",
+    levels: [
+      { level: "Reactivo", desc: "Va directo a la solución sin diagnóstico", signal: "low" },
+      { level: "Descriptivo", desc: "Describe el problema sin analizarlo", signal: "mid" },
+      { level: "Analítico", desc: "Descompone el problema con causas y variables", signal: "high" },
+      { level: "Crítico", desc: "Cuestiona la propia formulación del problema", signal: "top" }
+    ]
+  },
+  {
+    id: 4,
+    name: "Presencia de contraargumentos",
+    short: "Contraargumentos",
+    color: "#A02F6F",
+    colorDim: "rgba(160,47,111,0.1)",
+    definition: "Grado en que un equipo considera activamente las razones por las que su propia propuesta, análisis o decisión podría ser incorrecta, incompleta o subóptimal.",
+    mechanism: [
+      "La IA produce respuestas con alta fluencia y confianza aparente, lo que amplifica el sesgo de confirmación.",
+      "Un equipo con buen razonamiento incorpora objeciones a su propia posición como parte del análisis.",
+      "Es un indicador robusto de pensamiento crítico, independientemente del dominio."
+    ],
+    indicators: [
+      "Sección de riesgos, objeciones o limitaciones en entregables",
+      "¿Los contraargumentos atacan la tesis central o son periféricos?",
+      "Frecuencia de dudas o debilidades verbalizadas en reuniones",
+      "Respuesta a: ¿qué podría salir mal y por qué?",
+      "Existencia de pre-mortem o pensamiento inverso"
+    ],
+    risks: [
+      "La IA puede generar contraargumentos que suenan bien pero no atacan la tesis central.",
+      "Riesgo de convertirlo en check de proceso sin evaluar si los riesgos son reales.",
+      "Objeciones débiles para aparentar pensamiento crítico sin ejercerlo."
+    ],
+    copilot: "La IA puede funcionar como adversario intelectual seguro: se le puede pedir que ataque la propuesta sin riesgo interpersonal. Es una de las aplicaciones más valiosas y menos habituales.",
+    levels: [
+      { level: "Ausente", desc: "No se consideran objeciones", signal: "low" },
+      { level: "Periférico", desc: "Objeciones menores que no amenazan la tesis", signal: "mid" },
+      { level: "Central", desc: "Se atacan los puntos fuertes de la propuesta", signal: "high" },
+      { level: "Pre-mortem", desc: "Ejercicio sistemático de pensamiento inverso", signal: "top" }
+    ]
+  },
+  {
+    id: 5,
+    name: "Precisión en la formulación",
+    short: "Formulación",
+    color: "#66800B",
+    colorDim: "rgba(102,128,11,0.1)",
+    definition: "Capacidad de definir con exactitud qué se está intentando resolver antes de buscar soluciones. Incluye acotar el alcance, identificar variables relevantes y separar el problema real del síntoma.",
+    mechanism: [
+      "La calidad de cualquier solución está limitada por la calidad de la pregunta que la origina.",
+      "Si la pregunta es imprecisa, la respuesta es genérica. Si es precisa, la respuesta es útil.",
+      "Un equipo que formula bien obtiene más valor de cualquier herramienta, incluida la IA.",
+      "Es la métrica más difícil pero la más reveladora del nivel intelectual de un equipo."
+    ],
+    indicators: [
+      "Claridad del problema en documentos de arranque",
+      "Separación explícita entre síntoma y causa",
+      "Capacidad de reformular cuando la primera formulación no funciona",
+      "Calidad de prompts como proxy de calidad de formulación",
+      "Presencia de constraints en la definición del problema"
+    ],
+    risks: [
+      "Es la métrica más subjetiva. Requiere evaluadores con criterio.",
+      "Difícil de escalar sin formación previa del evaluador.",
+      "El proxy del prompt tiene limitaciones: puede ser bueno técnicamente pero dirigido a un problema mal definido."
+    ],
+    copilot: "La calidad del prompt es un proxy directo de esta capacidad. Los equipos que formulan bien sus problemas escriben mejores prompts y obtienen mejores resultados.",
+    levels: [
+      { level: "Difuso", desc: "\"Tenemos un problema con las ventas\"", signal: "low" },
+      { level: "Descriptivo", desc: "\"Las ventas enterprise cayeron un 15% en Q1\"", signal: "mid" },
+      { level: "Causal", desc: "\"La caída coincide con el cambio de pricing; hipótesis...\"", signal: "high" },
+      { level: "Estructural", desc: "\"El problema no es el pricing, es que ventas no tiene playbook adaptado\"", signal: "top" }
+    ]
+  }
+];
+
+const IMPL_STEPS = [
+  { metric: "Profundidad del diagnóstico", reason: "Observable en estructura de documentos; no requiere evaluación subjetiva inicial.", difficulty: "Baja", color: "#BC5215" },
+  { metric: "Presencia de contraargumentos", reason: "Binario en primera aproximación: hay o no hay objeciones.", difficulty: "Baja-media", color: "#A02F6F" },
+  { metric: "Amplitud de perspectivas", reason: "Requiere comparar entregables y acceso a documentos intermedios.", difficulty: "Media", color: "#205EA6" },
+  { metric: "Calidad de supuestos", reason: "Requiere evaluador con criterio para distinguir supuesto real de disclaimer.", difficulty: "Media-alta", color: "#24837B" },
+  { metric: "Precisión en la formulación", reason: "La más subjetiva; requiere formación del evaluador y múltiples observaciones.", difficulty: "Alta", color: "#66800B" }
+];
+
+const CONDITIONS = [
+  { title: "Razonamiento explícito", desc: "Cultura que valore el razonamiento explícito, no solo el resultado final." },
+  { title: "Tolerancia a la incertidumbre", desc: "Los equipos deben poder decir \"no sabemos\" sin penalización." },
+  { title: "Evaluadores competentes", desc: "Sin evaluadores con criterio suficiente, las métricas se degradan a checklist formales." },
+  { title: "Voluntad de medir lo nuevo", desc: "Aceptar que el sistema de métricas anterior era incompleto. Medir cosas que no se medían antes." }
+];
+
+// ─── RADAR CHART ───
+function buildRadar() {
+  const svg = document.getElementById('radarSvg');
+  const cx = 210, cy = 210, maxR = 160;
+  const n = 5;
+  const angles = METRICS.map((_, i) => (Math.PI * 2 * i / n) - Math.PI / 2);
+
+  for (let r = 1; r <= 4; r++) {
+    const radius = maxR * r / 4;
+    const pts = angles.map(a => `${cx + radius * Math.cos(a)},${cy + radius * Math.sin(a)}`).join(' ');
+    svg.innerHTML += `<polygon points="${pts}" fill="none" stroke="#CECDC3" stroke-width="1"/>`;
+  }
+
+  angles.forEach((a, i) => {
+    svg.innerHTML += `<line x1="${cx}" y1="${cy}" x2="${cx + maxR * Math.cos(a)}" y2="${cy + maxR * Math.sin(a)}" stroke="#CECDC3" stroke-width="1"/>`;
+    const lx = cx + (maxR + 28) * Math.cos(a);
+    const ly = cy + (maxR + 28) * Math.sin(a);
+    const anchor = Math.abs(Math.cos(a)) < 0.1 ? 'middle' : Math.cos(a) > 0 ? 'start' : 'end';
+    svg.innerHTML += `<text x="${lx}" y="${ly}" fill="${METRICS[i].color}" font-size="11" font-family="Inter" font-weight="600" text-anchor="${anchor}" dominant-baseline="middle">${METRICS[i].short}</text>`;
+  });
+
+  const defaultVals = [0.7, 0.6, 0.75, 0.55, 0.65];
+  const dataPts = angles.map((a, i) => {
+    const r = maxR * defaultVals[i];
+    return `${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`;
+  }).join(' ');
+  svg.innerHTML += `<polygon id="radarShape" points="${dataPts}" fill="rgba(32,94,166,0.08)" stroke="#205EA6" stroke-width="2"/>`;
+
+  angles.forEach((a, i) => {
+    const r = maxR * defaultVals[i];
+    svg.innerHTML += `<circle class="radar-dot" data-idx="${i}" cx="${cx + r * Math.cos(a)}" cy="${cy + r * Math.sin(a)}" r="5" fill="${METRICS[i].color}" stroke="${METRICS[i].color}" stroke-width="2" style="cursor:pointer"/>`;
+  });
+}
+
+function highlightRadarPoint(idx) {
+  document.querySelectorAll('.radar-dot').forEach((d, i) => {
+    d.setAttribute('r', i === idx ? '8' : '5');
+    d.style.filter = i === idx ? `drop-shadow(0 0 6px ${METRICS[i].color})` : 'none';
+  });
+}
+
+// ─── METRIC SELECTORS ───
+function buildSelectors() {
+  const container = document.getElementById('metricSelector');
+  METRICS.forEach((m, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'metric-btn';
+    btn.style.setProperty('--current-accent', m.color);
+    btn.style.setProperty('--current-accent-dim', m.colorDim);
+    btn.dataset.idx = i;
+    btn.innerHTML = `<span class="num" style="background:${m.colorDim};color:${m.color}">${m.id}</span><span class="label">${m.name}</span>`;
+    btn.addEventListener('click', () => selectMetric(i));
+    container.appendChild(btn);
+  });
+}
+
+function selectMetric(idx) {
+  document.querySelectorAll('.metric-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  highlightRadarPoint(idx);
+  showDetail(idx);
+}
+
+// ─── DETAIL CARDS ───
+function buildDetails() {
+  const panel = document.getElementById('detailPanel');
+  const signalColors = { low: '#AF3029', mid: '#AD8301', high: '#24837B', top: '#66800B' };
+  const signalLabels = { low: 'Bajo', mid: 'Medio', high: 'Alto', top: 'Excelente' };
+
+  METRICS.forEach((m, i) => {
+    const card = document.createElement('div');
+    card.className = 'detail-card';
+    card.dataset.idx = i;
+    card.style.setProperty('--current-accent', m.color);
+
+    let levelsHTML = m.levels.map(l => `
+      <tr>
+        <td><span class="level-badge" style="background:${signalColors[l.signal]}15;color:${signalColors[l.signal]}">${l.level}</span></td>
+        <td>${l.desc}</td>
+        <td><span class="level-badge" style="background:${signalColors[l.signal]}15;color:${signalColors[l.signal]}">${signalLabels[l.signal]}</span></td>
+      </tr>
+    `).join('');
+
+    card.innerHTML = `
+      <h3 style="color:${m.color}">${m.id}. ${m.name}</h3>
+      <div class="definition">${m.definition}</div>
+      <div class="detail-section">
+        <h4>Mecanismo</h4>
+        <ul>${m.mechanism.map(t => `<li>${t}</li>`).join('')}</ul>
+      </div>
+      <div class="detail-section">
+        <h4>Indicadores observables</h4>
+        <ul>${m.indicators.map(t => `<li>${t}</li>`).join('')}</ul>
+      </div>
+      <div class="detail-section">
+        <h4>Riesgos y limitaciones</h4>
+        <ul>${m.risks.map(t => `<li>${t}</li>`).join('')}</ul>
+      </div>
+      <div class="detail-section">
+        <h4>Conexión con Copilot / IA generativa</h4>
+        <ul><li>${m.copilot}</li></ul>
+      </div>
+      <div class="detail-section">
+        <h4>Niveles de madurez</h4>
+        <table class="maturity-table">
+          <thead><tr><th>Nivel</th><th>Descripción</th><th>Señal</th></tr></thead>
+          <tbody>${levelsHTML}</tbody>
+        </table>
+      </div>
+    `;
+    panel.appendChild(card);
+  });
+}
+
+function showDetail(idx) {
+  document.querySelectorAll('.detail-card').forEach((c, i) => c.classList.toggle('active', i === idx));
+}
+
+// ─── IMPLEMENTATION TIMELINE ───
+function buildTimeline() {
+  const container = document.getElementById('implTimeline');
+  IMPL_STEPS.forEach((s, i) => {
+    const step = document.createElement('div');
+    step.className = 'impl-step';
+    step.style.setProperty('--step-color', s.color);
+    step.innerHTML = `
+      <h3 style="color:${s.color}">Fase ${i + 1}: ${s.metric}</h3>
+      <span class="difficulty" style="background:${s.color}15;color:${s.color}">Dificultad: ${s.difficulty}</span>
+      <p>${s.reason}</p>
+    `;
+    container.appendChild(step);
+  });
+}
+
+// ─── CONDITIONS ───
+function buildConditions() {
+  const container = document.getElementById('conditionsGrid');
+  CONDITIONS.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'condition-card';
+    card.innerHTML = `<h3>${c.title}</h3><p>${c.desc}</p>`;
+    container.appendChild(card);
+  });
+}
+
+// ─── SCROLL ANIMATIONS ───
+function initObserver() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.problem-card, .thesis-box, .impl-step, .condition-card').forEach(el => observer.observe(el));
+}
+
+// ─── INIT ───
+buildRadar();
+buildSelectors();
+buildDetails();
+buildTimeline();
+buildConditions();
+initObserver();
+selectMetric(0);
+</script>
+</body>
+</html>
