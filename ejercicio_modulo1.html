@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    background: #F2F0E6;
+    color: #100F0F;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6F6E69;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: #100F0F;
+    margin-bottom: 6px;
+  }
+  .mission {
+    font-size: 13px;
+    color: #6F6E69;
+    margin-bottom: 24px;
+    max-width: 640px;
+    line-height: 1.5;
+  }
+  /* Grid de tarjetas */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: #FFFCF0;
+    border: 1.5px solid #E6E4D9;
+    border-radius: 10px;
+    padding: 14px 14px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+    position: relative;
+  }
+  .card:hover {
+    border-color: #24837B;
+    box-shadow: 0 2px 12px rgba(36,131,123,0.10);
+    transform: translateY(-1px);
+  }
+  .card.active {
+    border-color: #24837B;
+    background: #EEF6F5;
+    box-shadow: 0 2px 12px rgba(36,131,123,0.15);
+  }
+  .card-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: #24837B;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #100F0F;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .card-desc {
+    font-size: 11px;
+    color: #6F6E69;
+    line-height: 1.4;
+  }
+  /* Panel de detalle */
+  .detail-panel {
+    background: #FFFCF0;
+    border: 1.5px solid #E6E4D9;
+    border-radius: 12px;
+    padding: 22px 26px;
+    min-height: 200px;
+    transition: opacity 0.2s;
+  }
+  .detail-panel.hidden { display: none; }
+  .detail-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .detail-num {
+    background: #24837B;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .detail-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #100F0F;
+  }
+  .detail-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .detail-col h4 {
+    font-size: 11px;
+    font-weight: 700;
+    color: #24837B;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .detail-col ul {
+    list-style: none;
+    padding: 0;
+  }
+  .detail-col ul li {
+    font-size: 13px;
+    color: #100F0F;
+    padding: 5px 0 5px 14px;
+    border-bottom: 1px solid #F2F0E6;
+    position: relative;
+    line-height: 1.4;
+  }
+  .detail-col ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #24837B;
+    font-size: 11px;
+  }
+  .detail-col ul li:last-child { border-bottom: none; }
+  .tip-box {
+    background: #FFF8E6;
+    border-left: 3px solid #D4A017;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #6F6E69;
+    margin-top: 14px;
+    line-height: 1.5;
+    grid-column: 1 / -1;
+  }
+  .tip-box strong { color: #D4A017; }
+  /* Pill avanzado */
+  .advanced-pill {
+    display: inline-block;
+    background: #F2F0E6;
+    border: 1.5px solid #D4A017;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #D4A017;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: background 0.15s;
+  }
+  .advanced-pill:hover { background: #FFF3CC; }
+  /* Welcome state */
+  .welcome {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 180px;
+    gap: 8px;
+  }
+  .welcome-icon { font-size: 32px; }
+  .welcome-text { font-size: 14px; color: #6F6E69; }
+  /* Advanced panel */
+  .adv-panel {
+    background: #FFFCF0;
+    border: 1.5px solid #D4A017;
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-top: 10px;
+  }
+  .adv-panel h3 {
+    font-size: 14px; font-weight: 700; color: #D4A017;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .adv-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .adv-card {
+    background: #FFF8E6;
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .adv-card .emoji { font-size: 22px; margin-bottom: 6px; }
+  .adv-card .adv-label {
+    font-size: 12px; font-weight: 700; color: #100F0F;
+    margin-bottom: 4px;
+  }
+  .adv-card .adv-sub {
+    font-size: 11px; color: #6F6E69; line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Ejercicio práctico Módulo 1 – visualización interactiva de los 8 entregables</h2>
+
+<h1>Módulo 1 · Ejercicio Práctico</h1>
+<p class="subtitle">IA como palanca estratégica</p>
+<p class="mission">Identifica y prioriza oportunidades reales de IA en una empresa. Construye un primer roadmap de adopción creíble y orientado a impacto.</p>
+
+<div class="grid" id="cardGrid"></div>
+
+<div class="detail-panel" id="detailPanel">
+  <div class="welcome">
+    <div class="welcome-icon">👆</div>
+    <div class="welcome-text">Selecciona un entregable para ver su detalle</div>
+  </div>
+</div>
+
+<div id="advPanel" style="display:none"></div>
+
+<script>
+const cards = [
+  {
+    num: "01",
+    title: "Mapa del ecosistema IA",
+    desc: "Panorama de la industria",
+    detail: {
+      cols: [
+        {
+          heading: "Qué incluir",
+          items: ["Grandes modelos / plataformas (GPT, Gemini, Claude…)", "Hyperscalers (Azure, AWS, GCP)", "Herramientas empresariales (Copilot, Salesforce AI…)", "Capa de servicios / implantación"]
+        },
+        {
+          heading: "Clave de calidad",
+          items: ["No es una lista exhaustiva, es un mapa estructurado", "Muestra relaciones entre capas", "Contextualiza dónde entra la empresa objetivo"]
+        }
+      ],
+      tip: "⚠️ Error frecuente: hacer una lista de logos sin estructura ni jerarquía. El mapa debe mostrar cómo se relacionan las capas."
+    }
+  },
+  {
+    num: "02",
+    title: "3 Tendencias tecnológicas",
+    desc: "Impacto en empresa — 24 meses",
+    detail: {
+      cols: [
+        {
+          heading: "Una por nivel de impacto",
+          items: ["Alta — transformará procesos clave en el sector", "Media — hay que estar preparados para adoptarla", "Baja — monitorizar, aún no prioritaria"]
+        },
+        {
+          heading: "Para cada tendencia",
+          items: ["Descripción breve y accesible", "Relevancia concreta para la empresa elegida", "Reflexión introductoria: ¿qué implica realmente?", "+  ¿Qué debería entender primero antes de invertir?"]
+        }
+      ],
+      tip: "⚠️ Evita tendencias demasiado genéricas ('la IA lo cambiará todo'). Conecta cada una con un proceso o área específica."
+    }
+  },
+  {
+    num: "03",
+    title: "Área de la cadena de valor",
+    desc: "Elección del foco de análisis",
+    detail: {
+      cols: [
+        {
+          heading: "Opciones posibles",
+          items: ["Marketing y ventas", "Atención al cliente", "Operaciones y logística", "Recursos humanos", "Finanzas y administración"]
+        },
+        {
+          heading: "Criterio de elección",
+          items: ["Debe tener dolor real, no solo oportunidad teórica", "Volumen suficiente de tareas repetibles", "Datos disponibles o accesibles", "Decisión justificada, no arbitraria"]
+        }
+      ],
+      tip: "💡 No busques usar IA por usarla. Busca el área con más fricción real y más potencial de mejora medible."
+    }
+  },
+  {
+    num: "04",
+    title: "Mapa de oportunidad",
+    desc: "De proceso a beneficio",
+    detail: {
+      cols: [
+        {
+          heading: "Estructura por oportunidad",
+          items: ["Proceso afectado — ¿qué tarea concreta?", "Problema actual — ¿cuál es el dolor específico?", "Tipo de IA aplicable — generativa, predictiva, NLP…", "Beneficio esperado — tiempo, coste, calidad, UX"]
+        },
+        {
+          heading: "Ejemplos válidos",
+          items: ["Asistente interno para políticas internas", "Automatización de propuestas comerciales", "Análisis de incidencias de cliente", "Forecasting de demanda", "Clasificación de tickets de soporte"]
+        }
+      ],
+      tip: "⚠️ Formular entre 5 y 8 oportunidades. Ni muy pocas (poco análisis) ni demasiadas (falta de criterio)."
+    }
+  },
+  {
+    num: "05",
+    title: "Matriz de priorización",
+    desc: "Criterios explícitos",
+    detail: {
+      cols: [
+        {
+          heading: "5 dimensiones de evaluación",
+          items: ["Impacto potencial en negocio", "Viabilidad técnica y operativa", "Calidad / disponibilidad de datos", "Esfuerzo de implantación", "Velocidad de captura de valor"]
+        },
+        {
+          heading: "Cómo usarla bien",
+          items: ["Puntúa cada iniciativa en cada criterio (ej. 1-3)", "Justifica por qué una va antes que otra", "No basta con decir que 'parece buena'", "El resultado debe ser una secuencia ordenada"]
+        }
+      ],
+      tip: "⚠️ Error frecuente: matriz sin criterios explícitos o con puntuaciones sin razonamiento. La priorización debe ser reproducible."
+    }
+  },
+  {
+    num: "06",
+    title: "Diagnóstico de madurez",
+    desc: "Radiografía honesta de la empresa",
+    detail: {
+      cols: [
+        {
+          heading: "4-5 dimensiones a evaluar",
+          items: ["Estrategia y liderazgo — ¿hay visión y sponsor?", "Datos — ¿están disponibles y son fiables?", "Talento y capacidades — ¿quién lo puede implantar?", "Tecnología / integración — ¿qué hay instalado?", "Cultura y adopción — ¿están listos para cambiar?"]
+        },
+        {
+          heading: "Claves de honestidad",
+          items: ["Tener licencias ≠ estar en madurez alta", "Evalúa gobierno, no solo herramientas", "Una empresa puede ser avanzada en datos y primitiva en cultura", "El diagnóstico condiciona el roadmap"]
+        }
+      ],
+      tip: "⚠️ Sobrevalorar la madurez es el error más común. Sé honesto aunque incomode."
+    }
+  },
+  {
+    num: "07",
+    title: "Roadmap a 12 meses",
+    desc: "Tres horizontes de adopción",
+    detail: {
+      cols: [
+        {
+          heading: "Estructura temporal",
+          items: ["AHORA (0-3m) — quick wins, bases técnicas mínimas", "SIGUIENTE FASE (3-6m) — escalado de lo que funciona", "CONSOLIDACIÓN (6-12m) — integración profunda y cultura"]
+        },
+        {
+          heading: "Principios de diseño",
+          items: ["Secuencia lógica y dependencias claras", "Primero credibilidad interna, luego ambición", "Recursos y plazos realistas", "No una lista de deseos: un plan ejecutable"]
+        }
+      ],
+      tip: "⚠️ Roadmap demasiado ambicioso = roadmap inútil. Si no es creíble para la dirección, no vale."
+    }
+  },
+  {
+    num: "08",
+    title: "Barreras + mitigación",
+    desc: "Más allá de la tecnología",
+    detail: {
+      cols: [
+        {
+          heading: "Al menos una barrera por eje",
+          items: ["Cultura — resistencia al cambio, miedo a ser reemplazado", "Talento — falta de perfiles técnicos o formación", "Datos — dispersos, sucios o sin gobierno", "Tecnología — deuda técnica, falta de APIs o integración"]
+        },
+        {
+          heading: "Para cada barrera",
+          items: ["Descripción específica para esta empresa", "Acción de mitigación concreta (no genérica)", "Responsable o área que debe liderarla", "Indicador de que se está superando"]
+        }
+      ],
+      tip: "💡 Las barreras culturales y de adopción suelen ser más limitantes que las técnicas. No las ignores."
+    }
+  }
+];
+
+const grid = document.getElementById('cardGrid');
+const panel = document.getElementById('detailPanel');
+let activeIdx = null;
+
+cards.forEach((c, i) => {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = `
+    <div class="card-num">0${i+1 < 10 ? '' : ''}${i+1}</div>
+    <div class="card-title">${c.title}</div>
+    <div class="card-desc">${c.desc}</div>
+  `;
+  div.addEventListener('click', () => {
+    if (activeIdx === i) {
+      // deselect
+      activeIdx = null;
+      div.classList.remove('active');
+      panel.innerHTML = `<div class="welcome"><div class="welcome-icon">👆</div><div class="welcome-text">Selecciona un entregable para ver su detalle</div></div>`;
+      return;
+    }
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    div.classList.add('active');
+    activeIdx = i;
+    renderDetail(c);
+  });
+  grid.appendChild(div);
+});
+
+function renderDetail(c) {
+  const colsHtml = c.detail.cols.map(col => `
+    <div class="detail-col">
+      <h4>${col.heading}</h4>
+      <ul>${col.items.map(it => `<li>${it}</li>`).join('')}</ul>
+    </div>
+  `).join('');
+  panel.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-num">${c.num}</div>
+      <div class="detail-title">${c.title}</div>
+    </div>
+    <div class="detail-body">
+      ${colsHtml}
+      <div class="tip-box">${c.detail.tip}</div>
+    </div>
+  `;
+}
+
+// Advanced level toggle
+const advBtn = document.createElement('span');
+advBtn.className = 'advanced-pill';
+advBtn.textContent = '★ Ver nivel avanzado (opcional)';
+advBtn.addEventListener('click', () => {
+  const ap = document.getElementById('advPanel');
+  if (ap.style.display === 'none') {
+    ap.style.display = 'block';
+    ap.innerHTML = `
+      <div class="adv-panel">
+        <h3>★ Nivel Avanzado — Cartera equilibrada de proyectos</h3>
+        <div class="adv-grid">
+          <div class="adv-card">
+            <div class="emoji">⚡</div>
+            <div class="adv-label">Quick Win</div>
+            <div class="adv-sub">Impacto visible rápido. Genera credibilidad interna. Bajo esfuerzo relativo.</div>
+          </div>
+          <div class="adv-card">
+            <div class="emoji">🏗️</div>
+            <div class="adv-label">Iniciativa estructural</div>
+            <div class="adv-sub">Crea capacidades duraderas. Más esfuerzo, más retorno a medio plazo.</div>
+          </div>
+          <div class="adv-card">
+            <div class="emoji">🚀</div>
+            <div class="adv-label">Apuesta transformacional</div>
+            <div class="adv-sub">Alto impacto estratégico. Más riesgo. Requiere madurez previa y sponsorship ejecutivo.</div>
+          </div>
+        </div>
+        <div class="tip-box" style="margin-top:14px"><strong>Para las 3 iniciativas prioritarias:</strong> coste estimado de implantación · plazo estimado de retorno · riesgo principal · dependencia organizativa crítica</div>
+      </div>
+    `;
+    advBtn.textContent = '▲ Ocultar nivel avanzado';
+  } else {
+    ap.style.display = 'none';
+    advBtn.textContent = '★ Ver nivel avanzado (opcional)';
+  }
+});
+document.body.appendChild(advBtn);
+</script>
+</body>
+</html>
