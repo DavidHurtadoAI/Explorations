@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Agent 365 - Guía técnica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ─────────────────────────────────────────
+   FLEXOKI LIGHT - paleta completa
+   Fondo pergamino + azules en lugar de grises
+───────────────────────────────────────── */
+:root {
+  /* Paper backgrounds */
+  --paper:       #FFFCF0;   /* fondo principal */
+  --paper-dim:   #F2F0E6;   /* nav lateral */
+  --paper-deep:  #E8E6DA;   /* elementos hundidos */
+
+  /* Blue-tinted surfaces (en lugar de grises) */
+  --blue-surface:  #EBF0FA;   /* card resting */
+  --blue-hover:    #DDE6F5;   /* card hover */
+  --blue-active:   #CFDAF0;   /* seleccionado */
+  --blue-border:   #B8CCE8;   /* bordes */
+  --blue-border-d: #8AAAD6;   /* bordes énfasis */
+  --blue-subtle:   #F0F4FC;   /* fondo de info-box */
+
+  /* Flexoki text (ink sobre papel) */
+  --ink:       #1C1B1A;    /* texto principal */
+  --ink-2:     #343331;    /* subtítulos */
+  --ink-3:     #3A5278;    /* texto muted - azulado */
+  --ink-4:     #6080A8;    /* texto dim - azul claro */
+  --ink-5:     #90B0D0;    /* placeholder / muy dim */
+
+  /* Flexoki accents */
+  --fl-blue:    #205EA6;
+  --fl-blue-l:  #4385BE;
+  --fl-cyan:    #24837B;
+  --fl-cyan-l:  #3AA99F;
+  --fl-green:   #66800B;
+  --fl-green-l: #879A39;
+  --fl-yellow:  #AD8301;
+  --fl-yellow-l:#D0A215;
+  --fl-orange:  #BC5215;
+  --fl-red:     #AF3029;
+  --fl-purple:  #5E409D;
+  --fl-purple-l:#8B7EC8;
+  --fl-magenta: #A02F6F;
+
+  /* Semánticos */
+  --primary:    var(--fl-blue);
+  --secondary:  var(--fl-cyan);
+  --success:    var(--fl-green);
+  --warning:    var(--fl-yellow);
+  --danger:     var(--fl-red);
+
+  /* Tipo */
+  --serif:  'DM Sans', system-ui, sans-serif;
+  --mono:   'IBM Plex Mono', monospace;
+  --sans:   'DM Sans', system-ui, sans-serif;
+
+  /* Sombras con tono azulado */
+  --shadow-sm:  0 1px 3px rgba(32, 80, 166, 0.10);
+  --shadow-md:  0 3px 10px rgba(32, 80, 166, 0.12);
+  --shadow-lg:  0 6px 24px rgba(32, 80, 166, 0.14);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  background: var(--paper-dim);
+  border-right: 1.5px solid var(--blue-border);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-brand {
+  padding: 26px 22px 22px;
+  border-bottom: 1.5px solid var(--blue-border);
+  background: var(--paper-deep);
+}
+
+.brand-eyebrow {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.2em;
+  color: var(--fl-blue);
+  text-transform: uppercase;
+  margin-bottom: 7px;
+  display: block;
+}
+
+.nav-brand h1 {
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.nav-brand h1 strong {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--fl-blue);
+}
+
+.nav-section {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  padding: 18px 22px 6px;
+}
+
+nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 22px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-3);
+  text-decoration: none;
+  border-left: 2.5px solid transparent;
+  transition: all 0.18s;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+nav a:hover {
+  background: var(--blue-surface);
+  color: var(--ink);
+  border-left-color: var(--blue-border-d);
+}
+
+nav a.active {
+  background: var(--blue-active);
+  color: var(--fl-blue);
+  border-left-color: var(--fl-blue);
+  font-weight: 600;
+}
+
+nav a .nav-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* Badges */
+.badge {
+  font-family: var(--mono);
+  font-size: 7.5px;
+  letter-spacing: 0.08em;
+  padding: 1.5px 5px;
+  border-radius: 3px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.badge-ga  { background: rgba(102,128,11,.14); color: var(--fl-green); }
+.badge-pre { background: rgba(173,131,1,.14);  color: var(--fl-yellow); }
+.badge-new { background: rgba(32,94,166,.12);  color: var(--fl-blue); }
+
+/* ── MAIN ── */
+main { overflow-y: auto; }
+
+/* ── HERO ── */
+.hero {
+  background: var(--paper-dim);
+  border-bottom: 1.5px solid var(--blue-border);
+  padding: 48px 52px 38px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: 'AGENT 365';
+  position: absolute;
+  right: -20px;
+  bottom: -28px;
+  font-family: var(--sans);
+  font-size: 110px;
+  font-weight: 700;
+  color: rgba(32, 94, 166, 0.05);
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: -2px;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--fl-blue);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-eyebrow::after {
+  content: '';
+  display: block;
+  height: 1px;
+  width: 48px;
+  background: var(--fl-blue);
+  opacity: 0.4;
+}
+
+.hero h2 {
+  font-family: var(--sans);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.18;
+  margin-bottom: 14px;
+  max-width: 600px;
+}
+
+.hero h2 em {
+  font-style: normal;
+  color: var(--fl-blue);
+}
+
+.hero-desc {
+  font-size: 16px;
+  color: var(--ink-3);
+  line-height: 1.72;
+  max-width: 580px;
+  margin-bottom: 28px;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+  border: 1.5px solid var(--blue-border);
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 600px;
+  background: var(--paper);
+}
+
+.meta-item {
+  flex: 1;
+  padding: 12px 18px;
+  border-right: 1.5px solid var(--blue-border);
+  min-width: 110px;
+}
+
+.meta-item:last-child { border-right: none; }
+
+.meta-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.meta-value {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--fl-blue);
+  font-weight: 500;
+}
+
+/* ── SECTIONS ── */
+.section {
+  display: none;
+  padding: 42px 52px;
+  animation: fadein 0.28s ease;
+}
+
+.section.active { display: block; }
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SECTION HEADER ── */
+.sh { margin-bottom: 28px; }
+
+.sh .eyebrow {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.22em;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.sh h2 {
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 9px;
+  line-height: 1.22;
+}
+
+.sh p {
+  font-size: 15px;
+  color: var(--ink-3);
+  line-height: 1.7;
+  max-width: 660px;
+}
+
+/* ── CARDS GRID ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(276px, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.card {
+  background: var(--blue-surface);
+  border: 1.5px solid var(--blue-border);
+  border-radius: 8px;
+  padding: 22px 22px 20px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2.5px;
+  background: var(--card-top, var(--fl-blue));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.card:hover {
+  background: var(--blue-hover);
+  border-color: var(--blue-border-d);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.card:hover::before { opacity: 1; }
+
+.card-icon { font-size: 18px; margin-bottom: 12px; display: block; }
+
+.card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 7px;
+}
+
+.card p {
+  font-size: 14px;
+  color: var(--ink-3);
+  line-height: 1.65;
+}
+
+/* ── PILLARS ── */
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin-top: 26px;
+  border: 1.5px solid var(--blue-border);
+  border-radius: 9px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.pillar {
+  background: var(--blue-surface);
+  padding: 26px 22px;
+  cursor: pointer;
+  transition: background 0.18s;
+  border-right: 1.5px solid var(--blue-border);
+}
+
+.pillar:last-child { border-right: none; }
+
+.pillar:hover { background: var(--blue-hover); }
+
+.pillar.active {
+  background: var(--paper);
+  box-shadow: inset 0 3px 0 var(--pillar-c, var(--fl-blue));
+}
+
+.pillar-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 10px;
+}
+
+.p-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--pillar-c, var(--fl-blue));
+  flex-shrink: 0;
+}
+
+.pillar h3 {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pillar-c, var(--fl-blue));
+}
+
+.pillar-blurb {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+
+.pillar-feats {
+  display: none;
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px solid var(--blue-border);
+  flex-direction: column;
+  gap: 7px;
+}
+
+.pillar.active .pillar-feats { display: flex; }
+
+.pf {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 13.5px;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+.pf::before {
+  content: '▸';
+  color: var(--pillar-c, var(--fl-blue));
+  font-size: 10px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── AGENT TYPES ── */
+.agent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.agent-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  background: var(--blue-surface);
+  border: 1.5px solid var(--blue-border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  transition: all 0.18s;
+}
+
+.agent-row:hover {
+  background: var(--blue-hover);
+  border-color: var(--blue-border-d);
+}
+
+.agent-row .t { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.agent-row .d { font-size: 13.5px; color: var(--ink-3); line-height: 1.55; }
+.agent-row .eg {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-4);
+  margin-top: 5px;
+}
+.agent-row .ico { font-size: 24px; }
+
+/* ── DISCOVERY ── */
+.disc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.disc-card {
+  background: var(--blue-surface);
+  border: 1.5px solid var(--blue-border);
+  border-radius: 8px;
+  padding: 20px 22px;
+  transition: all 0.18s;
+}
+
+.disc-card:hover {
+  background: var(--blue-hover);
+  border-color: var(--blue-border-d);
+}
+
+.disc-type {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.15em;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+
+.disc-card h4 { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+.disc-card p  { font-size: 13.5px; color: var(--ink-3); line-height: 1.65; }
+
+.tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 11px; }
+
+.tag {
+  background: var(--paper);
+  border: 1.5px solid var(--blue-border);
+  border-radius: 4px;
+  padding: 2.5px 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+/* ── INTEGRATIONS ── */
+.int-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.int-card {
+  background: var(--blue-surface);
+  border: 1.5px solid var(--blue-border);
+  border-radius: 8px;
+  padding: 20px 22px;
+  transition: all 0.18s;
+}
+
+.int-card:hover {
+  background: var(--blue-hover);
+  border-color: var(--blue-border-d);
+}
+
+.int-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 13px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--blue-border);
+}
+
+.int-icon {
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.int-head strong { font-size: 15px; font-weight: 600; color: var(--ink); }
+
+.int-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+
+.int-list li {
+  font-size: 13.5px;
+  color: var(--ink-3);
+  line-height: 1.5;
+  padding-left: 14px;
+  position: relative;
+}
+
+.int-list li::before {
+  content: '·';
+  position: absolute;
+  left: 3px;
+  color: var(--ink-4);
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+/* ── TABLE ── */
+.dtable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+.dtable th {
+  background: var(--blue-active);
+  border: 1.5px solid var(--blue-border);
+  padding: 9px 14px;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.dtable td {
+  border: 1.5px solid var(--blue-border);
+  padding: 10px 14px;
+  color: var(--ink-3);
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+.dtable tr:hover td {
+  background: var(--blue-surface);
+  color: var(--ink);
+}
+
+.chk { color: var(--fl-green); font-weight: 600; }
+.par { color: var(--fl-yellow); font-weight: 600; }
+.nop { color: var(--ink-5); }
+
+/* ── PARTNER GRID ── */
+.partner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.partner-item {
+  background: var(--blue-surface);
+  border: 1.5px solid var(--blue-border);
+  border-radius: 6px;
+  padding: 11px 13px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink-3);
+  transition: all 0.18s;
+}
+
+.partner-item:hover {
+  background: var(--blue-hover);
+  border-color: var(--blue-border-d);
+  color: var(--ink);
+}
+
+.partner-item .role {
+  display: block;
+  font-size: 10.5px;
+  color: var(--ink-4);
+  margin-top: 3px;
+  font-weight: 400;
+}
+
+/* ── ROADMAP ── */
+.roadmap { margin-top: 22px; display: flex; flex-direction: column; gap: 0; }
+
+.rm-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.rm-row:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 119px;
+  top: 20px;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--blue-border);
+}
+
+.rm-date {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-4);
+  text-align: right;
+  padding-top: 4px;
+  line-height: 1.3;
+}
+
+.rm-card {
+  background: var(--blue-surface);
+  border: 1.5px solid var(--blue-border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  position: relative;
+}
+
+.rm-card::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 13px;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: var(--rm-c, var(--fl-blue));
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 1.5px var(--rm-c, var(--fl-blue));
+}
+
+.rm-card h4 { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.rm-card p  { font-size: 13.5px; color: var(--ink-3); line-height: 1.6; }
+
+/* ── PRICING ── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+  max-width: 660px;
+}
+
+.pricing-card {
+  background: var(--blue-surface);
+  border: 1.5px solid var(--blue-border);
+  border-radius: 9px;
+  padding: 26px 24px;
+  transition: all 0.2s;
+}
+
+.pricing-card:hover { background: var(--blue-hover); }
+
+.pricing-card.featured {
+  border-color: var(--fl-blue);
+  background: rgba(32, 94, 166, 0.06);
+  box-shadow: 0 0 0 1px var(--fl-blue), var(--shadow-md);
+}
+
+.p-plan { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.18em; color: var(--ink-4); text-transform: uppercase; margin-bottom: 8px; }
+.p-name { font-family: var(--sans); font-size: 19px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.p-price {
+  font-family: var(--mono);
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--fl-blue);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.p-price span { font-size: 13px; color: var(--ink-4); font-weight: 400; }
+.p-note { font-size: 13.5px; color: var(--ink-3); line-height: 1.6; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--blue-border); }
+
+/* ── INFO BOXES ── */
+.infobox {
+  background: var(--blue-subtle);
+  border: 1.5px solid var(--blue-border-d);
+  border-left: 3.5px solid var(--fl-blue);
+  border-radius: 7px;
+  padding: 16px 20px;
+  margin-top: 22px;
+  font-size: 14px;
+  color: var(--ink-3);
+  line-height: 1.65;
+}
+
+.infobox strong { color: var(--ink); }
+
+.infobox.warn {
+  background: rgba(173, 131, 1, 0.07);
+  border-color: rgba(173, 131, 1, 0.4);
+  border-left-color: var(--fl-yellow);
+}
+
+/* ── DIVIDER ── */
+hr.div {
+  border: none;
+  border-top: 1.5px solid var(--blue-border);
+  margin: 30px 0;
+}
+
+/* ── FAQ ── */
+.faq-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+
+.faq-item {
+  background: var(--blue-surface);
+  border: 1.5px solid var(--blue-border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  transition: all 0.18s;
+}
+
+.faq-item:hover {
+  background: var(--blue-hover);
+  border-color: var(--blue-border-d);
+}
+
+.faq-item h4 { font-size: 15px; font-weight: 600; color: var(--fl-blue); margin-bottom: 8px; }
+.faq-item p  { font-size: 14px; color: var(--ink-3); line-height: 1.65; }
+
+/* ── SCROLL ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--paper-dim); }
+::-webkit-scrollbar-thumb { background: var(--blue-border-d); border-radius: 4px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 780px) {
+  .layout { grid-template-columns: 1fr; }
+  nav { position: relative; height: auto; flex-wrap: wrap; padding: 10px; flex-direction: row; gap: 2px; }
+  .nav-brand { width: 100%; margin-bottom: 6px; }
+  .nav-section { display: none; }
+  nav a { padding: 5px 10px; border-left: none; border-bottom: 2px solid transparent; font-size: 12px; }
+  nav a.active { border-left: none; border-bottom-color: var(--fl-blue); }
+  .section, .hero { padding: 24px 18px; }
+  .pillars, .disc-grid, .int-grid, .pricing-grid { grid-template-columns: 1fr; }
+  .hero::after { display: none; }
+  .rm-row { grid-template-columns: 1fr; }
+  .rm-date { text-align: left; padding-top: 0; }
+  .rm-row::after { display: none; }
+  .rm-card::before { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ══════════════ NAV ══════════════ -->
+<nav id="nav">
+  <div class="nav-brand">
+    <span class="brand-eyebrow">Guía técnica · Mayo 2026</span>
+    <h1>Microsoft<br><strong>Agent 365</strong></h1>
+  </div>
+
+  <span class="nav-section">Visión general</span>
+  <a class="active" onclick="show('overview', this)"><span class="nav-dot"></span>¿Qué es?</a>
+  <a onclick="show('pillars', this)"><span class="nav-dot"></span>3 pilares</a>
+  <a onclick="show('agents', this)"><span class="nav-dot"></span>Tipos de agentes</a>
+
+  <span class="nav-section">Capacidades</span>
+  <a onclick="show('discovery', this)"><span class="nav-dot"></span>Descubrimiento</a>
+  <a onclick="show('integrations', this)"><span class="nav-dot"></span>Integraciones</a>
+  <a onclick="show('windows365', this)"><span class="nav-dot"></span>W365 for Agents</a>
+
+  <span class="nav-section">Ecosistema</span>
+  <a onclick="show('ecosystem', this)"><span class="nav-dot"></span>Partners y agentes</a>
+  <a onclick="show('roadmap', this)"><span class="nav-dot"></span>Hoja de ruta</a>
+
+  <span class="nav-section">Adopción</span>
+  <a onclick="show('pricing', this)"><span class="nav-dot"></span>Licenciamiento</a>
+  <a onclick="show('faq', this)"><span class="nav-dot"></span>Preguntas frecuentes</a>
+</nav>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<main id="main-scroll">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Disponibilidad general · 1 mayo 2026</div>
+    <h2>El <em>plano de control</em> para la gestión de agentes de IA en empresa</h2>
+    <p class="hero-desc">Microsoft Agent 365 es la capa de gobernanza, observabilidad y seguridad para todos los agentes de IA de tu organización - propios de Microsoft, de terceros y locales - gestionados desde los mismos flujos de trabajo que ya usas para los usuarios.</p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <span class="meta-label">Estado</span>
+        <span class="meta-value">GA · May 2026</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Precio standalone</span>
+        <span class="meta-value">$15 /usr /mes</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Incluido en</span>
+        <span class="meta-value">M365 E7</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Consola</span>
+        <span class="meta-value">M365 Admin Center</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── OVERVIEW ── -->
+  <div class="section active" id="section-overview">
+    <div class="sh">
+      <div class="eyebrow">¿Qué es?</div>
+      <h2>El problema que resuelve</h2>
+      <p>Los agentes de IA proliferan rápido y operan fuera de los controles habituales: ejecutan tareas de forma autónoma, acceden a datos sensibles, invocan herramientas e interactúan con otros agentes. Sin visibilidad centralizada, el riesgo crece con cada agente nuevo. Agent 365 cierra ese hueco.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card" style="--card-top: var(--fl-blue)">
+        <span class="card-icon">🗂️</span>
+        <h3>Registro unificado</h3>
+        <p>Inventario de todos los agentes: los creados en plataformas Microsoft, los de partners del ecosistema, y los que registres manualmente. Un único punto de verdad.</p>
+      </div>
+      <div class="card" style="--card-top: var(--fl-cyan)">
+        <span class="card-icon">🗺️</span>
+        <h3>Mapa de agentes</h3>
+        <p>Visualiza cómo cada agente encaja en el ecosistema: conexiones, dependencias, identidades asociadas, recursos en la nube alcanzables y servidores MCP configurados.</p>
+      </div>
+      <div class="card" style="--card-top: var(--fl-purple)">
+        <span class="card-icon">📊</span>
+        <h3>Analítica de rendimiento</h3>
+        <p>Monitorización de velocidad, calidad, impacto de negocio y ROI por agente. Métricas orientadas a decisión, no solo técnicas.</p>
+      </div>
+      <div class="card" style="--card-top: var(--fl-green)">
+        <span class="card-icon">🛡️</span>
+        <h3>Seguridad extremo a extremo</h3>
+        <p>Identidades gestionadas con Entra ID. Datos protegidos con Purview. Amenazas detectadas con Defender. El mismo nivel aplicado a personas.</p>
+      </div>
+      <div class="card" style="--card-top: var(--fl-yellow)">
+        <span class="card-icon">⚙️</span>
+        <h3>Gobernanza y ciclo de vida</h3>
+        <p>Incorporación supervisada por TI. Políticas automáticas: expirar inactivos, bloquear sin propietario, gestionar privilegios.</p>
+      </div>
+      <div class="card" style="--card-top: var(--fl-magenta)">
+        <span class="card-icon">🌐</span>
+        <h3>Ecosistema abierto</h3>
+        <p>Gestiona agentes de Copilot Studio, Azure Foundry, AWS Bedrock, Google Cloud, n8n, Kore.ai y muchos otros. Sin trabajo de integración extra para IT.</p>
+      </div>
+    </div>
+
+    <div class="infobox" style="margin-top:26px">
+      <p><strong>Concepto clave:</strong> Agent 365 no crea ni ejecuta agentes. Es la capa de control sobre los agentes que ya existen o se van a desplegar. La analogía correcta es Entra ID para personas: nadie "vive" en Entra, pero todas las identidades pasan por ahí.</p>
+    </div>
+  </div>
+
+  <!-- ── PILLARS ── -->
+  <div class="section" id="section-pillars">
+    <div class="sh">
+      <div class="eyebrow">Arquitectura funcional</div>
+      <h2>Los tres pilares</h2>
+      <p>Agent 365 estructura su funcionalidad en tres capas que se refuerzan entre sí. Haz clic en cada pilar para ver las capacidades específicas.</p>
+    </div>
+
+    <div class="pillars">
+      <div class="pillar active" style="--pillar-c: var(--fl-blue)" onclick="togglePillar(this)">
+        <div class="pillar-head"><div class="p-dot"></div><h3>Observar</h3></div>
+        <p class="pillar-blurb">Visibilidad completa de qué agentes existen, cómo se usan y qué riesgos presentan.</p>
+        <div class="pillar-feats">
+          <div class="pf">Registro centralizado de todos los agentes de la organización</div>
+          <div class="pf">Mapa visual de relaciones: agentes, identidades, recursos, MCP servers</div>
+          <div class="pf">Analítica de rendimiento, velocidad y calidad por agente</div>
+          <div class="pf">Monitorización de impacto de negocio y ROI</div>
+          <div class="pf">Supervisión diferenciada: IT, Seguridad, Responsable de negocio</div>
+          <div class="pf">Contexto de exposición: qué datos y recursos alcanza cada agente</div>
+        </div>
+      </div>
+
+      <div class="pillar" style="--pillar-c: var(--fl-cyan)" onclick="togglePillar(this)">
+        <div class="pillar-head"><div class="p-dot"></div><h3>Gobernar</h3></div>
+        <p class="pillar-blurb">Controles estructurales para que los agentes operen dentro de los límites que define IT.</p>
+        <div class="pillar-feats">
+          <div class="pf">Onboarding con flujos supervisados y plantillas de políticas de seguridad</div>
+          <div class="pf">Acceso con privilegios mínimos: usuarios, datos, herramientas y MCP servers</div>
+          <div class="pf">Gestión de ciclo de vida: expirar inactivos, bloquear sin propietario</div>
+          <div class="pf">Registro de auditoría y trazabilidad de acciones e interacciones</div>
+          <div class="pf">Controles de cumplimiento de datos para interacciones de agentes</div>
+          <div class="pf">Preparación para auditorías con retención integrada</div>
+        </div>
+      </div>
+
+      <div class="pillar" style="--pillar-c: var(--fl-magenta)" onclick="togglePillar(this)">
+        <div class="pillar-head"><div class="p-dot"></div><h3>Proteger</h3></div>
+        <p class="pillar-blurb">Seguridad de grado empresarial para las identidades, los datos y las amenazas de los agentes.</p>
+        <div class="pillar-feats">
+          <div class="pf">Control de acceso: políticas condicionales de Entra extendidas a agentes</div>
+          <div class="pf">Seguridad de datos: visibilidad de exposición de datos de IA con Purview</div>
+          <div class="pf">Protección contra amenazas: detección de comportamientos maliciosos</div>
+          <div class="pf">Filtrado de tráfico de red: destinos web, servicios no sancionados y ficheros sensibles</div>
+          <div class="pf">Protección frente a ataques de prompt injection</div>
+          <div class="pf">Bloqueo de agentes locales no gestionados mediante Intune</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── AGENT TYPES ── -->
+  <div class="section" id="section-agents">
+    <div class="sh">
+      <div class="eyebrow">Cobertura</div>
+      <h2>Tipos de agentes soportados</h2>
+      <p>Agent 365 gestiona agentes independientemente de cómo operan o dónde se han creado. La distinción principal es el modo de acceso: delegado (actúan en nombre de un usuario) o propio (tienen sus propias credenciales).</p>
+    </div>
+
+    <div class="agent-list">
+      <div class="agent-row">
+        <div>
+          <div class="t">Agentes con acceso delegado <span class="badge badge-ga">GA</span></div>
+          <div class="d">Actúan en nombre de un usuario con sus permisos. El usuario está en el centro de la interacción.</div>
+          <div class="eg">Ej: un agente que organiza el correo o gestiona el calendario de un empleado</div>
+        </div>
+        <div class="ico">👤</div>
+      </div>
+      <div class="agent-row">
+        <div>
+          <div class="t">Agentes autónomos en segundo plano <span class="badge badge-ga">GA</span></div>
+          <div class="d">Operan de forma independiente con sus propias credenciales. Sin intervención continua del usuario.</div>
+          <div class="eg">Ej: un agente que triage tickets de soporte de forma autónoma</div>
+        </div>
+        <div class="ico">🤖</div>
+      </div>
+      <div class="agent-row">
+        <div>
+          <div class="t">Agentes en flujos colaborativos de equipo <span class="badge badge-pre">Preview</span></div>
+          <div class="d">Participan activamente en procesos de equipo con acceso propio. Interactúan con personas y con otros agentes.</div>
+          <div class="eg">Ej: un agente que forma parte de un flujo de aprobación junto a personas</div>
+        </div>
+        <div class="ico">👥</div>
+      </div>
+      <div class="agent-row">
+        <div>
+          <div class="t">Agentes locales en dispositivos <span class="badge badge-pre">Preview · Jun 2026</span></div>
+          <div class="d">Agentes que el usuario instala y ejecuta en su dispositivo Windows. Fuente principal de Shadow AI en las organizaciones.</div>
+          <div class="eg">Ej: OpenClaw, Claude Code, GitHub Copilot CLI</div>
+        </div>
+        <div class="ico">💻</div>
+      </div>
+      <div class="agent-row">
+        <div>
+          <div class="t">Agentes SaaS de terceros <span class="badge badge-ga">GA</span></div>
+          <div class="d">Agentes de proveedores externos completamente configurados para ser gestionados por Agent 365. Sin trabajo de integración para IT.</div>
+          <div class="eg">Ej: Genspark, Zendesk, Egnyte, Zensai, Kore.ai, n8n</div>
+        </div>
+        <div class="ico">🔌</div>
+      </div>
+      <div class="agent-row">
+        <div>
+          <div class="t">Agentes en otras nubes <span class="badge badge-pre">Preview</span></div>
+          <div class="d">Descubrimiento e inventario automático de agentes desplegados en AWS Bedrock y Google Cloud mediante sincronización de registro.</div>
+          <div class="eg">Ej: agentes en AWS Bedrock, Google Gemini Enterprise Agent Platform</div>
+        </div>
+        <div class="ico">☁️</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DISCOVERY ── -->
+  <div class="section" id="section-discovery">
+    <div class="sh">
+      <div class="eyebrow">Capacidad clave</div>
+      <h2>Descubrimiento y Shadow AI</h2>
+      <p>Uno de los problemas más urgentes para IT es no saber qué agentes están ya corriendo en la organización. Agent 365 incorpora detección activa de agentes no gestionados - locales, SaaS y en la nube.</p>
+    </div>
+
+    <div class="disc-grid">
+      <div class="disc-card">
+        <div class="disc-type">Agentes locales · Preview jun 2026</div>
+        <h4>Detección en dispositivos Windows</h4>
+        <p>Microsoft Defender e Intune descubren agentes instalados localmente en equipos Windows gestionados. Visibilidad de en qué dispositivos corren, qué servidores MCP tienen configurados, qué identidades usan y qué recursos en la nube alcanzan esas identidades.</p>
+        <div class="tag-row">
+          <span class="tag">OpenClaw</span>
+          <span class="tag">Claude Code</span>
+          <span class="tag">GitHub Copilot CLI</span>
+        </div>
+      </div>
+
+      <div class="disc-card">
+        <div class="disc-type">Nube · Preview</div>
+        <h4>Sincronización con nubes externas</h4>
+        <p>Registry sync con AWS Bedrock y Google Cloud: descubrimiento e inventario automático de agentes en esas plataformas. Próximamente: operaciones básicas de ciclo de vida (arrancar, parar, eliminar) desde Agent 365.</p>
+        <div class="tag-row">
+          <span class="tag">AWS Bedrock</span>
+          <span class="tag">Google Vertex AI</span>
+          <span class="tag">Azure Foundry</span>
+        </div>
+      </div>
+
+      <div class="disc-card">
+        <div class="disc-type">Controles · Disponible</div>
+        <h4>Bloqueo y políticas de contención</h4>
+        <p>Una vez descubierto un agente no gestionado, IT puede aplicar políticas de Intune para bloquear sus métodos de ejecución. Si muestra comportamiento malicioso - como intentar exfiltrar datos - Defender lo bloquea en tiempo de ejecución y genera alertas con contexto de incidente.</p>
+        <div class="tag-row">
+          <span class="tag">Bloqueo por política</span>
+          <span class="tag">Alertas en Defender</span>
+          <span class="tag">Detecciones personalizadas</span>
+        </div>
+      </div>
+
+      <div class="disc-card">
+        <div class="disc-type">Consola · Disponible</div>
+        <h4>Shadow AI en Admin Center</h4>
+        <p>Nueva sección en el Centro de administración de M365 específica para Shadow AI: lista de agentes detectados, dispositivos donde corren, estado de gestión y acciones de contención disponibles. Vista unificada para IT y seguridad.</p>
+        <div class="tag-row">
+          <span class="tag">M365 Admin Center</span>
+          <span class="tag">Intune Admin Center</span>
+          <span class="tag">Microsoft Defender</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="infobox warn">
+      <p><strong>Punto de atención:</strong> Los agentes locales son la principal fuente de Shadow AI en las organizaciones hoy. Un desarrollador puede instalar Claude Code en su equipo, conectarlo a datos corporativos y actuar con sus permisos de red - sin pasar por IT. La cobertura de este vector es uno de los diferenciadores clave de Agent 365.</p>
+    </div>
+  </div>
+
+  <!-- ── INTEGRATIONS ── -->
+  <div class="section" id="section-integrations">
+    <div class="sh">
+      <div class="eyebrow">Plataformas base</div>
+      <h2>Integración con el stack de seguridad Microsoft</h2>
+      <p>Agent 365 no construye capacidades desde cero. Extiende los sistemas que las organizaciones ya tienen desplegados para personas, aplicándolos a agentes.</p>
+    </div>
+
+    <div class="int-grid">
+      <div class="int-card">
+        <div class="int-head">
+          <div class="int-icon" style="background:rgba(32,94,166,.12); color:var(--fl-blue)">🔐</div>
+          <strong>Microsoft Entra</strong>
+        </div>
+        <ul class="int-list">
+          <li>Identidades de agentes gestionadas como Entra Agent ID</li>
+          <li>Políticas de acceso condicional extendidas a agentes</li>
+          <li>Filtrado de tráfico de internet para agentes en Copilot Studio y dispositivos</li>
+          <li>Restricción de conexiones solo a destinos aprobados</li>
+          <li>Protección frente a ataques de prompt injection por red</li>
+        </ul>
+      </div>
+
+      <div class="int-card">
+        <div class="int-head">
+          <div class="int-icon" style="background:rgba(175,48,41,.10); color:var(--fl-red)">🛡️</div>
+          <strong>Microsoft Defender</strong>
+        </div>
+        <ul class="int-list">
+          <li>Descubrimiento de agentes locales en dispositivos Windows</li>
+          <li>Mapa de exposición: dispositivos, MCP servers, identidades, recursos cloud</li>
+          <li>Detección de comportamientos maliciosos en tiempo de ejecución</li>
+          <li>Bloqueo de agentes de código si muestran patrones de exfiltración</li>
+          <li>Alertas con contexto de incidente para investigación y respuesta</li>
+        </ul>
+      </div>
+
+      <div class="int-card">
+        <div class="int-head">
+          <div class="int-icon" style="background:rgba(94,64,157,.12); color:var(--fl-purple)">📋</div>
+          <strong>Microsoft Purview</strong>
+        </div>
+        <ul class="int-list">
+          <li>Visibilidad de exposición de datos generados y consumidos por agentes</li>
+          <li>Protección frente a over-sharing y fugas de datos</li>
+          <li>Controles de seguridad de contenido para interacciones de agentes</li>
+          <li>Retención e investigación de interacciones problemáticas</li>
+          <li>Registro de auditoría listo para cumplimiento normativo</li>
+        </ul>
+      </div>
+
+      <div class="int-card">
+        <div class="int-head">
+          <div class="int-icon" style="background:rgba(102,128,11,.12); color:var(--fl-green)">📱</div>
+          <strong>Microsoft Intune</strong>
+        </div>
+        <ul class="int-list">
+          <li>Gestión de agentes locales con las mismas políticas de endpoint que los usuarios</li>
+          <li>Bloqueo por política de agentes no gestionados en dispositivos corporativos</li>
+          <li>Inventario de agentes locales visible en Intune Admin Center</li>
+          <li>Controles basados en políticas para lo que los agentes pueden hacer</li>
+        </ul>
+      </div>
+    </div>
+
+    <hr class="div">
+
+    <div class="sh">
+      <div class="eyebrow">Estado de capacidades</div>
+      <h2>GA vs Preview</h2>
+    </div>
+
+    <table class="dtable">
+      <thead>
+        <tr>
+          <th>Capacidad</th>
+          <th>Herramienta</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Registro de agentes</td><td>M365 Admin Center</td><td><span class="badge badge-ga">GA</span></td></tr>
+        <tr><td>Shadow AI (agentes locales)</td><td>M365 Admin + Intune</td><td><span class="badge badge-pre">Preview</span></td></tr>
+        <tr><td>Mapa de exposición de agentes</td><td>Microsoft Defender</td><td><span class="badge badge-pre">Preview · Jun 2026</span></td></tr>
+        <tr><td>Políticas de bloqueo de agentes</td><td>Intune Admin Center</td><td><span class="badge badge-pre">Preview · Jun 2026</span></td></tr>
+        <tr><td>Registry sync AWS / Google Cloud</td><td>M365 Admin Center</td><td><span class="badge badge-pre">Preview</span></td></tr>
+        <tr><td>Control de red para agentes</td><td>Microsoft Entra</td><td><span class="badge badge-ga">GA</span></td></tr>
+        <tr><td>Protección de datos de agentes</td><td>Microsoft Purview</td><td><span class="badge badge-ga">GA</span></td></tr>
+        <tr><td>Windows 365 for Agents</td><td>Intune / M365 Admin</td><td><span class="badge badge-pre">Preview · Solo US</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── WINDOWS 365 ── -->
+  <div class="section" id="section-windows365">
+    <div class="sh">
+      <div class="eyebrow">Entorno de ejecución · Preview · Solo EE.UU.</div>
+      <h2>Windows 365 for Agents</h2>
+      <p>Agent 365 gestiona los agentes. Windows 365 for Agents es <em>donde los agentes trabajan</em>. Dos productos complementarios, no intercambiables.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card" style="--card-top: var(--fl-blue)">
+        <span class="card-icon">🖥️</span>
+        <h3>Cloud PCs para cargas agénticas</h3>
+        <p>Entorno de ejecución en la nube, gestionado desde Intune, diseñado específicamente para workloads de agentes. Los agentes corren con las mismas políticas de identidad, seguridad y gestión aplicadas a los empleados.</p>
+      </div>
+      <div class="card" style="--card-top: var(--fl-cyan)">
+        <span class="card-icon">🔐</span>
+        <h3>Entorno aislado y controlado</h3>
+        <p>Los agentes interactúan con aplicaciones en un entorno con controles de política. Reduce el radio de impacto si un agente se ve comprometido, separando su ejecución del dispositivo del usuario.</p>
+      </div>
+      <div class="card" style="--card-top: var(--fl-purple)">
+        <span class="card-icon">👁️</span>
+        <h3>Visibilidad desde Agent 365</h3>
+        <p>Los agentes que corren en W365 for Agents son observables desde Agent 365 en el Centro de administración de M365, vinculando la capa de ejecución con la de gobernanza.</p>
+      </div>
+      <div class="card" style="--card-top: var(--fl-green)">
+        <span class="card-icon">⚡</span>
+        <h3>De gobernanza a producción</h3>
+        <p>Agent 365 + Windows 365 for Agents permite ir de "tenemos visibilidad sobre los agentes" a "podemos correrlos en producción con confianza", con controles de seguridad de extremo a extremo.</p>
+      </div>
+    </div>
+
+    <div class="infobox warn">
+      <p><strong>Disponibilidad actual:</strong> Windows 365 for Agents está en preview público, disponible únicamente en Estados Unidos. No hay fecha pública confirmada para disponibilidad general ni para expansión geográfica.</p>
+    </div>
+  </div>
+
+  <!-- ── ECOSYSTEM ── -->
+  <div class="section" id="section-ecosystem">
+    <div class="sh">
+      <div class="eyebrow">Partners certificados</div>
+      <h2>Ecosistema de agentes gestionados</h2>
+      <p>Agent 365 no es solo para agentes de Microsoft. Los agentes de terceros que implementan la integración son directamente gestionables desde el plano de control - sin trabajo adicional por parte de IT.</p>
+    </div>
+
+    <div class="sh" style="margin-bottom:10px; margin-top:20px">
+      <div class="eyebrow">Agentes SaaS de terceros</div>
+    </div>
+    <div class="partner-grid">
+      <div class="partner-item">Genspark<span class="role">IA autónoma</span></div>
+      <div class="partner-item">Zendesk<span class="role">Atención al cliente</span></div>
+      <div class="partner-item">Egnyte<span class="role">Gestión de contenido</span></div>
+      <div class="partner-item">Zensai<span class="role">RRHH / Learning</span></div>
+      <div class="partner-item">Kore.ai<span class="role">Plataforma agéntica</span></div>
+      <div class="partner-item">n8n<span class="role">Automatización</span></div>
+      <div class="partner-item">Kasisto<span class="role">IA financiera</span></div>
+      <div class="partner-item">Adobe<span class="role">Creación de contenido</span></div>
+      <div class="partner-item">Cognition<span class="role">Ingeniería de software</span></div>
+      <div class="partner-item">Manus<span class="role">Agente autónomo</span></div>
+      <div class="partner-item">Glean<span class="role">Búsqueda enterprise</span></div>
+      <div class="partner-item">Workday<span class="role">RRHH / Finanzas</span></div>
+      <div class="partner-item">ServiceNow<span class="role">IT Service Mgmt</span></div>
+      <div class="partner-item">NVIDIA<span class="role">Infraestructura IA</span></div>
+    </div>
+
+    <hr class="div">
+
+    <div class="sh" style="margin-bottom:12px">
+      <div class="eyebrow">Plataformas de creación</div>
+    </div>
+    <div class="cards">
+      <div class="card" style="--card-top: var(--fl-blue)">
+        <h3>Microsoft Copilot Studio</h3>
+        <p>Creación low-code de agentes personalizados para procesos de negocio. Integración nativa con Agent 365.</p>
+      </div>
+      <div class="card" style="--card-top: var(--fl-purple)">
+        <h3>Azure AI Foundry</h3>
+        <p>Creación de agentes avanzados con modelos personalizados. Soporte completo para gestión en Agent 365.</p>
+      </div>
+      <div class="card" style="--card-top: var(--fl-yellow)">
+        <h3>AWS Bedrock</h3>
+        <p>Registry sync en preview: descubrimiento automático de agentes en la plataforma de Amazon.</p>
+      </div>
+      <div class="card" style="--card-top: var(--fl-cyan)">
+        <h3>Google Cloud</h3>
+        <p>Registry sync en preview: inventario de agentes en Google Gemini Enterprise Agent Platform (antes Vertex AI).</p>
+      </div>
+    </div>
+
+    <hr class="div">
+
+    <div class="sh" style="margin-bottom:12px">
+      <div class="eyebrow">Partners de servicios</div>
+      <p style="font-size:13px; color:var(--ink-3); margin-top:6px">Para organizaciones que necesitan acompañamiento en adopción, diagnóstico, implementación y operación continua.</p>
+    </div>
+    <div class="partner-grid">
+      <div class="partner-item">Accenture<span class="role">Estrategia y adopción</span></div>
+      <div class="partner-item">Deloitte<span class="role">Gobernanza y riesgo</span></div>
+      <div class="partner-item">KPMG<span class="role">Cumplimiento</span></div>
+      <div class="partner-item">EY<span class="role">Transformación</span></div>
+      <div class="partner-item">PwC<span class="role">Modelo operativo</span></div>
+      <div class="partner-item">Capgemini<span class="role">Integración</span></div>
+      <div class="partner-item">Avanade<span class="role">Implementación M365</span></div>
+      <div class="partner-item">TCS<span class="role">Servicios gestionados</span></div>
+    </div>
+  </div>
+
+  <!-- ── ROADMAP ── -->
+  <div class="section" id="section-roadmap">
+    <div class="sh">
+      <div class="eyebrow">Hoja de ruta</div>
+      <h2>Estado actual y próximos hitos</h2>
+      <p>Resumen del estado de las capacidades publicadas y confirmadas en el anuncio de disponibilidad general del 1 de mayo de 2026.</p>
+    </div>
+
+    <div class="roadmap">
+      <div class="rm-row">
+        <div class="rm-date">Mar 2026</div>
+        <div class="rm-card" style="--rm-c: var(--fl-blue)">
+          <h4>Anuncio y programa Frontier</h4>
+          <p>Primera comunicación pública de Agent 365. Lanzamiento del programa Frontier para clientes early adopters que aportaron feedback previo a la GA.</p>
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-date">1 may 2026</div>
+        <div class="rm-card" style="--rm-c: var(--fl-green)">
+          <h4>Disponibilidad General <span class="badge badge-ga">GA</span></h4>
+          <p>Agent 365 GA para clientes comerciales. Registro de agentes, gobernanza del ciclo de vida, integración con Entra + Purview + Defender, agentes delegados y autónomos, cobertura SaaS de partners certificados y controles de red.</p>
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-date">May 2026</div>
+        <div class="rm-card" style="--rm-c: var(--fl-yellow)">
+          <h4>Nuevas Previews <span class="badge badge-pre">Preview</span></h4>
+          <p>Registry sync con AWS Bedrock y Google Cloud. Windows 365 for Agents (solo US). Detección de agentes locales (OpenClaw). Cobertura de agentes en flujos de equipo.</p>
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-date">Jun 2026</div>
+        <div class="rm-card" style="--rm-c: var(--fl-magenta)">
+          <h4>Expansión de capacidades <span class="badge badge-pre">Anunciado</span></h4>
+          <p>Mapa de exposición de agentes locales en Defender (dispositivos, MCP servers, identidades, recursos cloud). Controles de política y bloqueo en runtime para agentes de código (OpenClaw, Claude Code, GitHub Copilot CLI). Ampliación a más agentes locales.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PRICING ── -->
+  <div class="section" id="section-pricing">
+    <div class="sh">
+      <div class="eyebrow">Licenciamiento</div>
+      <h2>Opciones de adquisición</h2>
+      <p>Agent 365 tiene disponibilidad general desde el 1 de mayo de 2026. Dos vías de acceso: incluido en Microsoft 365 E7, o como licencia standalone.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="p-plan">Standalone</div>
+        <div class="p-name">Agent 365</div>
+        <div class="p-price">$15 <span>/ usuario / mes</span></div>
+        <div class="p-note">Para organizaciones con M365 E3 o E5 que quieren añadir capacidades de control de agentes sin cambiar de plan.</div>
+      </div>
+      <div class="pricing-card featured">
+        <div class="p-plan">Bundle completo</div>
+        <div class="p-name">Microsoft 365 E7</div>
+        <div class="p-price">Incluido</div>
+        <div class="p-note">E7 integra M365 Copilot + Agent 365 + seguridad enterprise. Diseñado para organizaciones que despliegan IA de forma amplia y necesitan que Copilot, agentes y seguridad funcionen como un único sistema gobernado.</div>
+      </div>
+    </div>
+
+    <div class="infobox">
+      <p><strong>Modelo de licencia:</strong> Cada licencia cubre a una persona que gestiona o patrocina agentes, o que usa agentes que actúan en su nombre. El objetivo es que toda la actividad agéntica de la organización quede cubierta de forma predecible, independientemente del número de agentes desplegados.</p>
+    </div>
+
+    <hr class="div">
+
+    <!-- EJEMPLO PRÁCTICO -->
+    <div class="sh">
+      <div class="eyebrow">Ejemplo práctico</div>
+      <h2>¿Qué significa "usar agentes que actúan en tu nombre"?</h2>
+      <p>La clave del modelo de licencia es que no se licencia por número de agentes, sino por número de personas cuya actividad laboral toca agentes - ya sea gestionándolos, creándolos, o siendo el destinatario de su trabajo. Este ejemplo ilustra cómo funciona en una empresa real.</p>
+    </div>
+
+    <!-- Empresa ficticia -->
+    <div style="background:var(--blue-surface); border:1.5px solid var(--blue-border); border-radius:10px; padding:28px 28px 22px; margin-top:4px;">
+      <div style="display:flex; align-items:baseline; gap:12px; margin-bottom:22px; flex-wrap:wrap;">
+        <span style="font-family:var(--mono); font-size:10px; letter-spacing:0.18em; color:var(--ink-4); text-transform:uppercase;">Empresa ficticia</span>
+        <span style="font-family:var(--sans); font-size:17px; font-weight:600; color:var(--ink);">Distribuidora industrial · 800 empleados</span>
+      </div>
+
+      <!-- Barra visual de empleados -->
+      <div style="margin-bottom:24px;">
+        <div style="font-family:var(--mono); font-size:9px; letter-spacing:0.15em; color:var(--ink-4); text-transform:uppercase; margin-bottom:8px;">Distribución de los 800 empleados</div>
+        <div style="display:flex; height:32px; border-radius:6px; overflow:hidden; border:1.5px solid var(--blue-border);">
+          <div style="width:1.875%; background:var(--fl-blue); display:flex; align-items:center; justify-content:center;" title="IT: 15"></div>
+          <div style="width:3.125%; background:var(--fl-cyan); display:flex; align-items:center; justify-content:center;" title="Makers: 25"></div>
+          <div style="width:47.5%; background:rgba(32,94,166,0.25); display:flex; align-items:center; justify-content:center;" title="Usuarios: 380"></div>
+          <div style="width:47.5%; background:var(--paper-dim); display:flex; align-items:center; justify-content:center;" title="Sin agentes: 380"></div>
+        </div>
+        <div style="display:flex; gap:20px; margin-top:8px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-3);">
+            <span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:var(--fl-blue);"></span> IT / Admins (15)
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-3);">
+            <span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:var(--fl-cyan);"></span> Creadores de agentes (25)
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-3);">
+            <span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:rgba(32,94,166,0.35);"></span> Empleados con agentes asignados (380)
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-3);">
+            <span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:var(--paper-deep); border:1px solid var(--blue-border);"></span> Empleados sin agentes (380)
+          </div>
+        </div>
+      </div>
+
+      <!-- Tres grupos con licencia -->
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:22px;">
+
+        <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:start; gap:16px; background:rgba(32,94,166,0.08); border:1.5px solid rgba(32,94,166,0.3); border-radius:8px; padding:16px 18px;">
+          <div style="width:36px; height:36px; background:var(--fl-blue); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">🔧</div>
+          <div>
+            <div style="font-size:14.5px; font-weight:600; color:var(--ink); margin-bottom:4px;">Equipo IT - gobiernan y administran <span style="font-size:12px; color:var(--ink-4); font-weight:400;">(15 personas)</span></div>
+            <div style="font-size:13px; color:var(--ink-3); line-height:1.6;">Los administradores que acceden al Agent 365 Admin Center para registrar agentes, aplicar políticas, revisar auditorías, gestionar el ciclo de vida y responder a alertas de seguridad. Son los únicos con visibilidad y control total sobre todos los agentes de la organización.</div>
+          </div>
+          <div style="text-align:right; flex-shrink:0;">
+            <div style="font-family:var(--mono); font-size:11px; color:var(--fl-blue); font-weight:600;">15 licencias</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:start; gap:16px; background:rgba(36,131,123,0.08); border:1.5px solid rgba(36,131,123,0.3); border-radius:8px; padding:16px 18px;">
+          <div style="width:36px; height:36px; background:var(--fl-cyan); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">⚙️</div>
+          <div>
+            <div style="font-size:14.5px; font-weight:600; color:var(--ink); margin-bottom:4px;">Equipo de automatización - crean agentes <span style="font-size:12px; color:var(--ink-4); font-weight:400;">(25 personas)</span></div>
+            <div style="font-size:13px; color:var(--ink-3); line-height:1.6;">Analistas de negocio y desarrolladores low-code que construyen y mantienen agentes en Copilot Studio o Azure Foundry. Patrocinan agentes: son los responsables funcionales de que esos agentes hagan lo que tienen que hacer. Necesitan licencia aunque no toquen el Admin Center directamente.</div>
+          </div>
+          <div style="text-align:right; flex-shrink:0;">
+            <div style="font-family:var(--mono); font-size:11px; color:var(--fl-cyan); font-weight:600;">25 licencias</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:start; gap:16px; background:rgba(32,94,166,0.05); border:1.5px solid var(--blue-border); border-radius:8px; padding:16px 18px;">
+          <div style="width:36px; height:36px; background:rgba(32,94,166,0.18); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">👤</div>
+          <div>
+            <div style="font-size:14.5px; font-weight:600; color:var(--ink); margin-bottom:4px;">"Usuarios con agentes asignados" - usan agentes que actúan en su nombre <span style="font-size:12px; color:var(--ink-4); font-weight:400;">(380 personas)</span></div>
+            <div style="font-size:13px; color:var(--ink-3); line-height:1.6; margin-bottom:8px;">Aquí está el concepto clave. Estas 380 personas <strong style="color:var(--ink);">no usan activamente un agente</strong> - es el agente el que trabaja <strong style="color:var(--ink);">para ellas</strong>, muchas veces en segundo plano. Cada uno de estos empleados necesita una licencia de Agent 365 porque un agente actúa bajo su identidad o en su contexto laboral.</div>
+            <div style="background:var(--paper); border:1px solid var(--blue-border); border-radius:6px; padding:12px 14px;">
+              <div style="font-family:var(--mono); font-size:9px; letter-spacing:0.12em; color:var(--ink-4); text-transform:uppercase; margin-bottom:8px;">Ejemplos concretos en esta empresa</div>
+              <div style="display:flex; flex-direction:column; gap:5px;">
+                <div style="font-size:12.5px; color:var(--ink-3); padding-left:14px; position:relative;">
+                  <span style="position:absolute; left:2px; color:var(--fl-blue);">▸</span>
+                  Los 120 comerciales tienen un agente que prepara automáticamente el resumen de cliente antes de cada llamada, cruza datos de CRM y sugiere el siguiente paso. El comercial no "usa" el agente - recibe el informe en su bandeja de entrada.
+                </div>
+                <div style="font-size:12.5px; color:var(--ink-3); padding-left:14px; position:relative;">
+                  <span style="position:absolute; left:2px; color:var(--fl-blue);">▸</span>
+                  Los 80 gestores de logística tienen un agente que monitoriza incidencias de pedidos en tiempo real y escala solo las que superan un umbral de impacto. El gestor solo ve lo que el agente considera relevante.
+                </div>
+                <div style="font-size:12.5px; color:var(--ink-3); padding-left:14px; position:relative;">
+                  <span style="position:absolute; left:2px; color:var(--fl-blue);">▸</span>
+                  Los 180 técnicos de campo tienen un agente que triage el correo técnico, responde consultas de nivel 1 de clientes y eleva las que requieren atención humana. El técnico recibe solo lo escalado.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:right; flex-shrink:0;">
+            <div style="font-family:var(--mono); font-size:11px; color:var(--fl-blue); font-weight:600;">380 licencias</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:auto 1fr auto; align-items:start; gap:16px; background:var(--paper-dim); border:1.5px solid var(--blue-border); border-radius:8px; padding:16px 18px; opacity:0.75;">
+          <div style="width:36px; height:36px; background:var(--paper-deep); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">🏭</div>
+          <div>
+            <div style="font-size:14.5px; font-weight:600; color:var(--ink); margin-bottom:4px;">Resto de empleados - sin agentes asignados <span style="font-size:12px; color:var(--ink-4); font-weight:400;">(380 personas)</span></div>
+            <div style="font-size:13px; color:var(--ink-3); line-height:1.6;">Personal de almacén, producción y administrativos que trabajan con aplicaciones estándar sin que ningún agente de IA actúe en su nombre ni en su contexto. No necesitan licencia de Agent 365.</div>
+          </div>
+          <div style="text-align:right; flex-shrink:0;">
+            <div style="font-family:var(--mono); font-size:11px; color:var(--ink-4); font-weight:600;">0 licencias</div>
+          </div>
+        </div>
+      </div>
+
+<!-- ── Ejemplos SIN licencia ── -->
+<div style="background:rgba(173,131,1,0.06); border:1.5px solid rgba(173,131,1,0.3); border-radius:8px; padding:18px 20px; margin-bottom:10px;">
+  <div style="font-family:var(--mono); font-size:9px; letter-spacing:0.15em; color:var(--fl-yellow); text-transform:uppercase; margin-bottom:10px;">¿Qué casos NO generan licencia?</div>
+  <div style="font-size:13px; color:var(--ink-3); line-height:1.65; margin-bottom:10px;">
+    La licencia solo se requiere cuando un agente <strong style="color:var(--ink);">actúa en el contexto laboral de una persona específica</strong> - accede a sus datos, opera bajo su identidad o genera outputs personalizados para ella. Estos casos quedan fuera:
+  </div>
+  <div style="display:flex; flex-direction:column; gap:7px;">
+    <div style="font-size:12.5px; color:var(--ink-3); padding-left:16px; position:relative; line-height:1.6;">
+      <span style="position:absolute; left:2px; color:var(--fl-yellow); font-weight:600;">▸</span>
+      <strong style="color:var(--ink);">Chatbot de atención al cliente externo.</strong> Un agente en la web pública que responde preguntas de clientes sobre pedidos o productos. Los clientes externos no son empleados y no necesitan licencia. El agente tampoco opera en el contexto M365 de nadie interno.
+    </div>
+    <div style="font-size:12.5px; color:var(--ink-3); padding-left:16px; position:relative; line-height:1.6;">
+      <span style="position:absolute; left:2px; color:var(--fl-yellow); font-weight:600;">▸</span>
+      <strong style="color:var(--ink);">Bot de consulta compartido (sin datos personales).</strong> Un agente en Teams que responde preguntas sobre el catálogo de productos o la política de vacaciones, accediendo solo a bases de conocimiento compartidas. No toca el correo, calendario ni ficheros de ningún usuario en particular.
+    </div>
+    <div style="font-size:12.5px; color:var(--ink-3); padding-left:16px; position:relative; line-height:1.6;">
+      <span style="position:absolute; left:2px; color:var(--fl-yellow); font-weight:600;">▸</span>
+      <strong style="color:var(--ink);">Agente de proceso autónomo sin asignación a personas.</strong> Un agente que sincroniza datos entre ERP y CRM cada noche, o que genera informes automáticos de stock. Opera con su propia identidad de servicio y no actúa "en nombre de" ningún empleado concreto - su propietario técnico (el maker) ya tiene licencia.
+    </div>
+    <div style="font-size:12.5px; color:var(--ink-3); padding-left:16px; position:relative; line-height:1.6;">
+      <span style="position:absolute; left:2px; color:var(--fl-yellow); font-weight:600;">▸</span>
+      <strong style="color:var(--ink);">Empleados que usan el agente puntualmente como herramienta.</strong> Si un trabajador del almacén consulta un bot de turno en turno (tipo "¿cuántas unidades quedan del SKU 4421?") sin que ese agente tenga acceso a su contexto laboral ni opere de forma proactiva para él, ese empleado no consume licencia.
+    </div>
+  </div>
+  <div style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(173,131,1,0.2); font-size:12px; color:var(--ink-4); font-style:italic;">
+    Nota: la frontera entre "uso ocasional como herramienta" y "agente que actúa en tu nombre" puede ser difusa. En caso de duda, la recomendación de Microsoft es tratar la licencia como la cobertura de gobernanza, no solo como acceso a funcionalidad.
+  </div>
+</div>
+
+
+
+      <!-- Resumen numérico -->
+      <div style="background:var(--paper); border:1.5px solid var(--blue-border-d); border-radius:8px; padding:18px 22px; display:flex; gap:0; flex-wrap:wrap; overflow:hidden;">
+        <div style="flex:1; min-width:120px; padding:10px 20px; border-right:1px solid var(--blue-border); text-align:center;">
+          <div style="font-family:var(--mono); font-size:9px; letter-spacing:0.15em; color:var(--ink-4); text-transform:uppercase; margin-bottom:5px;">Total empleados</div>
+          <div style="font-family:var(--mono); font-size:26px; font-weight:600; color:var(--ink);">800</div>
+        </div>
+        <div style="flex:1; min-width:120px; padding:10px 20px; border-right:1px solid var(--blue-border); text-align:center;">
+          <div style="font-family:var(--mono); font-size:9px; letter-spacing:0.15em; color:var(--ink-4); text-transform:uppercase; margin-bottom:5px;">Licencias Agent 365</div>
+          <div style="font-family:var(--mono); font-size:26px; font-weight:600; color:var(--fl-blue);">420</div>
+        </div>
+        <div style="flex:1; min-width:120px; padding:10px 20px; border-right:1px solid var(--blue-border); text-align:center;">
+          <div style="font-family:var(--mono); font-size:9px; letter-spacing:0.15em; color:var(--ink-4); text-transform:uppercase; margin-bottom:5px;">Coste standalone / mes</div>
+          <div style="font-family:var(--mono); font-size:26px; font-weight:600; color:var(--fl-cyan);">$6.300</div>
+        </div>
+        <div style="flex:1; min-width:120px; padding:10px 20px; text-align:center;">
+          <div style="font-family:var(--mono); font-size:9px; letter-spacing:0.15em; color:var(--ink-4); text-transform:uppercase; margin-bottom:5px;">Sin licencia necesaria</div>
+          <div style="font-family:var(--mono); font-size:26px; font-weight:600; color:var(--ink-4);">380</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; font-size:12px; color:var(--ink-4); font-family:var(--mono);">* Cálculo: 420 licencias × $15/usuario/mes. Precio orientativo; la negociación enterprise puede variar.</div>
+    </div>
+
+    <hr class="div">
+
+    <div class="sh"><div class="eyebrow">Referencia</div><h2>E5 vs E7</h2></div>
+
+    <table class="dtable">
+      <thead>
+        <tr><th>Capacidad</th><th>M365 E5</th><th>M365 E7</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Microsoft 365 Apps</td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td></tr>
+        <tr><td>Seguridad Entra / Defender / Purview</td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td></tr>
+        <tr><td>Microsoft 365 Copilot</td><td><span class="nop">-</span></td><td><span class="chk">✓</span></td></tr>
+        <tr><td>Agent 365</td><td><span class="nop">-</span></td><td><span class="chk">✓</span></td></tr>
+        <tr><td>Gobernanza de agentes</td><td><span class="nop">-</span></td><td><span class="chk">✓</span></td></tr>
+        <tr><td>Control de Shadow AI</td><td><span class="par">Parcial</span></td><td><span class="chk">✓</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── FAQ ── -->
+  <div class="section" id="section-faq">
+    <div class="sh">
+      <div class="eyebrow">Preguntas frecuentes</div>
+      <h2>Lo que suele preguntar IT</h2>
+    </div>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <h4>¿Agent 365 crea o ejecuta agentes?</h4>
+        <p>No. Es el plano de control: observa, gobierna y protege agentes. Los agentes se crean en Copilot Studio, Azure Foundry, plataformas de terceros, etc. Agent 365 no interfiere en esa capa.</p>
+      </div>
+      <div class="faq-item">
+        <h4>¿Qué agentes aparecen automáticamente en el inventario?</h4>
+        <p>Todos los agentes publicados a través de canales de Microsoft 365 y registrados con un Entra Agent ID aparecen automáticamente. Los creados fuera de esos entornos requieren pasos adicionales de registro o integración.</p>
+      </div>
+      <div class="faq-item">
+        <h4>¿Necesitamos M365 E7 para usar Agent 365?</h4>
+        <p>No. Agent 365 está disponible como licencia standalone a $15/usuario/mes. E7 ofrece la experiencia más completa al incluir también Copilot y la suite de seguridad completa, pero no es un prerequisito técnico.</p>
+      </div>
+      <div class="faq-item">
+        <h4>¿Funciona con agentes no construidos con tecnología Microsoft?</h4>
+        <p>Sí. Los agentes de partners certificados (Zendesk, n8n, Kore.ai, Genspark, etc.) están completamente integrados. Para otros agentes hay mecanismos de registro manual. Registry sync con AWS y Google Cloud está en preview. La visión declarada es que Agent 365 sea agnóstico del origen del agente.</p>
+      </div>
+      <div class="faq-item">
+        <h4>¿Cómo gestiona Agent 365 los permisos de los agentes?</h4>
+        <p>A través del principio de privilegios mínimos via Entra: IT controla qué usuarios, datos, herramientas y servidores MCP puede usar cada agente. Solo tiene acceso a los recursos que necesita para su función específica.</p>
+      </div>
+      <div class="faq-item">
+        <h4>¿Hay capacidades de auditoría?</h4>
+        <p>Sí: registro detallado de acciones, informes de comportamiento e interacciones, eventos de seguridad y registros de auditoría listos para cumplimiento normativo. Integrado con Purview para retención e investigación.</p>
+      </div>
+      <div class="faq-item">
+        <h4>¿Qué es un servidor MCP en este contexto?</h4>
+        <p>MCP (Model Context Protocol) es el protocolo estándar emergente que define cómo los agentes se conectan a herramientas y fuentes de datos externas. Agent 365 tiene visibilidad de qué servidores MCP están configurados para cada agente local, lo que es clave para evaluar el radio de exposición potencial.</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+  function show(id, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    document.getElementById('section-' + id).classList.add('active');
+    if (el) el.classList.add('active');
+    document.getElementById('main-scroll').scrollTop = 0;
+  }
+
+  function togglePillar(el) {
+    const wasActive = el.classList.contains('active');
+    document.querySelectorAll('.pillar').forEach(p => p.classList.remove('active'));
+    if (!wasActive) el.classList.add('active');
+  }
+</script>
+</body>
+</html>
