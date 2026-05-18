@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El equipo de detección frontera · David Hurtado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:    #FFFCF0;
+    --paper2:   #FAF8EF;
+    --black:    #100F0F;
+    --base-50:  #F2F0E5;
+    --base-100: #E6E4D9;
+    --base-200: #CECDC3;
+    --base-300: #B7B5AC;
+    --base-400: #9F9D96;
+    --base-500: #878580;
+    --base-600: #6F6E69;
+    --base-700: #575653;
+    --red:      #AF3029;
+    --red-l:    #F4D9D5;
+    --orange:   #BC5215;
+    --orange-l: #FAE3CE;
+    --yellow:   #AD8301;
+    --yellow-l: #F5E6B6;
+    --green:    #66800B;
+    --green-l:  #DDE6B6;
+    --cyan:     #24837B;
+    --cyan-l:   #BFDDD8;
+    --blue:     #205EA6;
+    --blue-l:   #C9DBF4;
+    --magenta:  #A02F6F;
+    --magenta-l:#E5C8D7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    background: var(--paper);
+    color: var(--black);
+    line-height: 1.6;
+    font-size: 16px;
+    font-weight: 400;
+  }
+
+  /* ─────────── APP SHELL ─────────── */
+  .app {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ─────────── SIDEBAR ─────────── */
+  .sidebar {
+    position: sticky; top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--paper2);
+    border-right: 1px solid var(--base-200);
+    padding: 1.5rem 0.75rem 1.5rem 1.5rem;
+  }
+  .sb-brand {
+    padding: 0 0.75rem 1rem;
+    border-bottom: 1px solid var(--base-200);
+    margin-bottom: 1rem;
+  }
+  .sb-brand-name {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 0.95rem; font-weight: 600;
+    color: var(--black);
+    margin-bottom: 0.15rem;
+  }
+  .sb-brand-meta {
+    font-size: 0.72rem; color: var(--base-600);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.03em;
+  }
+  .sb-brand-meta strong { color: var(--magenta); }
+  .sb-progress {
+    height: 3px; background: var(--base-200);
+    border-radius: 2px; margin: 0.75rem 0 0.25rem;
+    overflow: hidden;
+  }
+  .sb-progress-fill {
+    height: 100%; background: var(--magenta);
+    width: 0%; transition: width 0.3s ease;
+  }
+  .sb-progress-label {
+    font-size: 0.68rem; font-family: 'IBM Plex Mono', monospace;
+    color: var(--base-500);
+  }
+  .sb-nav { padding: 0; }
+  .sb-nav a {
+    display: flex; align-items: baseline; gap: 0.55rem;
+    padding: 0.45rem 0.75rem;
+    color: var(--base-700); text-decoration: none;
+    font-size: 0.83rem; border-radius: 4px;
+    border-left: 2px solid transparent;
+    border-bottom: none;
+    line-height: 1.35;
+    margin-bottom: 1px;
+    transition: all 0.12s;
+  }
+  .sb-nav a:hover {
+    background: var(--base-50);
+    color: var(--black);
+    border-left-color: var(--base-400);
+  }
+  .sb-nav a.active {
+    background: var(--magenta-l);
+    color: var(--magenta);
+    border-left-color: var(--magenta);
+    font-weight: 600;
+  }
+  .sb-nav .nav-num {
+    color: var(--base-400);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    width: 1.5rem;
+  }
+  .sb-nav a.active .nav-num { color: var(--magenta); }
+
+  .sb-nav-prev-next {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-top: 1px solid var(--base-200);
+    display: flex; gap: 0.5rem;
+  }
+  .sb-btn {
+    flex: 1;
+    padding: 0.4rem 0.5rem;
+    background: var(--paper); border: 1px solid var(--base-200);
+    font-family: inherit; font-size: 0.7rem; font-weight: 500;
+    color: var(--base-700); cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+  }
+  .sb-btn:hover:not(:disabled) {
+    background: var(--magenta-l); border-color: var(--magenta);
+    color: var(--magenta);
+  }
+  .sb-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ─────────── MAIN PANEL ─────────── */
+  .content-wrap {
+    padding: 0;
+    overflow-x: hidden;
+    min-width: 0;
+  }
+  .sb-backdrop { display: none; }
+  .mobile-bar {
+    display: none;
+    position: sticky; top: 0;
+    background: rgba(255,252,240,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--base-200);
+    padding: 0.7rem 1rem;
+    align-items: center; justify-content: space-between;
+    z-index: 50;
+  }
+  .mobile-bar .mb-title {
+    font-size: 0.85rem; font-weight: 600; color: var(--black);
+  }
+  .mobile-bar .mb-toggle {
+    background: var(--base-50); border: 1px solid var(--base-200);
+    padding: 0.35rem 0.7rem;
+    font-family: inherit; font-size: 0.75rem;
+    border-radius: 4px; cursor: pointer;
+  }
+
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  /* ─────────── HERO ─────────── */
+  .hero {
+    padding: 2rem 0 2.5rem;
+    border-bottom: 1px solid var(--base-200);
+    margin-bottom: 2.5rem;
+  }
+  .hero-meta {
+    display: flex; gap: 0.75rem; align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem; color: var(--base-600);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+  }
+  .hero-meta .dot { width: 4px; height: 4px; background: var(--magenta); border-radius: 50%; }
+  .hero h1 {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    line-height: 1.15; font-weight: 600;
+    color: var(--black);
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  .hero-desc {
+    font-size: 1.05rem; color: var(--base-700);
+    max-width: 680px;
+  }
+  .hero-author {
+    margin-top: 1.5rem;
+    font-size: 0.85rem; color: var(--base-600);
+  }
+  .hero-author strong { color: var(--black); }
+
+  /* ─────────── SECTIONS ─────────── */
+  section { display: none; }
+  section.active {
+    display: block;
+    animation: fadeIn 0.25s ease forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .section-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--base-200);
+    display: flex; justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .sf-btn {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    background: var(--paper2); border: 1px solid var(--base-200);
+    font-family: inherit; font-size: 0.85rem; font-weight: 500;
+    color: var(--base-700); cursor: pointer;
+    border-radius: 6px;
+    text-align: left;
+    transition: all 0.12s;
+    display: flex; flex-direction: column;
+    text-decoration: none;
+  }
+  .sf-btn .sf-dir {
+    font-size: 0.7rem; color: var(--base-500);
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-bottom: 0.15rem;
+  }
+  .sf-btn .sf-title { color: var(--black); font-weight: 600; }
+  .sf-btn.next { text-align: right; }
+  .sf-btn:hover:not(:disabled) {
+    background: var(--magenta-l); border-color: var(--magenta);
+  }
+  .sf-btn:hover .sf-dir,
+  .sf-btn:hover .sf-title { color: var(--magenta); }
+  .sf-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  h2 {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 1.7rem; font-weight: 600;
+    color: var(--black);
+    margin-bottom: 1.25rem;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+  }
+  h2 .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem; font-weight: 500;
+    color: var(--magenta);
+    display: block; margin-bottom: 0.25rem;
+    letter-spacing: 0.05em;
+  }
+  h3 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 1.15rem; font-weight: 600;
+    color: var(--black);
+    margin: 1.5rem 0 0.75rem;
+  }
+  h4 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 600;
+    color: var(--base-700);
+    margin: 1rem 0 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  p { margin-bottom: 1rem; color: var(--base-700); }
+  p strong { color: var(--black); font-weight: 600; }
+  em { color: var(--base-700); }
+  a { color: var(--magenta); text-decoration: none; border-bottom: 1px solid var(--magenta-l); }
+  a:hover { border-bottom-color: var(--magenta); }
+
+  ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; color: var(--base-700); }
+  li { margin-bottom: 0.4rem; }
+  li strong { color: var(--black); }
+
+  /* ─────────── CALLOUTS ─────────── */
+  .callout {
+    margin: 1.5rem 0;
+    padding: 1.25rem 1.5rem;
+    border-radius: 6px;
+    border-left: 4px solid;
+    background: var(--paper2);
+  }
+  .callout.abstract { background: var(--magenta-l); border-color: var(--magenta); }
+  .callout.info { background: var(--blue-l); border-color: var(--blue); }
+  .callout.question { background: var(--cyan-l); border-color: var(--cyan); }
+  .callout.quote { background: var(--base-50); border-color: var(--base-400); font-style: italic; }
+  .callout.example { background: var(--paper2); border-color: var(--base-300); }
+  .callout.warning { background: var(--yellow-l); border-color: var(--yellow); }
+  .callout .callout-title {
+    font-size: 0.78rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 0.6rem;
+    color: var(--base-700);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .callout.abstract .callout-title { color: var(--magenta); }
+  .callout.info .callout-title { color: var(--blue); }
+  .callout.question .callout-title { color: var(--cyan); }
+  .callout.warning .callout-title { color: var(--orange); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.collapsible { cursor: pointer; }
+  .callout.collapsible .callout-title::after {
+    content: "+"; margin-left: auto;
+    font-size: 1.2rem; font-weight: 400;
+    transition: transform 0.2s;
+  }
+  .callout.collapsible.open .callout-title::after { content: "−"; }
+  .callout.collapsible .callout-body { display: none; }
+  .callout.collapsible.open .callout-body { display: block; margin-top: 0.6rem; }
+
+  /* ─────────── TABLES ─────────── */
+  .table-wrap {
+    margin: 1.5rem 0;
+    border: 1px solid var(--base-200);
+    border-radius: 6px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid var(--base-100);
+    vertical-align: top;
+  }
+  th {
+    background: var(--base-50);
+    font-weight: 600;
+    color: var(--black);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--base-200);
+  }
+  td { color: var(--base-700); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--paper2); }
+  td strong { color: var(--black); }
+
+  /* ─────────── ORG CHART ─────────── */
+  .org-chart {
+    background: var(--paper2);
+    border: 1px solid var(--base-200);
+    border-radius: 8px;
+    padding: 1.5rem 1rem;
+    margin: 1.5rem 0;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.75rem;
+  }
+  .org-node {
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    border: 1.5px solid var(--base-500);
+    background: var(--paper);
+    text-align: center;
+    min-width: 160px;
+  }
+  .org-node.board { background: var(--paper); border-color: var(--base-500); }
+  .org-node.ceo { background: var(--base-50); }
+  .org-node.lead { background: var(--magenta-l); border: 2px solid var(--magenta); font-weight: 600; }
+  .org-line { width: 2px; height: 18px; background: var(--base-300); }
+  .org-line.dashed { background: repeating-linear-gradient(to bottom, var(--base-300) 0 4px, transparent 4px 8px); }
+  .org-row {
+    display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;
+  }
+  .org-row .org-node { min-width: 150px; font-size: 0.82rem; padding: 0.5rem 0.9rem; }
+  .org-conn-row { display: flex; gap: 60px; }
+  .org-conn-row .org-line { height: 18px; }
+  .org-label-side {
+    font-size: 0.7rem; color: var(--base-600);
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  /* ─────────── PROFILE TABS ─────────── */
+  .profile-tabs {
+    display: flex; gap: 0.25rem;
+    border-bottom: 2px solid var(--base-200);
+    margin: 1.5rem 0 0;
+    flex-wrap: wrap;
+  }
+  .profile-tab {
+    padding: 0.6rem 1rem;
+    background: transparent; border: none;
+    font-family: inherit; font-size: 0.85rem; font-weight: 500;
+    color: var(--base-600); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+  }
+  .profile-tab:hover { color: var(--black); }
+  .profile-tab.active { color: var(--magenta); border-bottom-color: var(--magenta); }
+  .profile-content {
+    display: none;
+    background: var(--paper2);
+    border: 1px solid var(--base-200);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    padding: 1.5rem;
+  }
+  .profile-content.active { display: block; }
+  .profile-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 0.75rem; gap: 1rem; flex-wrap: wrap;
+  }
+  .profile-head h3 { margin: 0; color: var(--magenta); }
+  .profile-seniority {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem; color: var(--base-600);
+    background: var(--base-50); padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid var(--base-200);
+  }
+  .profile-mission {
+    font-style: italic;
+    color: var(--base-700);
+    padding: 0.75rem 1rem;
+    background: var(--base-50);
+    border-left: 3px solid var(--magenta);
+    margin: 1rem 0;
+    font-size: 0.95rem;
+  }
+  .profile-note {
+    background: var(--blue-l);
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    border-left: 3px solid var(--blue);
+    margin: 1rem 0;
+    font-size: 0.9rem;
+  }
+  .profile-note strong { color: var(--blue); }
+
+  /* ─────────── REPORT NAVIGATOR ─────────── */
+  .report-doc {
+    margin: 2rem 0;
+    background: var(--paper2);
+    border: 1px solid var(--base-200);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .report-header {
+    background: var(--black);
+    color: var(--paper);
+    padding: 1rem 1.25rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+  }
+  .report-pages {
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    gap: 4px;
+    padding: 1rem;
+    background: var(--base-50);
+  }
+  .report-page {
+    aspect-ratio: 0.7;
+    background: var(--paper);
+    border: 1px solid var(--base-300);
+    border-radius: 3px;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding: 0.25rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--base-500);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .report-page::before {
+    content: ""; position: absolute;
+    top: 6px; left: 6px; right: 6px;
+    height: 1px; background: var(--base-200);
+    box-shadow: 0 4px 0 var(--base-100), 0 8px 0 var(--base-100), 0 12px 0 var(--base-100);
+  }
+  .report-page:hover { transform: translateY(-2px); border-color: var(--magenta); }
+  .report-page.active { background: var(--magenta-l); border-color: var(--magenta); color: var(--magenta); font-weight: 600; }
+  .report-page.s1 { border-top: 3px solid var(--magenta); }
+  .report-page.s2 { border-top: 3px solid var(--blue); }
+  .report-page.s3 { border-top: 3px solid var(--orange); }
+  .report-page.s4 { border-top: 3px solid var(--cyan); }
+  .report-page.s5 { border-top: 3px solid var(--green); }
+  .report-page.s6 { border-top: 3px solid var(--yellow); }
+  .report-page.s7 { border-top: 3px solid var(--red); }
+  .report-section-detail {
+    padding: 1.5rem;
+    border-top: 1px solid var(--base-200);
+    background: var(--paper);
+  }
+  .report-section-detail h4 {
+    color: var(--black);
+    font-size: 1rem;
+    text-transform: none;
+    letter-spacing: 0;
+    margin: 0 0 0.4rem;
+  }
+  .report-section-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--base-600);
+    margin-bottom: 0.75rem;
+    display: flex; gap: 1rem; flex-wrap: wrap;
+  }
+  .report-section-meta span { background: var(--base-50); padding: 0.15rem 0.5rem; border-radius: 3px; }
+  .report-section-body {
+    color: var(--base-700);
+    font-size: 0.92rem;
+  }
+
+  /* ─────────── COST BARS ─────────── */
+  .cost-chart {
+    margin: 1.5rem 0;
+    background: var(--paper2);
+    border: 1px solid var(--base-200);
+    border-radius: 6px;
+    padding: 1.25rem;
+  }
+  .cost-row {
+    margin-bottom: 1rem;
+  }
+  .cost-row:last-child { margin-bottom: 0; }
+  .cost-label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 0.4rem;
+    font-size: 0.88rem;
+  }
+  .cost-label strong { color: var(--black); }
+  .cost-value { font-family: 'IBM Plex Mono', monospace; color: var(--base-600); font-size: 0.78rem; }
+  .cost-bar {
+    height: 24px;
+    background: var(--base-100);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .cost-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s ease;
+  }
+  .cost-row.frontera .cost-fill { background: linear-gradient(90deg, var(--magenta-l), var(--magenta)); }
+  .cost-row.consulting .cost-fill { background: linear-gradient(90deg, var(--orange-l), var(--orange)); }
+  .cost-row.lab .cost-fill { background: linear-gradient(90deg, var(--yellow-l), var(--yellow)); }
+  .cost-delivers {
+    font-size: 0.78rem; color: var(--base-600);
+    margin-top: 0.35rem;
+    font-style: italic;
+  }
+
+  /* ─────────── DIAGNOSTIC ─────────── */
+  .diagnostic {
+    background: var(--paper2);
+    border: 1px solid var(--base-200);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .diag-q {
+    padding: 0.8rem 1rem;
+    background: var(--paper);
+    border: 1px solid var(--base-200);
+    border-radius: 6px;
+    margin-bottom: 0.6rem;
+    cursor: pointer;
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    font-size: 0.92rem;
+    transition: all 0.15s;
+  }
+  .diag-q:hover { border-color: var(--cyan); }
+  .diag-q .check {
+    width: 20px; height: 20px;
+    border: 2px solid var(--base-300);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--paper);
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.15s;
+  }
+  .diag-q.checked .check {
+    background: var(--cyan); border-color: var(--cyan);
+  }
+  .diag-q.checked .check::after { content: "✓"; }
+  .diag-q.checked { background: var(--cyan-l); border-color: var(--cyan); }
+  .diag-score {
+    margin-top: 1rem; padding: 0.9rem 1rem;
+    background: var(--black); color: var(--paper);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .diag-score strong { color: var(--magenta-l); }
+
+  /* ─────────── PRECEDENT CARDS ─────────── */
+  .precedent-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+  }
+  .precedent-card {
+    border: 1px solid var(--base-200);
+    border-radius: 6px;
+    padding: 1.25rem;
+    background: var(--paper2);
+    border-left: 4px solid var(--base-400);
+  }
+  .precedent-card.success { border-left-color: var(--green); }
+  .precedent-card.warn { border-left-color: var(--red); }
+  .precedent-card h4 {
+    color: var(--black);
+    font-size: 1rem;
+    text-transform: none;
+    letter-spacing: 0;
+    margin: 0 0 0.6rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .precedent-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    background: var(--green-l); color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .precedent-card.warn .precedent-tag {
+    background: var(--red-l); color: var(--red);
+  }
+  .precedent-card p { margin-bottom: 0.5rem; font-size: 0.9rem; }
+  .precedent-card .pre-label {
+    font-size: 0.72rem; font-weight: 600;
+    color: var(--base-600);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-top: 0.6rem;
+  }
+
+  /* ─────────── FAILURE CARDS ─────────── */
+  .failure-grid {
+    display: grid; grid-template-columns: 1fr; gap: 0.6rem;
+    margin: 1.5rem 0;
+  }
+  .failure-card {
+    background: var(--paper2);
+    border: 1px solid var(--base-200);
+    border-left: 4px solid var(--orange);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+  }
+  .failure-card h4 {
+    color: var(--black); font-size: 0.95rem;
+    text-transform: none; letter-spacing: 0;
+    margin: 0;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .failure-card .fnum {
+    background: var(--orange); color: var(--paper);
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .failure-body { display: none; margin-top: 0.75rem; font-size: 0.9rem; color: var(--base-700); }
+  .failure-card.open .failure-body { display: block; }
+  .failure-card .sol {
+    margin-top: 0.6rem;
+    padding: 0.6rem 0.8rem;
+    background: var(--green-l); color: var(--base-700);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    border-left: 3px solid var(--green);
+  }
+  .failure-card .sol strong { color: var(--green); }
+
+  /* ─────────── TIMELINE ─────────── */
+  .timeline {
+    margin: 1.5rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .timeline::before {
+    content: ""; position: absolute;
+    left: 8px; top: 0; bottom: 0;
+    width: 2px; background: var(--base-200);
+  }
+  .timeline-row {
+    position: relative;
+    padding: 0.6rem 0 0.6rem 1rem;
+  }
+  .timeline-row::before {
+    content: ""; position: absolute;
+    left: -16px; top: 1rem;
+    width: 12px; height: 12px;
+    background: var(--magenta);
+    border-radius: 50%;
+    border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--magenta);
+  }
+  .timeline-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem; color: var(--magenta);
+    font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .timeline-content {
+    font-size: 0.92rem; color: var(--base-700);
+    margin-top: 0.2rem;
+  }
+
+  /* ─────────── 3-LEVERS ─────────── */
+  .levers {
+    margin: 1.5rem 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--paper2);
+    border: 1px solid var(--base-200);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+  .lever {
+    background: var(--paper);
+    border: 1px solid var(--base-200);
+    border-radius: 6px;
+    padding: 0.85rem;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+  .lever.sensor { background: var(--magenta-l); border-color: var(--magenta); }
+  .lever strong { display: block; color: var(--black); font-size: 0.9rem; margin-bottom: 0.25rem; }
+  .lever em { color: var(--base-600); font-style: normal; font-size: 0.75rem; font-family: 'IBM Plex Mono', monospace; }
+  .lever-arrow {
+    font-size: 1.2rem; color: var(--base-400);
+    text-align: center;
+  }
+
+  /* ─────────── TIER COMPARISON ─────────── */
+  .tier-grid {
+    display: grid; grid-template-columns: 1fr; gap: 0.75rem;
+    margin: 1.5rem 0;
+  }
+  .tier-card {
+    border: 1px solid var(--base-200);
+    border-radius: 6px;
+    padding: 1.25rem;
+    background: var(--paper2);
+  }
+  .tier-card.ibex { border-top: 4px solid var(--magenta); }
+  .tier-card.midlarge { border-top: 4px solid var(--blue); }
+  .tier-card.midmed { border-top: 4px solid var(--cyan); }
+  .tier-card h4 {
+    color: var(--black); font-size: 1rem;
+    text-transform: none; letter-spacing: 0;
+    margin: 0 0 0.5rem;
+  }
+  .tier-meta {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+  }
+  .tier-meta span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    background: var(--base-50);
+    color: var(--base-700);
+    padding: 0.2rem 0.55rem;
+    border-radius: 3px;
+    border: 1px solid var(--base-200);
+  }
+  .tier-card.ibex .tier-meta span.cost { background: var(--magenta-l); color: var(--magenta); border-color: var(--magenta); }
+  .tier-card.midlarge .tier-meta span.cost { background: var(--blue-l); color: var(--blue); border-color: var(--blue); }
+  .tier-card.midmed .tier-meta span.cost { background: var(--cyan-l); color: var(--cyan); border-color: var(--cyan); }
+  .tier-card p { font-size: 0.88rem; margin-bottom: 0; }
+
+  /* ─────────── KPI TABLE STYLE ─────────── */
+  .kpi-table th { background: var(--magenta-l); color: var(--magenta); }
+  .kpi-table td:nth-child(2) {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--black); font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* ─────────── DELIVERABLES LIST ─────────── */
+  .deliverables {
+    background: var(--base-50);
+    border-radius: 6px;
+    padding: 0.9rem 1.25rem;
+    margin-top: 1rem;
+  }
+  .deliverables ul { margin-bottom: 0; padding-left: 1.25rem; }
+  .deliverables li { font-size: 0.88rem; margin-bottom: 0.3rem; }
+  .deliverables-title {
+    font-size: 0.72rem; font-weight: 600;
+    color: var(--base-700);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+  }
+
+  /* ─────────── CADENCE TABLE ─────────── */
+  .cadence-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.6rem;
+    margin: 1.5rem 0;
+  }
+  .cadence-card {
+    background: var(--paper2);
+    border: 1px solid var(--base-200);
+    border-radius: 6px;
+    padding: 1rem;
+  }
+  .cadence-card h4 {
+    color: var(--magenta);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin: 0 0 0.25rem;
+    letter-spacing: 0.05em;
+  }
+  .cadence-card .cf {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--black); font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .cadence-card p { font-size: 0.82rem; margin-bottom: 0; }
+
+  /* ─────────── HBR ORIGIN ─────────── */
+  .hbr-origin {
+    background: var(--paper2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border: 1px solid var(--base-200);
+  }
+  .hbr-tag {
+    display: inline-block;
+    background: var(--red); color: var(--paper);
+    padding: 0.2rem 0.6rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem; font-weight: 600;
+    border-radius: 3px;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─────────── ONBOARDING TIMELINE ─────────── */
+  .onboard-timeline {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+    position: relative;
+  }
+  .onboard-step {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    background: var(--paper2);
+    border: 1px solid var(--base-200);
+    border-radius: 6px;
+    border-top: 3px solid var(--magenta);
+    font-size: 0.82rem;
+  }
+  .onboard-step .om {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--magenta);
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+
+  /* ─────────── FOOTER LINKS ─────────── */
+  .footer {
+    border-top: 1px solid var(--base-200);
+    padding-top: 1.5rem; margin-top: 3rem;
+    font-size: 0.85rem; color: var(--base-600);
+  }
+  .footer-links {
+    display: flex; gap: 0.75rem; margin-top: 0.5rem;
+  }
+  .footer-links a {
+    padding: 0.3rem 0.7rem;
+    background: var(--base-50);
+    border: 1px solid var(--base-200);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--base-700);
+    font-size: 0.8rem;
+  }
+  .footer-links a:hover { background: var(--magenta-l); color: var(--magenta); border-color: var(--magenta); }
+
+  /* ─────────── MOBILE ─────────── */
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 300px;
+      z-index: 200;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      box-shadow: 4px 0 24px rgba(16,15,15,0.12);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .mobile-bar { display: flex; }
+    main { padding: 1.5rem 1rem 3rem; }
+    .sb-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(16,15,15,0.4);
+      z-index: 150;
+    }
+    .sb-backdrop.show { display: block; }
+  }
+  @media (max-width: 720px) {
+    .hero h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.4rem; }
+    h3 { font-size: 1.05rem; }
+    table { font-size: 0.8rem; }
+    th, td { padding: 0.5rem 0.6rem; }
+    .report-pages { grid-template-columns: repeat(7, 1fr); }
+    .levers { grid-template-columns: 1fr; }
+    .lever-arrow { transform: rotate(90deg); margin: 0.25rem 0; }
+    .onboard-timeline { grid-template-columns: repeat(2, 1fr); }
+    .profile-head { flex-direction: column; align-items: flex-start; }
+    .section-footer { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-brand-name">El equipo de detección frontera</div>
+    <div class="sb-brand-meta"><strong>David Hurtado</strong> · NL #79</div>
+    <div class="sb-progress"><div class="sb-progress-fill" id="progFill"></div></div>
+    <div class="sb-progress-label" id="progLabel">Sección 1 / 19</div>
+  </div>
+  <nav class="sb-nav" id="sbNav">
+    <a href="#abstract" data-section="abstract"><span class="nav-num">00</span><span>Resumen y contexto</span></a>
+    <a href="#que-es" data-section="que-es"><span class="nav-num">01</span><span>Qué es un equipo de detección frontera</span></a>
+    <a href="#origen" data-section="origen"><span class="nav-num">02</span><span>Origen de la idea (HBR)</span></a>
+    <a href="#precedentes" data-section="precedentes"><span class="nav-num">03</span><span>Precedentes históricos</span></a>
+    <a href="#diagnostico" data-section="diagnostico"><span class="nav-num">04</span><span>¿Necesita su empresa este equipo?</span></a>
+    <a href="#cuatro" data-section="cuatro"><span class="nav-num">05</span><span>Por qué cuatro personas y no más</span></a>
+    <a href="#organos" data-section="organos"><span class="nav-num">06</span><span>Lo que ya existe vs. lo que se propone</span></a>
+    <a href="#estructura" data-section="estructura"><span class="nav-num">07</span><span>Estructura del equipo</span></a>
+    <a href="#perfiles" data-section="perfiles"><span class="nav-num">08</span><span>Los cuatro perfiles en detalle</span></a>
+    <a href="#informe" data-section="informe"><span class="nav-num">09</span><span>El informe trimestral, página por página</span></a>
+    <a href="#ritmo" data-section="ritmo"><span class="nav-num">10</span><span>El ritmo del equipo</span></a>
+    <a href="#coste" data-section="coste"><span class="nav-num">11</span><span>Cuánto cuesta y con qué se compara</span></a>
+    <a href="#prescripciones" data-section="prescripciones"><span class="nav-num">12</span><span>Las otras dos prescripciones</span></a>
+    <a href="#muere" data-section="muere"><span class="nav-num">13</span><span>Cómo muere este equipo</span></a>
+    <a href="#cnmv" data-section="cnmv"><span class="nav-num">14</span><span>Marco legal y de buen gobierno</span></a>
+    <a href="#arrancar" data-section="arrancar"><span class="nav-num">15</span><span>Cómo arrancar en seis meses</span></a>
+    <a href="#asesoria" data-section="asesoria"><span class="nav-num">16</span><span>¿Y no debería asesorar también...?</span></a>
+    <a href="#middle" data-section="middle"><span class="nav-num">17</span><span>Adaptación a middle-market</span></a>
+    <a href="#cierre" data-section="cierre"><span class="nav-num">18</span><span>Cierre</span></a>
+  </nav>
+</aside>
+
+<div class="sb-backdrop" id="sbBackdrop"></div>
+
+<div class="content-wrap">
+  <div class="mobile-bar">
+    <div class="mb-title" id="mbTitle">Resumen</div>
+    <button class="mb-toggle" id="sbToggle">☰ Secciones</button>
+  </div>
+
+<main>
+
+  <!-- ═══════════════ ABSTRACT (con hero) ═══════════════ -->
+  <section id="abstract" class="active">
+    <header class="hero">
+      <div class="hero-meta">
+        <span>Newsletter #79</span>
+        <span class="dot"></span>
+        <span>16 mayo 2026</span>
+        <span class="dot"></span>
+        <span>Reflexiones</span>
+      </div>
+      <h1>El equipo de detección frontera</h1>
+      <p class="hero-desc">
+        Cuatro personas, dependencia directa del CEO, línea al consejo cada noventa días. Diseño detallado del equipo de detección frontera y del informe trimestral con el que se gana o pierde el derecho a seguir existiendo.
+      </p>
+      <div class="hero-author">Por <strong>David Hurtado</strong></div>
+    </header>
+    <div class="callout abstract">
+      <div class="callout-title">📘 Qué es un equipo de frontera</div>
+      <p>Un equipo de cuatro personas, sin función operativa directa, cuyo trabajo es decir al consejo cada noventa días qué está cambiando en la frontera de IA -capacidades, comoditizaciones, amenazas emergentes, regulación nueva esperada- y qué implica para esta compañía.</p>
+    </div>
+
+    <p>Lo que sigue es el diseño detallado de ese equipo y del informe trimestral con el que se gana el derecho a seguir existiendo. El diseño base está pensado para una empresa cotizada del IBEX35 o Fortune500; la sección final del artículo lo adapta a empresas middle-market.</p>
+
+    <div class="callout info collapsible" data-collapsible>
+      <div class="callout-title">ℹ️ Sobre las cifras de este post</div>
+      <div class="callout-body">
+        <p>Conviven tres tipos de números:</p>
+        <ul>
+          <li><strong>Referencias verificables</strong> (velocidad de releases de frontera, salarios, calendario CNMV): citadas con enlace.</li>
+          <li><strong>Decisiones de diseño</strong> (4 personas, 90 días, 14 páginas, mandato de 3 años): justificadas en el propio texto.</li>
+          <li><strong>Estimaciones de partida</strong>: los rangos de KPIs (<em>≥ 60%</em>, <em>≤ 45 días</em>, <em>12-20 hipótesis vivas</em>...) y los rangos de coste comparado más adelante son <strong>valores orientativos</strong>, no <em>benchmarks</em> industriales. No hay todavía suficiente historia de equipos de frontera funcionando como para calcular empíricamente. Cada compañía debería calibrarlos con sus propios datos tras dos o tres trimestres de operación. En esta fase el objetivo es fijar qué se mide; el número exacto vendrá después.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 01 ═══════════════ -->
+  <section id="que-es">
+    <h2><span class="num">01</span>Qué es un equipo de detección frontera</h2>
+
+    <p>Es la respuesta organizativa a un problema: <strong>la frontera de la inteligencia artificial avanza más rápido de lo que cualquier estructura corporativa convencional puede procesar</strong>. El problema no es falta de personas inteligentes; es que ninguno de los roles existentes tiene el objetivo de estudiar qué va a poder hacer la IA en 18 meses que hoy todavía no hace, ni su impacto en el negocio. El CIO, el CTO, la función de innovación, el área de estrategia: todos tienen dueños, procesos y ciclos definidos. Pero traducir lo que está ocurriendo en la frontera a decisiones del consejo no está en ninguna de sus responsabilidades.</p>
+
+    <p>La misma lógica vale para CISO y responsable de cumplimiento. La frontera de IA tiene dos caras -oportunidad y amenaza, capacidad y obligación regulatoria- y el equipo cubre las dos con los mismos cuatro perfiles.</p>
+
+    <p>El equipo de frontera ocupa ese espacio en blanco. No ejecuta, no pilota, no compite con nadie. Su único producto es un informe trimestral dirigido al consejo, con tres tipos de recomendación: tramos para ganar ventaja competitiva, tramos a parar, e hipótesis del plan estratégico que merecen reabrirse. Cada una con coste, plazo y consecuencia de no actuar.</p>
+
+    <p>El trabajo tiene dos ejes que conviene nombrar por separado, aunque salen del mismo informe. El <strong>eje defensivo</strong> protege el plan estratégico de hipótesis que la frontera está dejando obsoletas: comoditizaciones que vacían líneas que el plan todavía da por rentables, amenazas adversariales nuevas, regulación que cambia el coste de seguir como hasta ahora. El <strong>eje ofensivo</strong> identifica ventaja competitiva por el hecho de decidir antes y con más claridad que los competidores: invertir, parar y reabrir hipótesis con mejor información y mayor antelación que el rival. La ventaja no nace de hacer cosas que los demás no puedan hacer, nace de decidir mejor sobre las mismas cosas. Esa ventaja se gana sin ejecutar nada distinto: se gana en la decisión, no en la operación.</p>
+  </section>
+
+  <!-- ═══════════════ 02 ═══════════════ -->
+  <section id="origen">
+    <h2><span class="num">02</span>Origen de la idea</h2>
+    <div class="hbr-origin">
+      <span class="hbr-tag">Harvard Business Review · Abril 2026</span>
+      <p>La idea viene del ensayo de <em>Harvard Business Review</em> sobre la opacidad económica que la IA está introduciendo en las decisiones de largo plazo. Allí se plantea como una de las tres prescripciones para líderes que quieren operar con la niebla puesta sin paralizarse: <strong>poner en marcha un sistema de detección frontera reportando al consejo</strong>.</p>
+      <p>La idea me pareció muy interesante, así que la expando en este artículo con más detalle y concreción, para llegar a una estructura definida -cuatro perfiles, KPIs por rol y formato del informe- que un consejo del IBEX35 podría aprobar en su próxima sesión.</p>
+      <p>El artículo original: <a href="https://hbr.org/2026/04/the-future-is-shrouded-in-an-ai-fog" target="_blank" rel="noopener">The Future Is Shrouded in an AI Fog ↗</a></p>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 03 ═══════════════ -->
+  <section id="precedentes">
+    <h2><span class="num">03</span>Precedentes</h2>
+    <p>Esta no es la primera vez que una compañía decide separar a un grupo pequeño y senior para mirar lo que viene. Hay un siglo de experiencia previa: tres ejemplos que sirven de plantilla y uno que sirve de aviso.</p>
+
+    <div class="precedent-grid">
+      <div class="precedent-card success">
+        <h4>Skunk Works (Lockheed, 1943) <span class="precedent-tag">Plantilla</span></h4>
+        <p>Las <a href="https://publications.sto.nato.int/publications/AGARD/AGARD-CP-602/04CHAP01.pdf" target="_blank" rel="noopener">14 reglas de Kelly Johnson</a>: equipo pequeño, senior, aislado, autoridad delegada. Entregaron el XP-80 en 143 días.</p>
+        <div class="pre-label">Qué reutilizar</div>
+        <p>Tamaño Dunbar bajo, autoridad real, exención de la burocracia matriz.</p>
+      </div>
+
+      <div class="precedent-card success">
+        <h4>Bell Labs <span class="precedent-tag">Plantilla</span></h4>
+        <p>Inventaron el transistor, Unix y la teoría de la información. Y los transfirieron. Tenían una capa formal de <em>systems engineering</em> que cogía la investigación y la llevaba a producto.</p>
+        <div class="pre-label">Qué reutilizar</div>
+        <p>El equipo no ejecuta, pero <strong>debe forzar la transferencia</strong> al CIO/CTO con un protocolo nombrado.</p>
+      </div>
+
+      <div class="precedent-card warn">
+        <h4><a href="https://en.wikipedia.org/wiki/PARC_(company)" target="_blank" rel="noopener">Xerox PARC</a> - la trampa <span class="precedent-tag">Aviso</span></h4>
+        <p>Refinaron e integraron el ratón, inventaron la GUI moderna y Ethernet a 3.000 millas de Rochester, sin canal de transferencia a producto. Apple se lo quedó casi todo (interesante historia con Steve Jobs en el centro).</p>
+        <div class="pre-label">Qué reutilizar</div>
+        <p>La distancia geográfica o jerárquica con el resto de la compañía es un riesgo, no una virtud.</p>
+      </div>
+    </div>
+
+    <p>El equipo de frontera hereda el ADN de los tres: tamaño y aislamiento de Skunk Works, exigencia de transferencia de Bell Labs, conciencia anti-PARC del riesgo de inventar al margen. La línea directa al consejo y el café mensual con el CEO funcionan como esa línea de transferencia continua que protege el trabajo del aislamiento.</p>
+  </section>
+
+  <!-- ═══════════════ 04 ═══════════════ -->
+  <section id="diagnostico">
+    <h2><span class="num">04</span>¿Necesita su empresa este equipo?</h2>
+    <p>Antes del diseño, una pregunta más práctica: ¿es este el problema correcto para su compañía hoy? Algunas preguntas para pensarlo.</p>
+
+    <div class="diagnostic">
+      <div class="callout-title" style="color: var(--cyan); margin-bottom: 0.75rem;">❓ Diagnóstico - marca las que respondas "sí"</div>
+      <div class="diag-q" data-diag>
+        <div class="check"></div>
+        <div>¿El último plan estratégico tiene más de tres años y depende de hipótesis sobre IA que no se revisan periódicamente?</div>
+      </div>
+      <div class="diag-q" data-diag>
+        <div class="check"></div>
+        <div>¿Su CIO o CTO ha llevado al consejo en los últimos noventa días una recomendación de IA que <strong>no fuera</strong> de eficiencia o productividad básica?</div>
+      </div>
+      <div class="diag-q" data-diag>
+        <div class="check"></div>
+        <div>¿Sabe el consejo qué modelo de frontera puede automatizar qué línea de negocio que aporta más del 20% del EBIT?</div>
+      </div>
+      <div class="diag-q" data-diag>
+        <div class="check"></div>
+        <div>¿Hay algún competidor directo que haya cambiado de discurso sobre IA en los últimos seis meses?</div>
+      </div>
+      <div class="diag-q" data-diag>
+        <div class="check"></div>
+        <div>¿El presupuesto de IA está dentro del CAPEX/OPEX tecnológico, o tiene partida propia revisada por el consejo?</div>
+      </div>
+      <div class="diag-q" data-diag>
+        <div class="check"></div>
+        <div>¿Algún consejero ha leído un <em>paper</em> de frontera -no un resumen- en el último año?</div>
+      </div>
+      <div class="diag-score" id="diagScore">Has marcado <strong>0 / 6</strong>. Cuantas más respondas con franqueza, más probable es que la conversación esté madura.</div>
+    </div>
+
+    <p>Una referencia interesante para situarse: el <a href="https://www.gartner.com/en/chief-information-officer/research/ai-maturity-model-toolkit" target="_blank" rel="noopener">Gartner AI Maturity Model</a> (Exploración → Oportunista → Sistemático → Transformador). El equipo aporta poco en el primer estadio, donde no hay con qué alimentarlo, y sobra en el último, donde la frontera ya está integrada en cada decisión. Su sitio natural está en la transición entre Oportunista y Sistemático, cuando el coste de no decidir empieza a pesar más que el coste de equivocarse.</p>
+  </section>
+
+  <!-- ═══════════════ 05 ═══════════════ -->
+  <section id="cuatro">
+    <h2><span class="num">05</span>Por qué cuatro personas y no más</h2>
+    <p>La tentación natural es montar un comité grande de IA con representación de cada función. No funciona: en los comités grandes nadie es responsable de nada y la información llega masticada. El ritmo al que avanza la frontera de IA hace inviable cualquier gobierno por consenso.</p>
+
+    <div class="callout quote">
+      <div class="callout-title" style="color: var(--base-700);">💬 Principios de diseño del equipo</div>
+      <ul style="margin-bottom: 0;">
+        <li>Pequeño para que sea ágil.</li>
+        <li>Senior para que el consejo escuche.</li>
+        <li>Mixto para que no caiga en endogamia técnica ni de negocio.</li>
+        <li>Independiente para que pueda decir cosas incómodas.</li>
+        <li>Sin miedo a ser despedidos (al final os explico por qué)</li>
+      </ul>
+    </div>
+
+    <h3>Cuatro restricciones</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Restricción</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Tamaño</strong></td><td>4 personas máximo.</td></tr>
+          <tr><td><strong>Dependencia</strong></td><td>CEO directo, línea al consejo cada 90 días.</td></tr>
+          <tr><td><strong>Dedicación</strong></td><td>100% sin doble función operativa.</td></tr>
+          <tr><td><strong>Duración</strong></td><td>3 años renovable. Suficiente para ver el efecto del equipo en dos ciclos de plan, corto para evitar acomodo.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 06 ═══════════════ -->
+  <section id="organos">
+    <h2><span class="num">06</span>Lo que ya existe vs. lo que se propone</h2>
+    <p>Una objeción de cualquier consejero es: ¿no tenemos ya órganos para esto? Sí, pero hacen otra cosa. Os dejo cuatro referencias contemporáneas del IBEX y del Fortune 500 que sirven para situar la propuesta:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Órgano</th>
+            <th>Tamaño</th>
+            <th>Reporta a</th>
+            <th>Pregunta a la que responde</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/msc/documents/presentations/CSR/Responsible-AI-Transparency-Report-2025-vertical.pdf" target="_blank" rel="noopener">Microsoft Office of Responsible AI</a></td>
+            <td>Decenas de personas + <em>champions</em> distribuidos</td>
+            <td>ESPP Committee del consejo</td>
+            <td>¿Cómo desplegamos IA respetando políticas y normativa?</td>
+          </tr>
+          <tr>
+            <td><a href="https://www.efinancialcareers.com/news/2021/11/jpmorgan-ai-research-group" target="_blank" rel="noopener">JPMorgan AI Research</a></td>
+            <td>~200 personas globales</td>
+            <td>Área de Tecnología</td>
+            <td>¿Cómo aplicamos investigación en IA a problemas de banca a escala?</td>
+          </tr>
+          <tr>
+            <td><a href="https://cyberlideriamgzn.es/nombramiento-ignacio-bernal-nuevo-chief-ai-officer-de-grupo-santander/" target="_blank" rel="noopener">Santander · CAIO Iñaki Bernal</a> (mayo 2025)</td>
+            <td>Variable</td>
+            <td>Ricardo Martín Manjón (CRO)</td>
+            <td>¿Cómo coordinamos el despliegue corporativo de IA en el grupo?</td>
+          </tr>
+          <tr>
+            <td><a href="https://revista.aenor.com/411/iberdrola-pionera-en-certificar-su-sistema-de-gestion-de-ia.html" target="_blank" rel="noopener">Iberdrola · ISO/IEC 42001</a> (marzo 2025)</td>
+            <td>Función transversal</td>
+            <td>Comité de ética y cumplimiento</td>
+            <td>¿Cumplimos la norma internacional de gestión de IA?</td>
+          </tr>
+          <tr style="background: var(--magenta-l);">
+            <td><strong>Equipo de frontera</strong> (este post)</td>
+            <td><strong>4 personas</strong></td>
+            <td><strong>CEO + línea al consejo</strong></td>
+            <td><strong>¿Sigue válido el plan estratégico tras lo que cambió en la frontera de la IA?</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>El equipo de frontera no compite con ninguna de estas figuras. Cada órgano contesta a una pregunta distinta, y la del equipo de frontera no tiene dueño formal en la mayoría de las compañías: si el plan estratégico todavía se sostiene tras lo que ha cambiado en la frontera, y qué decisiones del consejo se siguen de la respuesta.</p>
+
+    <p>El argumento que vale para CIO y CTO vale igual para CISO y para el comité de ética y cumplimiento. El Office of Responsible AI de Microsoft despliega la política vigente; el comité de ética y cumplimiento de Iberdrola certifica frente a la norma actual ISO/IEC 42001; el CISO del banco protege el perímetro que existe hoy. Esos órganos están operando, no investigando lo que vendrá. El equipo de frontera identifica qué política, qué norma y qué amenazas probablemente van a existir dentro de 18-24 meses, y qué hipótesis del plan dependen de ello. El reparto se hace por horizonte temporal, no por competencia, y por eso el solapamiento no aparece aunque los temas se rocen.</p>
+  </section>
+
+  <!-- ═══════════════ 07 ═══════════════ -->
+  <section id="estructura">
+    <h2><span class="num">07</span>Estructura del equipo</h2>
+    <p>No son cuatro versiones del mismo perfil. Cada uno cubre un ángulo distinto del mismo problema: qué se puede hacer técnicamente, qué significa eso para el negocio, cómo lo va a mover el mercado y cuánto vale en euros y en riesgo.</p>
+
+    <div class="org-chart">
+      <div class="org-node board">Consejo</div>
+      <div class="org-label-side">supervisión</div>
+      <div class="org-line dashed"></div>
+      <div class="org-node ceo">CEO</div>
+      <div class="org-line"></div>
+      <div class="org-node lead">Frontier Lead</div>
+      <div class="org-label-side">reporte directo al consejo cada 90 días</div>
+      <div class="org-line"></div>
+      <div class="org-conn-row">
+        <div class="org-line"></div>
+        <div class="org-line"></div>
+        <div class="org-line"></div>
+      </div>
+      <div class="org-row">
+        <div class="org-node">Tech Translator</div>
+        <div class="org-node">Market Intelligence</div>
+        <div class="org-node">Strategy Economist</div>
+      </div>
+    </div>
+
+    <h3>Visión rápida de los cuatro perfiles</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Perfil</th><th>Seniority</th><th>Ángulo que cubre</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Frontier Lead</strong></td><td>Director · 15+ años</td><td>Decisión, síntesis, interlocución con el consejo</td></tr>
+          <tr><td><strong>Tech Translator</strong></td><td>Senior IC · 10+ años</td><td>Qué pueden hacer los modelos hoy</td></tr>
+          <tr><td><strong>Market Intelligence</strong></td><td>Senior IC · 8+ años</td><td>Qué están haciendo los actores</td></tr>
+          <tr><td><strong>Strategy Economist</strong></td><td>Senior IC · 10+ años</td><td>Cuánto vale, cuánto destruye, cuándo</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 08 PERFILES ═══════════════ -->
+  <section id="perfiles">
+    <h2><span class="num">08</span>Los cuatro perfiles en detalle</h2>
+    <p>Cada perfil se abre haciendo clic en su pestaña. Cubren ángulos complementarios del mismo problema.</p>
+
+    <div class="profile-tabs">
+      <button class="profile-tab active" data-pt="0">1 · Frontier Lead</button>
+      <button class="profile-tab" data-pt="1">2 · Tech Translator</button>
+      <button class="profile-tab" data-pt="2">3 · Market Intelligence</button>
+      <button class="profile-tab" data-pt="3">4 · Strategy Economist</button>
+    </div>
+
+    <!-- LEAD -->
+    <div class="profile-content active" data-pc="0">
+      <div class="profile-head">
+        <h3>Perfil 1 · Frontier Lead</h3>
+        <span class="profile-seniority">Director · 15+ años</span>
+      </div>
+      <div class="profile-mission">Decir al consejo qué está cambiando en la frontera de IA y qué implica para esta compañía. Si no sabe responder, no es el perfil.</div>
+
+      <h4>Perfil</h4>
+      <p>Tecnólogo de fondo con entendimiento profundo de negocio. No es un investigador, no es un consultor y no es un exdirectivo de unidad que dejó de tocar tecnología hace una década. Sigue usando IA todos los días, ha transformado su propio método de trabajo a base de incorporar capacidades nuevas y puede leer un paper de frontera sin intermediación. A esa base técnica se suma experiencia ejecutiva con consecuencias reales sobre un negocio: haber conducido decisiones tecnológicas con dinero ajeno encima -no haber estado solo en la sala cuando se tomaron- y haber cerrado al menos una decisión difícil donde el consejo prefería no decidir y aun así se decidió. La capacidad de cerrar, no solo de abrir, es lo que separa al Lead útil del invitado interesante.</p>
+
+      <p>Suma dos rasgos que hacen al rol viable. El primero, comunicación excepcional demostrada delante de audiencias no técnicas. El segundo, una cultura personal de poca cosmética y poco quedar bien: sin discurso corporativo, con tendencia a decir lo que piensa, sin miedo a consejos ni comités. Con humildad sobre lo que no sabe, pero con la convicción de quien domina su área. Educado y mesurado, sí; sin pelos en la lengua, también.</p>
+
+      <p>Es un perfil outlier. La combinación de profundidad técnica, agencia, experiencia ejecutiva, comunicación y temperamento es rara. Para una compañía del IBEX35 o Fortune 500 con la necesidad y el presupuesto del equipo, encontrar a la persona correcta es más decisivo que cualquier otro aspecto del diseño: un Lead de segunda fila reproduce exactamente el problema que el equipo nace para resolver. Si no aparece, no se arranca. Reporta al CEO con línea punteada al consejo.</p>
+
+      <h4>KPIs trimestrales</h4>
+      <div class="table-wrap">
+        <table class="kpi-table">
+          <thead><tr><th>KPI</th><th>Target</th><th>Nota</th></tr></thead>
+          <tbody>
+            <tr><td>Recomendaciones accionadas</td><td>≥ 60% por trimestre</td><td>De las recomendaciones firmadas, al menos seis de cada diez se traducen en decisión del consejo. Mide a la vez la calidad del Lead y la disposición del consejo a decidir sobre lo que recibe.</td></tr>
+            <tr><td>Tiempo a decisión</td><td>≤ 45 días desde entrega</td><td>Desde que se entrega el informe hasta que el consejo cierra una decisión sobre cada recomendación.</td></tr>
+            <tr><td>Hipótesis activas en seguimiento</td><td>12-20 vivas</td><td>Por debajo el equipo no mira a suficiente distancia. Por encima pierde foco.</td></tr>
+            <tr><td>NPS interno del consejo</td><td>&gt; +30</td><td>Encuesta anónima a consejeros tras cada sesión. Es la única forma de medir si el informe sirve.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="deliverables">
+        <div class="deliverables-title">Entregables</div>
+        <ul>
+          <li>Resumen ejecutivo del informe trimestral (página 1)</li>
+          <li>Lista de recomendaciones firmadas al consejo (páginas 13-14)</li>
+          <li>Café mensual con CEO</li>
+          <li>Sesión Q&amp;A trimestral con el consejo</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- TECH -->
+    <div class="profile-content" data-pc="1">
+      <div class="profile-head">
+        <h3>Perfil 2 · Tech Translator</h3>
+        <span class="profile-seniority">Senior IC · 10+ años</span>
+      </div>
+      <div class="profile-mission">Saber qué pueden hacer los modelos hoy y traducirlo a lenguaje de negocio sin perder ni rigor técnico ni utilidad operativa.</div>
+
+      <h4>Perfil</h4>
+      <p>Perfil técnico con base en ingeniería de software, ML o investigación aplicada. No tiene que ser publicador científico, pero sí alguien que prueba modelos antes de hablar de ellos. Idealmente ha trabajado tanto en producto como en research. Habla con investigadores en su idioma y con un consejero también. Sin ego de demo: solo cuenta lo que funciona en producción.</p>
+
+      <div class="profile-note"><strong>Nota</strong>: El alcance incluye también capacidades adversariales -agentes ofensivos, deepfakes operativos, inyección indirecta de prompt, jailbreaks de modelos propios- con la misma lógica de umbral. Briefing al CISO por excepción.</div>
+
+      <h4>KPIs trimestrales</h4>
+      <div class="table-wrap">
+        <table class="kpi-table">
+          <thead><tr><th>KPI</th><th>Target</th><th>Nota</th></tr></thead>
+          <tbody>
+            <tr><td>Capacidades validadas</td><td>≥ 8 por trimestre</td><td>Cruzan un umbral medible: precisión, coste, latencia o ámbito de tareas. No anuncios.</td></tr>
+            <tr><td>Tiempo desde release a evaluación</td><td>≤ 30 días</td><td>Desde que un modelo o capability sale a producción hasta que el equipo tiene una evaluación interna.</td></tr>
+            <tr><td>Falsos positivos descartados</td><td>≥ 50% del pipeline</td><td>Filtrar el ruido es parte del trabajo. Si todo lo que llega al informe acaba aprobado, el filtro está roto.</td></tr>
+            <tr><td>Reproducibilidad</td><td>100%</td><td>Toda capability mencionada en el informe debe ser reproducible por un evaluador externo en menos de un día, en entorno equivalente.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="deliverables">
+        <div class="deliverables-title">Entregables</div>
+        <ul>
+          <li>Sección "Capacidades nuevas" del informe (páginas 2-3)</li>
+          <li>Banco de pruebas reproducibles para el consejo</li>
+          <li>Briefings tácticos al CIO y al CTO cuando algo es accionable</li>
+          <li>Vigilancia activa de papers, releases y benchmarks de frontera</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- MARKET -->
+    <div class="profile-content" data-pc="2">
+      <div class="profile-head">
+        <h3>Perfil 3 · Market Intelligence</h3>
+        <span class="profile-seniority">Senior IC · 8+ años</span>
+      </div>
+      <div class="profile-mission">Saber qué están haciendo los actores -hyperscalers, startups, competidores, nuevos entrantes- con la frontera, no qué dicen que harán.</div>
+
+      <h4>Perfil</h4>
+      <p>Analista cuantitativo con capacidad demostrada de construir y operar pipelines de inteligencia sobre la frontera: ingesta de fuentes abiertas -papers, releases, hiring data, filings regulatorios, github, podcasts, blogs de hyperscalers-, normalización, detección de patrones, alertas. Súper-usuario de IA al mismo nivel que el Lead y el Tech Translator: la mitad del trabajo es decidir qué prompts, qué embeddings, qué dashboards y qué frecuencias dan el signal correcto.</p>
+
+      <p>A esa base técnica se le suma criterio editorial sobre qué patrones son señal y cuáles son ruido -sin haber visto cómo se mueve un hyperscaler o una startup en serio por dentro, los patrones se interpretan mal- y una red estrecha de diez a quince validadores bien colocados -operadores reales, no analistas- que se usa para confirmar las señales sorprendentes antes de subirlas al informe, no para generar el signal de partida. El rolodex de doscientos nombres del competitive intelligence clásico no es la herramienta.</p>
+
+      <p>Puede venir de data science aplicado a competitive intelligence, de equipos de inteligencia en hyperscalers, de research cuantitativo en hedge funds o de startups de data. El criterio de procedencia es haber operado pipelines de signal sobre dominios cambiantes, no haber acumulado contactos.</p>
+
+      <div class="profile-note"><strong>Nota</strong>: El alcance incluye también patrones de adopción humana en la frontera -workflows que dejan de existir, herramientas que desplazan categorías enteras, brechas generacionales emergentes, vocabulario y métodos que delatan reorganización del trabajo. La frontera de cómo trabajan las personas con IA fuera. Co-trabajado con Strategy Economist para alimentar las hipótesis de adopción del plan.</div>
+
+      <h4>KPIs trimestrales</h4>
+      <div class="table-wrap">
+        <table class="kpi-table">
+          <thead><tr><th>KPI</th><th>Target</th><th>Nota</th></tr></thead>
+          <tbody>
+            <tr><td>Movimientos detectados pre-anuncio</td><td>≥ 30% del total</td><td>De los movimientos relevantes del trimestre, al menos tres de cada diez se detectan antes del comunicado público.</td></tr>
+            <tr><td>Cobertura de competidores directos</td><td>100% trimestre a trimestre</td><td>Ninguno se queda sin actualización trimestral, por discreto que sea su movimiento.</td></tr>
+            <tr><td>Nuevos entrantes mapeados</td><td>≥ 5 por trimestre</td><td>Compañías que han pasado de irrelevantes a vigilables. Es el indicador adelantado de comoditizaciones.</td></tr>
+            <tr><td>Verificación con tres fuentes</td><td>100%</td><td>Cualquier señal incluida en el informe está verificada por al menos tres fuentes independientes. "Fuente" puede ser pipeline propio, fuente abierta o validador humano: lo decisivo es la independencia entre las tres, no su naturaleza.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="deliverables">
+        <div class="deliverables-title">Entregables</div>
+        <ul>
+          <li>Sección "Movimientos de actores" del informe (páginas 6-7)</li>
+          <li>Sección "Cambios en cómo trabajan las personas con IA" del informe (páginas 8-9) · co-firma con Strategy Economist</li>
+          <li>Mapa vivo de nuevos entrantes en cada categoría</li>
+          <li>Alertas urgentes al Lead cuando algo se mueve fuera de ciclo</li>
+          <li>Pipeline de inteligencia operativo y red estrecha de validadores</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ECON -->
+    <div class="profile-content" data-pc="3">
+      <div class="profile-head">
+        <h3>Perfil 4 · Strategy Economist</h3>
+        <span class="profile-seniority">Senior IC · 10+ años</span>
+      </div>
+      <div class="profile-mission">Cuantificar lo que el resto del equipo ve. Si una capability vale algo o destruye algo, ponerle número y horizonte.</div>
+
+      <h4>Perfil</h4>
+      <p>Perfil mixto de estrategia y modelización financiera. Probablemente exconsultor de estrategia con paso por banca de inversión o por una función de corporate development. Maneja DCF, opcionalidad real y análisis de sensibilidad. Pero también entiende mercado: no se queda en el modelo. Capaz de estresar las hipótesis del plan estratégico con datos del trimestre y de proponer cuándo hay que reabrirlo.</p>
+
+      <div class="profile-note"><strong>Nota</strong>: El alcance incluye también dos tipos de hipótesis adicionales: regulatorias -AI Act y actos delegados, ISO/IEC 42001, NIST AI RMF, calendario CNMV2030, borradores europeos en consulta- y de adopción humana -velocidad real de incorporación de IA por roles y funciones, brechas generacionales, workflows que dejan de existir-. Ambas co-trabajadas con Market Intelligence y tratadas como hipótesis vivas del plan: las regulatorias afectan al coste de seguir como hasta ahora, las de adopción al multiplicador real de productividad y headcount asumido en el plan.</div>
+
+      <h4>KPIs trimestrales</h4>
+      <div class="table-wrap">
+        <table class="kpi-table">
+          <thead><tr><th>KPI</th><th>Target</th><th>Nota</th></tr></thead>
+          <tbody>
+            <tr><td>Hipótesis del plan en revisión</td><td>12-20 vivas</td><td>Mantenidas con estado verde / amarillo / rojo y delta vs trimestre anterior. Es el corazón del trabajo.</td></tr>
+            <tr><td>Modelos financieros actualizados</td><td>100% del top 10</td><td>Las diez líneas con mayor exposición al cambio tecnológico tienen DCF actualizado cada trimestre.</td></tr>
+            <tr><td>Alertas tempranas activadas</td><td>Bandera roja en T-N</td><td>Capacidad de levantar la mano al menos un trimestre antes de que un valor terminal explote.</td></tr>
+            <tr><td>Recomendaciones financiables</td><td>100% con coste estimado</td><td>Ninguna recomendación al consejo va sin coste, plazo y consecuencia de no actuar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="deliverables">
+        <div class="deliverables-title">Entregables</div>
+        <ul>
+          <li>Sección "Comoditizaciones" del informe (páginas 4-5)</li>
+          <li>Sección "Cambios en cómo trabajan las personas con IA" del informe (páginas 8-9) · co-firma con Market Intelligence</li>
+          <li>Sección "Hipótesis en seguimiento" (páginas 10-12)</li>
+          <li>Modelos de sensibilidad sobre el plan estratégico</li>
+          <li>Co-firma de las recomendaciones con coste asociado</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 09 INFORME ═══════════════ -->
+  <section id="informe">
+    <h2><span class="num">09</span>El informe trimestral, página por página</h2>
+    <p>El informe es corto, conciso, al grano: catorce páginas máximo, estructura fija, mismas siete secciones cada trimestre. La utilidad sale de poder comparar trimestre a trimestre cómo evoluciona cada hipótesis, más que de la novedad de cada entrega.</p>
+
+    <div class="report-doc">
+      <div class="report-header">Frontier Report · Q[N] · [Año] · 14 páginas · Entrega T-14 · Sesión consejo T-0</div>
+      <div class="report-pages" id="reportPages">
+        <div class="report-page s1" data-rp="1">1</div>
+        <div class="report-page s2" data-rp="2">2</div>
+        <div class="report-page s2" data-rp="2">3</div>
+        <div class="report-page s3" data-rp="3">4</div>
+        <div class="report-page s3" data-rp="3">5</div>
+        <div class="report-page s4" data-rp="4">6</div>
+        <div class="report-page s4" data-rp="4">7</div>
+        <div class="report-page s5" data-rp="5">8</div>
+        <div class="report-page s5" data-rp="5">9</div>
+        <div class="report-page s6" data-rp="6">10</div>
+        <div class="report-page s6" data-rp="6">11</div>
+        <div class="report-page s6" data-rp="6">12</div>
+        <div class="report-page s7" data-rp="7">13</div>
+        <div class="report-page s7" data-rp="7">14</div>
+      </div>
+      <div class="report-section-detail" id="reportDetail">
+        <!-- JS injects content here; default loads section 1 -->
+      </div>
+    </div>
+
+    <p style="font-size: 0.85rem; color: var(--base-600); text-align: center; margin-top: -0.5rem;">↑ Haz clic en cualquier página para ver la sección correspondiente</p>
+
+    <div class="callout info collapsible" data-collapsible>
+      <div class="callout-title">ℹ️ Ejemplos de patrones que entrarían en la sección 5</div>
+      <div class="callout-body">
+        <p>Dos casos concretos del tipo de signal que cabe aquí, para que se vea la línea con lo que no cabe:</p>
+        <ul>
+          <li><strong>La brecha generacional intra-empresa.</strong> El junior que trabaja con seis modelos abiertos a la vez frente al senior que aún espera a que TI le active Copilot. Cuando esa brecha aparece en sectores comparables al de la compañía, es un indicador adelantado de que la productividad real va a depender más de la capa cultural que de la capa de licencia.</li>
+          <li><strong>Patrones culturales en empresas que adoptan bien vs. mal.</strong> Quién protege a los super-usuarios, quién los frena, quién institucionaliza el método y quién lo deja morir en el cubículo del entusiasta. Se leen en hiring, en blogs internos publicados, en charlas de empleados en conferencias y en rotación específica de roles.</li>
+        </ul>
+        <p>Lo que no entra: cómo formamos a nuestros equipos, qué plan de comunicación interna lanzamos, qué partner contratamos para el rollout. Eso es ejecución y vive en RR.HH., comunicación o transformación. El equipo de frontera detecta el patrón fuera; el aterrizaje dentro no es su pregunta.</p>
+      </div>
+    </div>
+
+    <p>El informe no se escribe la semana de la sesión: se cierra dos semanas antes y llega al consejo con margen para leerlo. Eso obliga al equipo a un ritmo continuo durante todo el trimestre, no a una carrera final.</p>
+  </section>
+
+  <!-- ═══════════════ 10 RITMO ═══════════════ -->
+  <section id="ritmo">
+    <h2><span class="num">10</span>El ritmo del equipo</h2>
+    <p>El equipo no debe convertirse en un comité que solo trabaja la semana antes de la sesión.</p>
+
+    <div class="cadence-grid">
+      <div class="cadence-card">
+        <h4>Semanal</h4>
+        <div class="cf">Sesión interna · 90 min</div>
+        <p>Captura de capacidades nuevas y comoditizaciones detectadas. Sin diapositivas, sin actas.</p>
+      </div>
+      <div class="cadence-card">
+        <h4>Mensual</h4>
+        <div class="cf">Café con CEO · 60 min</div>
+        <p>Una página: lo que el CEO debería saber esta semana aunque no se lo pregunte nadie.</p>
+      </div>
+      <div class="cadence-card">
+        <h4>Trimestral</h4>
+        <div class="cf">Informe + sesión consejo</div>
+        <p>Entrega T-14, Q&amp;A 45 min en sesión, decisiones documentadas.</p>
+      </div>
+      <div class="cadence-card">
+        <h4>Anual</h4>
+        <div class="cf">Revisión del equipo</div>
+        <p>¿Sigue siendo útil el equipo? ¿Hay que rotar perfiles? Si la respuesta no se da en serio, se disuelve.</p>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-title">ℹ️ ¿Por qué 90 días y no 30 ni 180?</div>
+      <p>En Q2 de 2026, los <em>frontier labs</em> publican capacidades nuevas cada once días de mediana (<a href="https://www.digitalapplied.com/blog/frontier-model-release-velocity-index-q2-2026" target="_blank" rel="noopener">Frontier Model Release Velocity Q2 2026</a>). OpenAI ha bajado de 170 días entre <em>releases</em> en 2023 a 49 en lo que va de 2026; Anthropic se mueve en torno a 71. Si la frontera publica cada dos a siete semanas, la <strong>detección</strong> tiene que ser semanal y la <strong>decisión del consejo</strong>, trimestral. Mensual satura al consejo sin mejorar la calidad de las llamadas. Semestral pierde la ventana en la que la decisión todavía es accionable.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 11 COSTE ═══════════════ -->
+  <section id="coste">
+    <h2><span class="num">11</span>Cuánto cuesta y con qué se compara</h2>
+    <p>El CFO va a preguntar cuánto cuesta esto, así que vamos a intentar responder en esta sección.</p>
+
+    <p>Cuatro perfiles senior en España, todo incluido -compensación, <em>secondments</em> desde otras unidades, presupuesto de <em>research</em> y asesoría legal- se mueven entre <strong>800.000 y 1,4 millones de euros al año</strong>. La banda alta corresponde a un Frontier Lead con perfil de exejecutivo con P&amp;L y a un Strategy Economist con paso por banca. Referencia salarial española 2026: CTO/CIO hasta 180 K€, CDO en torno a 135 K€, CAIO senior estimado entre 150 y 250 K€ de fijo más variable (<a href="https://www.universidadviu.com/es/actualidad/nuestros-expertos/informe-de-salarios-en-inteligencia-artificial-en-espana-2026" target="_blank" rel="noopener">Informe de Salarios IA España 2026</a>).</p>
+
+    <div class="cost-chart">
+      <div class="cost-row frontera">
+        <div class="cost-label"><strong>Equipo de frontera</strong> <span class="cost-value">0,8 - 1,4 M€/año</span></div>
+        <div class="cost-bar"><div class="cost-fill" style="width: 28%;"></div></div>
+        <div class="cost-delivers">Recomendación trimestral firmada al consejo</div>
+      </div>
+      <div class="cost-row consulting">
+        <div class="cost-label"><strong>Consultoría estratégica IA (McKinsey, BCG)</strong> <span class="cost-value">2 - 5 M€/proyecto (3-6 meses)</span></div>
+        <div class="cost-bar"><div class="cost-fill" style="width: 70%;"></div></div>
+        <div class="cost-delivers">Informe puntual, sin seguimiento</div>
+      </div>
+      <div class="cost-row lab">
+        <div class="cost-label"><strong>Innovation lab medio español</strong> <span class="cost-value">3 - 8 M€/año</span></div>
+        <div class="cost-bar"><div class="cost-fill" style="width: 100%;"></div></div>
+        <div class="cost-delivers">Pilotos, prototipos, presencia en ferias</div>
+      </div>
+    </div>
+
+    <p>Los dos últimos rangos son órdenes de magnitud típicos para proyectos de consultoría estratégica de IA y para <em>innovation labs</em> corporativos en España 2025-2026, no cifras auditadas.</p>
+
+    <p>El equipo es <strong>sensiblemente más barato</strong> que cualquiera de las alternativas con las que compite por presupuesto. No las sustituye: resuelve un problema distinto, el de gobernar la incertidumbre en lugar de explorarla. El presupuesto, además, es la parte sencilla; la complicada es encontrar a las cuatro personas adecuadas.</p>
+
+    <div class="callout info collapsible" data-collapsible>
+      <div class="callout-title">ℹ️ ¿Y por qué no contratar a una consultora estratégica?</div>
+      <div class="callout-body">
+        <p>El modelo McKinsey o BCG sale más caro porque, además del trabajo, lo que se compra es externalizar la decisión y la responsabilidad de equivocarse. Es un servicio razonable cuando la pregunta es discreta y tiene fecha de caducidad. Para gobernar la frontera de IA, en cambio, conviene una <strong>capacidad propia y continuada</strong> que sostenga la línea con el consejo trimestre a trimestre.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 12 PRESCRIPCIONES ═══════════════ -->
+  <section id="prescripciones">
+    <h2><span class="num">12</span>Las otras dos prescripciones (lo que este post no cubre)</h2>
+    <p>El artículo original de HBR propone tres palancas para operar con la niebla puesta. Este post desarrolla la tercera -el equipo de detección frontera- pero conviene comentar el alcance. Las otras dos son:</p>
+
+    <ol>
+      <li><strong>Optionality.</strong> Construir una cartera de opciones reales sobre IA: apuestas pequeñas con derecho -no obligación- de seguir invirtiendo si la incertidumbre se resuelve a favor. Tratamiento detallado en <a href="https://hbr.org/2026/01/manage-your-ai-investments-like-a-portfolio" target="_blank" rel="noopener">Manage Your AI Investments Like a Portfolio</a> (HBR, enero 2026).</li>
+      <li><strong>Stage-gate de capital con ciclos cortos.</strong> Liberar inversión por hito alcanzado, no por presupuesto anual aprobado. Combina <em>stage-gate</em> clásico con <em>real options</em> y <em>value of information</em> para decidir cuándo seguir, cuándo doblar y cuándo cortar.</li>
+    </ol>
+
+    <p>Las tres palancas funcionan como sistema. El equipo de frontera es el sensor; la cartera de opciones, el actuador; el <em>stage-gate</em>, la válvula de capital.</p>
+
+    <div class="levers">
+      <div class="lever sensor">
+        <strong>Detección frontera</strong>
+        <em>cada 90 días</em>
+      </div>
+      <div class="lever-arrow">→</div>
+      <div class="lever">
+        <strong>Cartera de opciones</strong>
+        <em>continua</em>
+      </div>
+      <div class="lever-arrow">→</div>
+      <div class="lever">
+        <strong>Stage-gate de capital</strong>
+        <em>por hito</em>
+      </div>
+    </div>
+
+    <p>Sin equipo de frontera, optionality y stage-gate operan a ciegas: invierten en opciones que ya no son tales y cierran tramos que todavía valían algo. La detección es la entrada que ordena las otras dos decisiones.</p>
+  </section>
+
+  <!-- ═══════════════ 13 CÓMO MUERE ═══════════════ -->
+  <section id="muere">
+    <h2><span class="num">13</span>Cómo muere este equipo</h2>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠️ Cinco formas habituales en que este equipo deja de funcionar</div>
+      <p style="margin-bottom: 0;">Haz clic en cada modo para ver la solución asociada.</p>
+    </div>
+
+    <div class="failure-grid">
+      <div class="failure-card" data-failure>
+        <h4><span class="fnum">1</span>Se vuelve un think tank</h4>
+        <div class="failure-body">
+          <p>Produce papers brillantes que no se conectan a ninguna decisión.</p>
+          <div class="sol"><strong>Solución:</strong> las páginas 13-14 (recomendaciones firmadas) son obligatorias, no opcionales.</div>
+        </div>
+      </div>
+
+      <div class="failure-card" data-failure>
+        <h4><span class="fnum">2</span>Se solapa con innovación, estrategia, ciber o cumplimiento</h4>
+        <div class="failure-body">
+          <p>Empieza a hacer pilotos, controles o políticas.</p>
+          <div class="sol"><strong>Solución:</strong> el equipo no ejecuta. Si propone, lo hace otro equipo.</div>
+        </div>
+      </div>
+
+      <div class="failure-card" data-failure>
+        <h4><span class="fnum">3</span>Captura por una facción</h4>
+        <div class="failure-body">
+          <p>El Lead acaba alineado con una línea de negocio o con el CIO.</p>
+          <div class="sol"><strong>Solución:</strong> la línea de reporte al consejo y el mandato a 3 años son la protección.</div>
+        </div>
+      </div>
+
+      <div class="failure-card" data-failure>
+        <h4><span class="fnum">4</span>El CEO no defiende al Lead</h4>
+        <div class="failure-body">
+          <p>El Lead llega con una cultura distinta a la del resto del consejo -poca cosmética, sin discurso corporativo, tendencia a decir lo que piensa- y al primer roce el CEO le pide que modere, que evite incomodar al consejero senior, que ajuste el tono.</p>
+          <div class="sol"><strong>Solución:</strong> la condición previa al arranque del equipo es que el CEO esté de acuerdo con incorporar a alguien de una cultura distinta a la del consejo, y dispuesto a defender públicamente ese estilo, no solo a tolerarlo. Si esa cobertura no está garantizada antes, no se ficha al Lead.</div>
+        </div>
+      </div>
+
+      <div class="failure-card" data-failure>
+        <h4><span class="fnum">5</span>Se vuelve cómodo</h4>
+        <div class="failure-body">
+          <p>El informe deja de incomodar.</p>
+          <div class="sol"><strong>Solución:</strong> <em><strong>el consejo debe poder despedir al Lead sin coste político si pasan dos trimestres sin haber forzado una decisión difícil al consejo</strong></em>.</div>
+        </div>
+      </div>
+    </div>
+
+    <p>Esa última solución conviene matizarla, porque la rendición de cuentas va en las dos direcciones. El consejo puede despedir al Lead si se acomoda, pero el Lead también se va si descubre que sus recomendaciones acaban archivadas. Un outlier con la combinación de rasgos que pide el perfil no aguanta dos trimestres viendo cómo sus llamadas no se traducen en decisiones: es justamente la agencia que se le exige al puesto; si la usa al entrar, también la usa para salir. Por eso el KPI de "Recomendaciones accionadas ≥ 60%" no mide solo al Lead: mide también la disposición del consejo a decidir sobre lo que recibe. Si ese número se hunde dos trimestres seguidos, las dos lecturas posibles llevan al mismo sitio. O el consejo despide al Lead porque no está apuntando a las decisiones que tocan, o el Lead se despide de un consejo que no apuesta.</p>
+  </section>
+
+  <!-- ═══════════════ 14 CNMV ═══════════════ -->
+  <section id="cnmv">
+    <h2><span class="num">14</span>Marco legal y de buen gobierno (España)</h2>
+    <p>Para una compañía cotizada española hay un argumento adicional para arrancar este equipo en 2026 y no en 2028: la CNMV tiene en curso desde noviembre de 2025 un proceso de revisión del Código de Buen Gobierno (Plan CNMV2030), con foco en digitalización, ciberseguridad e IA en consejos.</p>
+
+    <div class="callout info">
+      <div class="callout-title">ℹ️ Calendario CNMV2030</div>
+      <div class="timeline" style="margin: 0.5rem 0 0;">
+        <div class="timeline-row">
+          <div class="timeline-label">2026</div>
+          <div class="timeline-content">Reuniones del grupo de expertos</div>
+        </div>
+        <div class="timeline-row">
+          <div class="timeline-label">Q1 2027</div>
+          <div class="timeline-content">Consulta pública del nuevo Código</div>
+        </div>
+        <div class="timeline-row">
+          <div class="timeline-label">Q2 2027</div>
+          <div class="timeline-content">Aprobación</div>
+        </div>
+      </div>
+      <p style="margin-top: 0.75rem;">Quien tenga el equipo en marcha en 2026 estará mejor preparado para alinearse con la futura redacción cuando salga, no corriendo detrás de ella. Fuente: <a href="https://www.garrigues.com/en_GB/new/spain-cnmv-launches-process-review-good-governance-code-listed-companies" target="_blank" rel="noopener">Garrigues · CNMV launches review of Good Governance Code</a>.</p>
+    </div>
+
+    <p>Que la revisión incluya explícitamente ciberseguridad e IA refuerza la decisión de cubrir las dos caras de la frontera en el trabajo habitual del equipo.</p>
+
+    <p>La forma jurídica natural es la de <strong>comité consultivo del consejo</strong> sin función ejecutiva. El equipo no decide ni ejecuta; sus recomendaciones pasan por el CEO antes de llegar al consejo. Eso elimina el solapamiento competencial con CIO y CTO, y deja la responsabilidad ejecutiva donde corresponde.</p>
+
+    <p>Y aporta lo que una consultoría externa no aporta: si el consejero recibe el informe trimestral y no actúa, queda traza documental de qué se le advirtió y cuándo. Esa trazabilidad es la condición que da peso a la recomendación, no un efecto colateral que convenga disimular.</p>
+  </section>
+
+  <!-- ═══════════════ 15 ARRANCAR ═══════════════ -->
+  <section id="arrancar">
+    <h2><span class="num">15</span>Cómo arrancar en seis meses</h2>
+    <p>Lo que sigue es la versión razonable de una puesta en marcha. Cada compañía la ajustará a su propio calendario de consejo.</p>
+
+    <div class="onboard-timeline">
+      <div class="onboard-step">
+        <div class="om">MES 1</div>
+        Aprobación. Búsqueda y fichaje del Frontier Lead.
+      </div>
+      <div class="onboard-step">
+        <div class="om">MES 2</div>
+        El Lead ficha al Tech Translator, al Market Intelligence y al Strategy Economist.
+      </div>
+      <div class="onboard-step">
+        <div class="om">MES 3</div>
+        Primeras sesiones internas. Primer café con el CEO.
+      </div>
+      <div class="onboard-step">
+        <div class="om">MES 4-5</div>
+        Primer informe trimestral piloto, no vinculante, presentado al CEO.
+      </div>
+      <div class="onboard-step">
+        <div class="om">MES 6</div>
+        Primer informe oficial al consejo.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 16 ASESORÍA ═══════════════ -->
+  <section id="asesoria">
+    <h2><span class="num">16</span>¿Y no debería asesorar también al resto de iniciativas de IA?</h2>
+    <p>Es la objeción razonable cuando se lee el diseño completo: cuatro personas muy senior, dedicadas al 100%, con la mejor visión de frontera de la compañía, produciendo un único entregable cada noventa días. <strong>Suena a infrautilización</strong>. Mientras tanto, docenas de iniciativas de IA se deciden en paralelo, en cada unidad de negocio, sin esa visión. ¿No sería natural que el equipo asesorase también esas decisiones, sin hacerse cargo de ellas?</p>
+
+    <p>Es lo primero que aparece en mis conversaciones con comités de dirección de cotizadas. La intuición es correcta: hay valor sin explotar. Pero el diseño está pensado para una sola función, y la extensión tiene pros y contras.</p>
+
+    <h3 style="color: var(--green);">A favor de abrirlo a asesoría interna</h3>
+    <p>Entre informe e informe, el equipo va a estar leyendo papers, probando modelos y hablando con su red. Buena parte de ese conocimiento muere allí si no se conecta con quien está decidiendo en una unidad. Un director de operaciones que está a punto de firmar un contrato de tres años con un proveedor que el Tech Translator sabe que se va a comoditizar en seis meses se ahorra mucho dinero con una llamada de treinta minutos. Sin ese canal, el conocimiento se acumula en el equipo y no sale.</p>
+
+    <p>Hay también un riesgo de calidad. Sin contacto con la realidad operativa, el informe puede derivar hacia el ejercicio teórico que el consejo lee con interés y luego archiva. El precedente de Xerox PARC va exactamente de eso: inventar al margen, sin canal de transferencia. La asesoría interna sería uno de esos canales. Y si el equipo solo le habla al consejo, el resto de la compañía acaba percibiéndolo como un órgano remoto que dicta desde arriba: cuando en el informe haya que recomendar parar un tramo concreto, esa recomendación pesa más viniendo de quien ya conoce a los equipos por dentro.</p>
+
+    <h3 style="color: var(--red);">En contra de abrirlo</h3>
+    <p>El argumento central del diseño es la independencia. Si el equipo asesora una iniciativa concreta, queda comprometido con su éxito y luego no puede recomendar al consejo parar ese tramo sin un coste reputacional propio. La sección "Cómo muere este equipo" ya nombra ese fallo: captura por una facción. La asesoría interna sistemática convierte ese riesgo en algo casi inevitable.</p>
+
+    <p>A eso se suma el foco. La frontera publica cada once días; la detección requiere tiempo despejado para leer, probar y verificar. Cada hora dedicada a resolver una duda operativa de una unidad es una hora que no se dedica a mirar qué va a poder hacer la IA en los próximos meses. Cuatro personas están calculadas para esa función; para asesoría continua harían falta diez o quince, y se volvería al comité grande del que se huye. Y en cuanto el equipo asesora iniciativas concretas, entra en el territorio del CIO y del CTO, que es exactamente lo que el diseño quiere evitar: la pregunta del equipo de frontera es si el plan estratégico sigue siendo válido, no cómo se despliega la tecnología.</p>
+
+    <p>Por último, la rendición de cuentas. Hoy el equipo no ejecuta ni acompaña: informa, recomienda y firma. Esa claridad es la que permite despedir al Lead sin coste político si pasan dos trimestres sin haber forzado una decisión difícil al consejo. Con asesoría añadida, el éxito se mide también por la satisfacción del cliente interno. Son dos trabajos con culturas opuestas.</p>
+
+    <h3 style="color: var(--blue);">El punto medio razonable</h3>
+    <p>El diseño ya contiene dos vías de transferencia hacia el resto de la organización: los briefings tácticos al CIO y al CTO que entrega el Tech Translator, y el café mensual con el CEO. Esas vías pueden formalizarse sin romper el modelo. Lo que no encaja es abrir la puerta a que cualquier unidad pida hora directamente al equipo.</p>
+
+    <div class="callout info">
+      <div class="callout-title">ℹ️ Tres formas de abrir el canal sin perder la independencia</div>
+      <ul style="margin-bottom: 0;">
+        <li><strong>Asesoría a través del CEO, no directa.</strong> Las unidades no piden hora al equipo; piden al CEO que el equipo se pronuncie sobre una decisión concreta. El CEO filtra. Protege la independencia y limita el volumen.</li>
+        <li><strong>Una franja mensual acotada.</strong> Una mañana al mes, abierta, con regla explícita: opinión sobre estado de frontera, no acompañamiento de proyecto. El equipo no firma planes ni recibe encargos. Escucha y opina.</li>
+        <li><strong>Briefings periódicos a CIO y CTO.</strong> Lo que el diseño ya contempla como informal, calendarizado. Una vez al mes, sin extender a más interlocutores.</li>
+      </ul>
+    </div>
+
+    <p>La extensión amplia -convertir al equipo en una pequeña consultoría interna a disposición de las unidades- cambia el coste, cambia el tamaño, cambia los KPIs y cambia el riesgo de captura. No es aprovechar mejor el equipo. Es un equipo distinto.</p>
+
+    <p>Si el problema es la percepción de infrautilización, la respuesta razonable está en formalizar las vías ya previstas, no en abrir nuevas vías. El equipo de frontera es valioso porque puede decir cosas incómodas. Esa capacidad es la primera que se pierde cuando empieza a ayudar.</p>
+  </section>
+
+  <!-- ═══════════════ 17 MIDDLE-MARKET ═══════════════ -->
+  <section id="middle">
+    <h2><span class="num">17</span>¿Cómo se adapta a empresas que no son IBEX35 ni Fortune500?</h2>
+    <p>El diseño está pensado para una empresa cotizada con consejo profesionalizado y EBIT suficiente para absorber 0,8-1,4 M€ anuales en gobernanza de frontera. Esa restricción excluye a la mayor parte del tejido empresarial español. La pregunta razonable es si una empresa de 300, 800 o 2.000 empleados puede tener su propia versión.</p>
+
+    <p>La respuesta corta es sí, pero no como réplica reducida del mismo equipo. Las versiones que funcionan son <strong>equipos distintos con la misma misión y menor cobertura</strong>. Pierdes profundidad técnica continua, pierdes red propia de inteligencia de mercado, pierdes la línea formal al consejo; ganas viabilidad económica. Es un trade-off explícito, no un descuento.</p>
+
+    <h3>Tres tramos</h3>
+    <div class="tier-grid">
+      <div class="tier-card ibex">
+        <h4>IBEX35 / Fortune500</h4>
+        <div class="tier-meta">
+          <span class="cost">0,8 - 1,4 M€/año</span>
+          <span>4 perfiles internos</span>
+          <span>100% dedicación</span>
+          <span>Línea al consejo</span>
+        </div>
+        <p><strong>Ritmo de informe:</strong> Trimestral al consejo.</p>
+      </div>
+      <div class="tier-card midlarge">
+        <h4>Middle-market grande · 1.000-3.000 empleados</h4>
+        <div class="tier-meta">
+          <span class="cost">250 - 400 K€/año</span>
+          <span>2 perfiles internos (Lead + Tech Translator)</span>
+          <span>Retainer externo (Market &amp; Econ)</span>
+        </div>
+        <p><strong>Ritmo de informe:</strong> Semestral al consejo, briefing trimestral al comité de dirección.</p>
+      </div>
+      <div class="tier-card midmed">
+        <h4>Middle-market mediano · 200-1.000 empleados</h4>
+        <div class="tier-meta">
+          <span class="cost">150 - 250 K€/año</span>
+          <span>1 Lead interno full-time</span>
+          <span>Asesoría externa los otros tres ángulos</span>
+        </div>
+        <p><strong>Ritmo de informe:</strong> Semestral al comité de dirección. Sin línea formal al consejo.</p>
+      </div>
+    </div>
+
+    <h3>Diferencias con el modelo IBEX</h3>
+    <p>Lo que se mantiene en los tres tramos: el principio de un único entregable firmado, la página de recomendaciones con coste y plazo, la cadencia trimestral de detección semanal y la separación entre quién detecta y quién ejecuta. Ese es el núcleo del diseño y lo que justifica el equipo en cualquier tamaño.</p>
+
+    <p>Lo que se cambia a medida que se baja de tramo: la profundidad técnica del Tech Translator interno se sustituye por consultor externo, y por tanto pierde continuidad entre informes. El pipeline propio del Market Intelligence se sustituye por boletines, bases de datos y herramientas SaaS de competitive intelligence; pierde detección pre-anuncio y profundidad de patrones, gana viabilidad operativa. La línea al consejo se cambia por línea al comité de dirección, lo que reduce la trazabilidad documental de las recomendaciones no atendidas.</p>
+
+    <p>La independencia, en cambio, se preserva en los tres tramos. Esa es la razón por la que el Lead del tramo mediano es full-time y no a tiempo parcial: un Lead al 50% acaba con otra función operativa en la compañía y queda capturado desde el primer trimestre, lo que vacía al equipo de su única capacidad valiosa, que es decir cosas incómodas. La asesoría externa contratada para los otros tres ángulos se calibra para no romper el principio: los consultores entregan input al Lead, no firman el informe.</p>
+
+    <p>No es un equipo peor. Es un equipo que cubre menos superficie de frontera por euro invertido, y que sirve a una empresa cuya frontera relevante también es más estrecha. Una cotizada del IBEX necesita vigilar agentes ofensivos, AI Act, modelos de frontera y comoditizaciones de líneas con miles de millones de exposición; y, en paralelo, identificar dónde puede ganar ventaja competitiva moviendo capital con más antelación o mejor calibrado que sus rivales en esas mismas líneas. Una compañía de 400 empleados necesita lo mismo a otra escala: dos o tres categorías de capacidades que afectan a su negocio, los cambios regulatorios que le aplican, y las dos o tres apuestas de ventaja competitiva que la frontera abre en su sector. La cobertura debe ser proporcional al riesgo y a la oportunidad, no al organigrama.</p>
+
+    <h3>Cuándo no montar nada</h3>
+    <p>Si la compañía está todavía en estadio "Exploración" del modelo Gartner (la mayoría del tejido empresarial español lo está hoy), un equipo de frontera -en cualquier configuración- es un gasto sin retorno. No hay todavía suficiente superficie de decisión que dependa de la frontera. La respuesta correcta es asesoría externa puntual cuando aparezca una decisión concreta, no estructura permanente. Crear el equipo antes de tener el problema es un error simétrico a no crearlo cuando el problema ya está encima.</p>
+  </section>
+
+  <!-- ═══════════════ 18 CIERRE ═══════════════ -->
+  <section id="cierre">
+    <h2><span class="num">18</span>Cierre</h2>
+    <p>Este diseño coge las ideas del artículo de HBR y las aterriza: cuatro personas, dependencia directa del CEO, un informe presentado cada noventa días.</p>
+
+    <p>El diseño no resuelve la niebla de la IA, pero la convierte en algo gobernable: un objeto fijo en la agenda del consejo, con responsable, formato y fecha. Lo que hasta ahora era incertidumbre difusa pasa a ser una recomendación firmada con coste, plazo y consecuencia de no actuar. Eso ya se puede debatir.</p>
+
+    <div class="footer">
+      Publicado el 16 de mayo de 2026
+      <div class="footer-links">
+        <a href="https://www.linkedin.com/pulse/el-equipo-de-detecci%C3%B3n-frontera-david-hurtado-tor%C3%A1n-slbje" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://open.substack.com/pub/davidhurtado/p/el-equipo-de-deteccion-frontera?r=4uyjfg&utm_campaign=post-expanded-share&utm_medium=web" target="_blank" rel="noopener">Substack</a>
+        <a href="https://x.com/dhtoran/status/2055529527091040535?s=20" target="_blank" rel="noopener">X</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div><!-- /content-wrap -->
+</div><!-- /app -->
+
+<script>
+  // ────────── SECTION NAVIGATION ──────────
+  const sections = Array.from(document.querySelectorAll('main > section'));
+  const navLinks = Array.from(document.querySelectorAll('#sbNav a'));
+  const progFill = document.getElementById('progFill');
+  const progLabel = document.getElementById('progLabel');
+  const mbTitle = document.getElementById('mbTitle');
+  const sidebar = document.getElementById('sidebar');
+  const sbBackdrop = document.getElementById('sbBackdrop');
+  const sbToggle = document.getElementById('sbToggle');
+
+  function showSection(id, push = true) {
+    const target = document.getElementById(id);
+    if (!target) return;
+    sections.forEach(s => s.classList.remove('active'));
+    target.classList.add('active');
+
+    // Append prev/next footer (regenerated each time)
+    const idx = sections.indexOf(target);
+    const old = target.querySelector('.section-footer');
+    if (old) old.remove();
+    const footer = document.createElement('div');
+    footer.className = 'section-footer';
+    const prev = sections[idx - 1];
+    const next = sections[idx + 1];
+    if (prev) {
+      const prevLink = navLinks.find(l => l.dataset.section === prev.id);
+      const prevTitle = prevLink ? prevLink.querySelector('span:last-child').textContent : '';
+      footer.innerHTML += `<a class="sf-btn prev" data-go="${prev.id}"><span class="sf-dir">← Anterior</span><span class="sf-title">${prevTitle}</span></a>`;
+    } else {
+      footer.innerHTML += `<button class="sf-btn prev" disabled><span class="sf-dir">← Anterior</span><span class="sf-title">-</span></button>`;
+    }
+    if (next) {
+      const nextLink = navLinks.find(l => l.dataset.section === next.id);
+      const nextTitle = nextLink ? nextLink.querySelector('span:last-child').textContent : '';
+      footer.innerHTML += `<a class="sf-btn next" data-go="${next.id}"><span class="sf-dir">Siguiente →</span><span class="sf-title">${nextTitle}</span></a>`;
+    } else {
+      footer.innerHTML += `<button class="sf-btn next" disabled><span class="sf-dir">Siguiente →</span><span class="sf-title">-</span></button>`;
+    }
+    target.appendChild(footer);
+
+    // Hook prev/next clicks
+    footer.querySelectorAll('[data-go]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        showSection(a.dataset.go);
+      });
+    });
+
+    // Update nav active state
+    navLinks.forEach(l => l.classList.toggle('active', l.dataset.section === id));
+    const activeLink = navLinks.find(l => l.dataset.section === id);
+    if (activeLink) {
+      activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      mbTitle.textContent = activeLink.querySelector('span:last-child').textContent;
+    }
+
+    // Progress
+    const pct = ((idx + 1) / sections.length) * 100;
+    progFill.style.width = pct + '%';
+    progLabel.textContent = `Sección ${idx + 1} / ${sections.length}`;
+
+    // URL hash + scroll
+    if (push) history.replaceState(null, '', '#' + id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Close mobile sidebar
+    sidebar.classList.remove('open');
+    sbBackdrop.classList.remove('show');
+  }
+
+  navLinks.forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      showSection(a.dataset.section);
+    });
+  });
+
+  // Mobile sidebar toggle
+  sbToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    sbBackdrop.classList.toggle('show');
+  });
+  sbBackdrop.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    sbBackdrop.classList.remove('show');
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    const active = document.querySelector('main > section.active');
+    if (!active) return;
+    const idx = sections.indexOf(active);
+    if (e.key === 'ArrowLeft' && idx > 0) showSection(sections[idx - 1].id);
+    if (e.key === 'ArrowRight' && idx < sections.length - 1) showSection(sections[idx + 1].id);
+  });
+
+  // Init from hash or first
+  const initId = (location.hash || '#abstract').slice(1);
+  showSection(document.getElementById(initId) ? initId : 'abstract', false);
+  window.addEventListener('hashchange', () => {
+    const id = location.hash.slice(1);
+    if (document.getElementById(id)) showSection(id, false);
+  });
+
+  // ────────── COLLAPSIBLE CALLOUTS ──────────
+  document.querySelectorAll('.callout.collapsible').forEach(c => {
+    c.addEventListener('click', () => c.classList.toggle('open'));
+  });
+
+  // ────────── DIAGNOSTIC ──────────
+  const diagItems = document.querySelectorAll('[data-diag]');
+  const diagScore = document.getElementById('diagScore');
+  function updateDiag() {
+    const n = document.querySelectorAll('[data-diag].checked').length;
+    let msg;
+    if (n === 0) msg = `Has marcado <strong>0 / 6</strong>. Cuantas más respondas con franqueza, más probable es que la conversación esté madura.`;
+    else if (n <= 2) msg = `Has marcado <strong>${n} / 6</strong>. Señal débil: probablemente no es el momento todavía.`;
+    else if (n <= 4) msg = `Has marcado <strong>${n} / 6</strong>. Zona de transición. Vale la pena explorar el formato.`;
+    else msg = `Has marcado <strong>${n} / 6</strong>. Señal fuerte: la conversación con el consejo está madura.`;
+    diagScore.innerHTML = msg;
+  }
+  diagItems.forEach(q => {
+    q.addEventListener('click', () => {
+      q.classList.toggle('checked');
+      updateDiag();
+    });
+  });
+
+  // ────────── PROFILE TABS ──────────
+  document.querySelectorAll('.profile-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      const i = t.dataset.pt;
+      document.querySelectorAll('.profile-tab').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.profile-content').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      document.querySelector(`[data-pc="${i}"]`).classList.add('active');
+    });
+  });
+
+  // ────────── REPORT NAVIGATOR ──────────
+  const reportSections = {
+    1: {
+      title: '§1 · Resumen ejecutivo',
+      pages: 'p. 1',
+      responsable: 'Frontier Lead',
+      color: 'magenta',
+      body: 'Una página. Tres frases por bloque: capacidades nuevas, comoditizaciones detectadas, recomendaciones. Si el consejero no lee nada más, lee esto. Una página exacta: si necesita dos, el trimestre todavía no está cerrado.'
+    },
+    2: {
+      title: '§2 · Capacidades nuevas en frontera',
+      pages: 'pp. 2-3',
+      responsable: 'Tech Translator · VB del Lead',
+      body: 'Las 3-5 capacidades que han cruzado un umbral relevante este trimestre, adversariales incluidas. Para cada una: qué puede hacer ahora que no podía hace 90 días, fuente verificada, implicación para alguna línea de negocio o para la postura defensiva.'
+    },
+    3: {
+      title: '§3 · Comoditizaciones del trimestre',
+      pages: 'pp. 4-5',
+      responsable: 'Strategy Economist',
+      body: 'Qué partes del modelo de negocio propio o del competidor se pueden volver disponibles a coste marginal cero. Lista comparable trimestre a trimestre. Si una entrada lleva tres trimestres en el mapa sin acción, escala roja.'
+    },
+    4: {
+      title: '§4 · Movimientos de actores relevantes',
+      pages: 'pp. 6-7',
+      responsable: 'Market Intelligence',
+      body: 'Qué han hecho los hyperscalers, las startups con tracción, los competidores directos y los nuevos entrantes. No qué han anunciado: qué están desplegando con clientes reales.'
+    },
+    5: {
+      title: '§5 · Cambios en cómo trabajan las personas con IA',
+      pages: 'pp. 8-9',
+      responsable: 'Market Intelligence · Strategy Economist',
+      body: 'Patrones de adopción humana en la frontera: workflows que dejan de existir, herramientas que desplazan categorías enteras, brechas generacionales emergentes, vocabulario y métodos que delatan reorganización del trabajo. La frontera de cómo trabajan las personas con IA fuera. Implicaciones para las hipótesis de productividad, rotación y headcount del plan.'
+    },
+    6: {
+      title: '§6 · Hipótesis del plan en seguimiento',
+      pages: 'pp. 10-12',
+      responsable: 'Strategy Economist · Lead',
+      body: 'Lista viva de hipótesis que dependen de que la IA <em>no</em> avance en cierta dirección, de que la regulación <em>no</em> cambie en una concreta, o de que la adopción humana <em>sí</em> siga la velocidad supuesta por el plan. Cada una con estado (verde/amarillo/rojo), evolución vs trimestre anterior y qué activaría una revisión del plan.'
+    },
+    7: {
+      title: '§7 · Recomendaciones al consejo',
+      pages: 'pp. 13-14',
+      responsable: '<strong>Firma el Frontier Lead.</strong> Única página donde el equipo se moja.',
+      body: 'Tres tipos de recomendación, máximo dos de cada: tramos para ganar ventaja competitiva, tramos a parar, hipótesis a reabrir. Cada recomendación con coste, plazo y consecuencia de no actuar. La primera categoría es el eje ofensivo del trabajo: identifica dónde la compañía puede mover capital con más antelación o mejor calibrado que sus rivales. Las otras dos son el eje defensivo: proteger plan y capital de hipótesis que la frontera ya ha invalidado.'
+    }
+  };
+
+  const reportDetail = document.getElementById('reportDetail');
+  function renderReportSection(n) {
+    const s = reportSections[n];
+    reportDetail.innerHTML = `
+      <h4>${s.title}</h4>
+      <div class="report-section-meta">
+        <span>${s.pages}</span>
+        <span>${s.responsable}</span>
+      </div>
+      <div class="report-section-body">${s.body}</div>
+    `;
+    document.querySelectorAll('.report-page').forEach(p => {
+      p.classList.toggle('active', p.dataset.rp == n);
+    });
+  }
+  document.querySelectorAll('.report-page').forEach(p => {
+    p.addEventListener('click', () => renderReportSection(p.dataset.rp));
+  });
+  renderReportSection(1);
+
+  // ────────── FAILURE CARDS ──────────
+  document.querySelectorAll('[data-failure]').forEach(c => {
+    c.addEventListener('click', () => c.classList.toggle('open'));
+  });
+</script>
+
+</body>
+</html>
