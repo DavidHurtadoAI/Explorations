@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escapada de fin de semana · Siete Picos (Navacerrada → Cercedilla)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+  :root{
+    --verde:#2f6b3c; --verde-claro:#4a9b5e; --tierra:#8a5a2b;
+    --crema:#f7f4ec; --txt:#23311f; --gris:#6b7568;
+    --naranja:#e07b2e; --azul:#3a7ca5;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--txt)}
+  #app{display:flex;height:100vh;overflow:hidden}
+  /* Sidebar */
+  #panel{width:370px;min-width:370px;background:var(--crema);height:100%;overflow-y:auto;border-right:1px solid #e2dccb}
+  #panel header{background:linear-gradient(135deg,var(--verde),var(--verde-claro));color:#fff;padding:22px 20px 18px}
+  #panel header h1{font-size:1.25rem;line-height:1.25;margin-bottom:6px}
+  #panel header p{font-size:.82rem;opacity:.92}
+  .stats{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .stat{background:rgba(255,255,255,.16);border-radius:9px;padding:7px 11px;font-size:.72rem;line-height:1.3}
+  .stat b{display:block;font-size:.98rem}
+  .section{padding:14px 18px;border-bottom:1px solid #ece6d8}
+  .section h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gris);margin-bottom:10px}
+  .poi{display:flex;gap:11px;align-items:flex-start;padding:9px;border-radius:10px;cursor:pointer;transition:background .15s;margin-bottom:3px}
+  .poi:hover{background:#ece4d2}
+  .poi .pin{width:30px;height:30px;min-width:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.95rem;color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .poi .info b{display:block;font-size:.9rem;margin-bottom:1px}
+  .poi .info span{font-size:.78rem;color:var(--gris);line-height:1.35}
+  .tips li{font-size:.84rem;margin:0 0 8px 18px;line-height:1.4}
+  .foot{padding:14px 18px;font-size:.72rem;color:var(--gris);line-height:1.45}
+  .note{background:#fff6e8;border:1px solid #f0d9b0;border-radius:9px;padding:10px 12px;font-size:.76rem;color:#7a5a1e;margin:12px 18px;line-height:1.4}
+  /* Map */
+  #map{flex:1;height:100%}
+  .legend{background:#fff;padding:10px 12px;border-radius:9px;box-shadow:0 1px 6px rgba(0,0,0,.18);font-size:.76rem;line-height:1.7}
+  .legend .row{display:flex;align-items:center;gap:8px}
+  .legend .dot{width:13px;height:13px;border-radius:50%;display:inline-block}
+  .legend .line{width:22px;height:4px;border-radius:2px;display:inline-block}
+  .leaflet-popup-content{font-size:.85rem;line-height:1.45}
+  .leaflet-popup-content b{color:var(--verde)}
+  @media(max-width:780px){
+    #app{flex-direction:column}
+    #panel{width:100%;min-width:0;height:auto;max-height:46vh;border-right:none;border-bottom:1px solid #e2dccb}
+    #map{height:54vh}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="panel">
+    <header>
+      <h1>🥾 Escapada de fin de semana</h1>
+      <p>Día redondo en la Sierra de Guadarrama · Navacerrada → Siete Picos → Cercedilla</p>
+      <div class="stats">
+        <div class="stat"><b>~10–13 km</b>Distancia</div>
+        <div class="stat"><b>Medio</b>Nivel</div>
+        <div class="stat"><b>~1.860 m</b>Salida</div>
+        <div class="stat"><b>Tren</b>Vuelta fácil</div>
+      </div>
+    </header>
+
+    <div class="section">
+      <h2>📍 Puntos de la ruta</h2>
+      <div id="poi-list"></div>
+    </div>
+
+    <div class="section">
+      <h2>🎯 Claves prácticas</h2>
+      <ul class="tips">
+        <li>Empieza pronto: evitas gente y calor.</li>
+        <li>Baja a Cercedilla y vuelve en tren → sin logística extra.</li>
+        <li>Naturaleza + esfuerzo justo + comida buena + desconexión real.</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      ⚠️ El trazado es <b>aproximado e ilustrativo</b> para planificar. No lo uses como track GPS de navegación: lleva mapa/app de senderismo en el monte.
+    </div>
+
+    <div class="foot">
+      Clica cualquier punto del listado o del mapa para volar hasta él.<br>
+      Base cartográfica © OpenStreetMap.
+    </div>
+  </aside>
+  <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+// --- Datos de la ruta (coordenadas aproximadas, Sierra de Guadarrama) ---
+const pois = [
+  { id:'salida', nombre:'Puerto de Navacerrada', tipo:'Salida', emoji:'🚩', color:'#2f6b3c',
+    desc:'Punto de partida (~1.860 m). Arranca pronto para evitar gente y calor.', lat:40.7806, lng:-4.0030 },
+  { id:'pradera', nombre:'Pradera de Siete Picos', tipo:'Hito', emoji:'🌄', color:'#4a9b5e',
+    desc:'Pradera amplia camino de la cresta, vistas que se abren.', lat:40.7752, lng:-4.0160 },
+  { id:'cresta', nombre:'Cresta de Siete Picos', tipo:'Cima', emoji:'⛰️', color:'#4a9b5e',
+    desc:'Cresta con vistas abiertas a ambos valles. Lo mejor del recorrido.', lat:40.7700, lng:-4.0265 },
+  { id:'miradores', nombre:'Miradores de los Poetas / V. Aleixandre', tipo:'Mirador', emoji:'👁️', color:'#3a7ca5',
+    desc:'Miradores en la bajada hacia Cercedilla. Parada para fotos.', lat:40.7605, lng:-4.0420 },
+  { id:'dehesas', nombre:'Las Dehesas', tipo:'Cierre tranquilo', emoji:'🌲', color:'#2f6b3c',
+    desc:'Paseo corto por bosque llano, cero exigencia. Cierre perfecto.', lat:40.7535, lng:-4.0470 },
+  { id:'asador', nombre:'Asador de Ángel', tipo:'Comer 🍽️', emoji:'🔥', color:'#e07b2e',
+    desc:'Carne a la brasa, plan perfecto post-ruta. Alternativas: Yeyu / El Corralón.', lat:40.7418, lng:-4.0548 },
+  { id:'tren', nombre:'Estación de Cercedilla', tipo:'Vuelta en tren', emoji:'🚂', color:'#8a5a2b',
+    desc:'Fin de ruta. Tren de vuelta sin logística extra.', lat:40.7414, lng:-4.0556 }
+];
+
+// Traza aproximada de la ruta (orden de recorrido)
+const ruta = [
+  [40.7806,-4.0030],[40.7780,-4.0090],[40.7752,-4.0160],[40.7728,-4.0220],
+  [40.7700,-4.0265],[40.7672,-4.0335],[40.7635,-4.0385],[40.7605,-4.0420],
+  [40.7568,-4.0445],[40.7535,-4.0470],[40.7480,-4.0515],[40.7418,-4.0548],[40.7414,-4.0556]
+];
+
+const map = L.map('map',{scrollWheelZoom:true});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxZoom:18, attribution:'© OpenStreetMap'
+}).addTo(map);
+
+// Sombra de la línea + línea principal (efecto "track")
+L.polyline(ruta,{color:'#1c3a22',weight:8,opacity:.35}).addTo(map);
+L.polyline(ruta,{color:'#e07b2e',weight:4,opacity:.95,dashArray:'1,9',lineCap:'round'}).addTo(map);
+
+const markers = {};
+pois.forEach(p=>{
+  const icon = L.divIcon({
+    className:'',
+    html:`<div style="width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(45deg);background:${p.color};box-shadow:0 2px 5px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center">
+            <span style="transform:rotate(-45deg);font-size:14px">${p.emoji}</span></div>`,
+    iconSize:[30,30], iconAnchor:[15,28], popupAnchor:[0,-26]
+  });
+  const m = L.marker([p.lat,p.lng],{icon}).addTo(map)
+    .bindPopup(`<b>${p.emoji} ${p.nombre}</b><br><i>${p.tipo}</i><br>${p.desc}`);
+  markers[p.id]=m;
+});
+
+map.fitBounds(L.polyline(ruta).getBounds(),{padding:[45,45]});
+
+// Leyenda
+const legend = L.control({position:'bottomright'});
+legend.onAdd = function(){
+  const d = L.DomUtil.create('div','legend');
+  d.innerHTML = `
+    <div class="row"><span class="line" style="background:#e07b2e"></span> Ruta (~10–13 km)</div>
+    <div class="row"><span class="dot" style="background:#2f6b3c"></span> Inicio / fin / bosque</div>
+    <div class="row"><span class="dot" style="background:#4a9b5e"></span> Cima y praderas</div>
+    <div class="row"><span class="dot" style="background:#3a7ca5"></span> Miradores</div>
+    <div class="row"><span class="dot" style="background:#e07b2e"></span> Comida 🍽️</div>`;
+  return d;
+};
+legend.addTo(map);
+
+// Listado lateral
+const list = document.getElementById('poi-list');
+pois.forEach(p=>{
+  const el = document.createElement('div');
+  el.className='poi';
+  el.innerHTML = `<div class="pin" style="background:${p.color}">${p.emoji}</div>
+    <div class="info"><b>${p.nombre}</b><span>${p.tipo} — ${p.desc}</span></div>`;
+  el.onclick = ()=>{ map.flyTo([p.lat,p.lng],15,{duration:.8}); markers[p.id].openPopup(); };
+  list.appendChild(el);
+});
+</script>
+</body>
+</html>
