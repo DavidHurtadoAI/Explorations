@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offshore Energy — Interactive Explainer</title>
+<style>
+  :root{
+    --sky1:#0a1929; --sky2:#13315c; --sea1:#0d4d6b; --sea2:#072a3d;
+    --deep:#04141f; --sand:#c2a878; --rock:#6b7a85;
+    --accent:#36d1c4; --accent2:#ffb74d; --hot:#ff5e57; --good:#5ee08a;
+    --steel:#9fb3c8; --txt:#e7f1f7; --dim:#9bb0bf; --panel:#0e2233; --panelb:#1b3a52;
+    --mono:#4fc3f7; --jacket:#ba9cff; --grav:#ffb74d; --suction:#5ee08a; --float:#ff8a9b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:linear-gradient(180deg,#04141f,#072133 40%,#04141f);
+    color:var(--txt); line-height:1.6; overflow-x:hidden;
+  }
+  h1,h2,h3{font-weight:700; letter-spacing:-.02em; line-height:1.15}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 22px}
+  section{padding:70px 0; position:relative}
+  .eyebrow{color:var(--accent); font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.22em; margin-bottom:10px}
+  .lead{color:var(--dim); font-size:1.05rem; max-width:720px; margin-top:14px}
+  .tag{display:inline-block; padding:3px 10px; border-radius:30px; font-size:.72rem; font-weight:700; letter-spacing:.04em}
+
+  /* ---------- HERO ---------- */
+  .hero{height:100vh; min-height:620px; position:relative; overflow:hidden; padding:0;
+    background:linear-gradient(180deg,#071a2b 0%,#0a2740 45%,#08344b 60%,#062436 100%)}
+  .hero svg{position:absolute; inset:0; width:100%; height:100%}
+  .hero-content{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    z-index:5; pointer-events:none}
+  .hero h1{font-size:clamp(2.4rem,6vw,4.6rem); text-shadow:0 4px 30px rgba(0,0,0,.5)}
+  .hero h1 span{color:var(--accent)}
+  .hero p{max-width:560px; font-size:1.15rem; color:#cfe6f0; margin-top:18px}
+  .scroll-hint{position:absolute; bottom:26px; left:50%; transform:translateX(-50%); z-index:6;
+    color:var(--dim); font-size:.8rem; text-align:center; animation:bob 2s infinite}
+  @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+  /* ---------- generic panels ---------- */
+  .panel{background:linear-gradient(160deg,var(--panel),#0a1b29); border:1px solid var(--panelb);
+    border-radius:18px; padding:24px; box-shadow:0 12px 40px rgba(0,0,0,.35)}
+  .grid{display:grid; gap:22px}
+  .controls{display:flex; flex-wrap:wrap; gap:18px; align-items:center; margin-top:8px}
+  .ctrl{flex:1; min-width:200px}
+  .ctrl label{display:flex; justify-content:space-between; font-size:.82rem; color:var(--dim); margin-bottom:6px}
+  .ctrl label b{color:var(--accent); font-variant-numeric:tabular-nums}
+  input[type=range]{-webkit-appearance:none; width:100%; height:6px; border-radius:6px;
+    background:linear-gradient(90deg,var(--accent),var(--panelb)); outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:20px; height:20px; border-radius:50%;
+    background:#fff; border:3px solid var(--accent); cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.4)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--accent);cursor:pointer}
+  .btn{cursor:pointer; border:1px solid var(--panelb); background:#102a3d; color:var(--txt);
+    padding:9px 16px; border-radius:10px; font-weight:600; font-size:.85rem; transition:.18s; user-select:none}
+  .btn:hover{background:#16384f; border-color:var(--accent)}
+  .btn.active{background:var(--accent); color:#04141f; border-color:var(--accent)}
+  .btn.alt.active{background:var(--accent2); color:#04141f; border-color:var(--accent2)}
+
+  /* ---------- foundation explorer ---------- */
+  .seg{display:flex; flex-wrap:wrap; gap:8px; margin:18px 0}
+  .readout{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:14px; margin-top:18px}
+  .stat{background:#0a1b29; border:1px solid var(--panelb); border-radius:12px; padding:14px}
+  .stat .k{font-size:.72rem; color:var(--dim); text-transform:uppercase; letter-spacing:.08em}
+  .stat .v{font-size:1.5rem; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums}
+  .stat .v small{font-size:.8rem; color:var(--dim); font-weight:500}
+  .pill-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
+  .pill{font-size:.74rem; padding:4px 11px; border-radius:20px; background:#0a1b29; border:1px solid var(--panelb)}
+  .pill.pro{border-color:rgba(94,224,138,.5); color:var(--good)}
+  .pill.con{border-color:rgba(255,94,87,.5); color:var(--hot)}
+
+  .two{display:grid; grid-template-columns:1.1fr .9fr; gap:24px; align-items:center}
+  @media(max-width:820px){.two{grid-template-columns:1fr}}
+
+  .svgstage{width:100%; background:linear-gradient(180deg,#0a2c44,#062231 55%,#041824); border-radius:16px;
+    border:1px solid var(--panelb); display:block}
+
+  /* noise meter */
+  .meter{height:26px; border-radius:13px; background:#0a1b29; border:1px solid var(--panelb); overflow:hidden; position:relative}
+  .meter .fill{height:100%; width:0%; border-radius:13px; transition:width .25s, background .25s}
+  .meter .lbl{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:.78rem; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,.6)}
+
+  /* compare table */
+  table{width:100%; border-collapse:collapse; margin-top:10px; font-size:.86rem}
+  th,td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--panelb)}
+  th{color:var(--accent); font-size:.74rem; text-transform:uppercase; letter-spacing:.08em}
+  td b{color:var(--txt)}
+
+  /* timeline */
+  .timeline{display:flex; gap:0; margin-top:26px; flex-wrap:wrap}
+  .tl-step{flex:1; min-width:120px; text-align:center; cursor:pointer; position:relative; padding-top:30px}
+  .tl-step::before{content:''; position:absolute; top:13px; left:0; right:0; height:3px; background:var(--panelb)}
+  .tl-step:first-child::before{left:50%}
+  .tl-step:last-child::before{right:50%}
+  .tl-dot{position:absolute; top:6px; left:50%; transform:translateX(-50%); width:18px; height:18px;
+    border-radius:50%; background:#0a1b29; border:3px solid var(--panelb); z-index:2; transition:.2s}
+  .tl-step.on .tl-dot{border-color:var(--accent); background:var(--accent); box-shadow:0 0 14px var(--accent)}
+  .tl-step .num{font-size:.7rem; color:var(--dim)}
+  .tl-step .ti{font-size:.82rem; font-weight:600; margin-top:2px}
+  .tl-detail{margin-top:22px; min-height:64px}
+
+  /* feature cards */
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; margin-top:24px}
+  .card{background:linear-gradient(160deg,#0e2233,#0a1824); border:1px solid var(--panelb); border-radius:16px; padding:20px; transition:.2s}
+  .card:hover{transform:translateY(-4px); border-color:var(--accent); box-shadow:0 14px 34px rgba(0,0,0,.4)}
+  .card .ico{font-size:1.8rem}
+  .card h3{font-size:1.05rem; margin:10px 0 6px}
+  .card p{font-size:.86rem; color:var(--dim)}
+
+  .note{font-size:.82rem; color:var(--dim); margin-top:14px; padding:12px 16px; background:rgba(54,209,196,.06);
+    border-left:3px solid var(--accent); border-radius:0 8px 8px 0}
+  .hl{color:var(--accent2); font-weight:600}
+
+  .navdots{position:fixed; right:18px; top:50%; transform:translateY(-50%); z-index:50; display:flex; flex-direction:column; gap:11px}
+  .navdots a{width:11px; height:11px; border-radius:50%; background:#1b3a52; border:1px solid #2a516e; transition:.2s; display:block}
+  .navdots a:hover,.navdots a.active{background:var(--accent); transform:scale(1.3)}
+  @media(max-width:720px){.navdots{display:none}}
+  footer{padding:50px 0 70px; text-align:center; color:var(--dim); font-size:.85rem}
+  .divider{height:1px; background:linear-gradient(90deg,transparent,var(--panelb),transparent); margin:0}
+  .marine{font-size:1.4rem; transition:transform .2s}
+</style>
+</head>
+<body>
+
+<!-- ===================== NAV DOTS ===================== -->
+<div class="navdots" id="navdots"></div>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero" id="hero">
+  <svg viewBox="0 0 1440 820" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0e4a66"/><stop offset="1" stop-color="#041824"/>
+      </linearGradient>
+      <radialGradient id="sun" cx="78%" cy="22%" r="40%">
+        <stop offset="0" stop-color="#ffd28a" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ffd28a" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1440" height="500" fill="url(#sun)"/>
+    <rect y="430" width="1440" height="400" fill="url(#seaG)"/>
+    <!-- waves -->
+    <path id="w1" d="M0,440 q90,-22 180,0 t180,0 t180,0 t180,0 t180,0 t180,0 t180,0 t180,0 V820 H0 Z" fill="#0d4a66" opacity=".55"/>
+    <path id="w2" d="M0,452 q90,18 180,0 t180,0 t180,0 t180,0 t180,0 t180,0 t180,0 t180,0 V820 H0 Z" fill="#0a3a52" opacity=".6"/>
+    <!-- distant turbines group injected by JS -->
+    <g id="heroFarm"></g>
+  </svg>
+  <div class="hero-content wrap">
+    <div class="eyebrow">Interactive Engineering Explainer</div>
+    <h1>How we build<br><span>offshore energy</span></h1>
+    <p>Foundations, giant cranes, buried cables, rock dumping and floating turbines — explore the technology behind an offshore wind farm by playing with every concept yourself.</p>
+  </div>
+  <div class="scroll-hint">scroll to explore ▾</div>
+</header>
+
+<!-- ===================== 1. THE BIG PICTURE ===================== -->
+<section id="depth">
+  <div class="wrap">
+    <div class="eyebrow">01 — The Master Variable</div>
+    <h2>Water depth changes <em>everything</em></h2>
+    <p class="lead">Almost every choice on an offshore project flows from one number: how deep is the water? Drag the slider and watch the foundation, the install method and the economics adapt in real time.</p>
+
+    <div class="panel" style="margin-top:28px">
+      <div class="two">
+        <svg class="svgstage" id="depthSVG" viewBox="0 0 640 460"></svg>
+        <div>
+          <div class="ctrl">
+            <label>Water depth <b id="depthVal">25 m</b></label>
+            <input type="range" id="depthSlider" min="5" max="120" value="25">
+          </div>
+          <div class="ctrl" style="margin-top:14px">
+            <label>Turbine rotor diameter <b id="rotorVal">150 m</b></label>
+            <input type="range" id="rotorSlider" min="80" max="280" value="150">
+          </div>
+
+          <div style="margin-top:18px; display:flex; align-items:center; gap:12px">
+            <span class="tag" id="zoneTag">SHALLOW</span>
+            <strong id="recName" style="font-size:1.15rem; color:var(--accent)">Monopile</strong>
+          </div>
+          <p id="recDesc" style="color:var(--dim); font-size:.9rem; margin-top:8px">A single steel tube hammered into the seabed — the workhorse of shallow-water wind.</p>
+
+          <div class="readout">
+            <div class="stat"><div class="k">Foundation</div><div class="v" id="sFound" style="font-size:1.05rem">Monopile</div></div>
+            <div class="stat"><div class="k">Pile length</div><div class="v" id="sLen">—</div></div>
+            <div class="stat"><div class="k">Rel. cost</div><div class="v" id="sCost">—</div></div>
+          </div>
+          <div class="note" id="depthNote">Below ~60 m, bottom-fixed foundations get prohibitively heavy — the industry switches to <span class="hl">floating</span> platforms anchored by cables.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== 2. FOUNDATION EXPLORER ===================== -->
+<section id="foundations">
+  <div class="wrap">
+    <div class="eyebrow">02 — Foundations</div>
+    <h2>Five ways to hold a turbine still</h2>
+    <p class="lead">A turbine the height of a skyscraper must not move. The structure that anchors it depends on depth, seabed soil and noise rules. Click each type.</p>
+
+    <div class="seg" id="foundSeg"></div>
+
+    <div class="panel">
+      <div class="two">
+        <svg class="svgstage" id="foundSVG" viewBox="0 0 560 460"></svg>
+        <div>
+          <h3 id="fName" style="color:var(--accent)">Monopile</h3>
+          <p id="fDesc" style="color:var(--dim); margin-top:8px"></p>
+          <div class="readout" style="grid-template-columns:1fr 1fr">
+            <div class="stat"><div class="k">Typical depth</div><div class="v" id="fDepth" style="font-size:1.1rem">—</div></div>
+            <div class="stat"><div class="k">Install method</div><div class="v" id="fInstall" style="font-size:1.05rem">—</div></div>
+          </div>
+          <div class="pill-row" id="fPros"></div>
+          <div class="pill-row" id="fCons"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== 3. INSTALL: HAMMER vs SUCTION ===================== -->
+<section id="install">
+  <div class="wrap">
+    <div class="eyebrow">03 — Getting it into the seabed</div>
+    <h2>Hammering vs. suction: the noise problem</h2>
+    <p class="lead">Hammering a monopile is brutally loud — a threat to whales, dolphins and fish. DEME's subsidiary SPT Offshore pioneered <span class="hl">suction piles</span> that install in near silence. Compare them.</p>
+
+    <div class="panel" style="margin-top:24px">
+      <div class="seg">
+        <button class="btn active" data-install="hammer">🔨 Hammered monopile</button>
+        <button class="btn alt" data-install="suction">🤫 Suction bucket</button>
+      </div>
+      <div class="two">
+        <svg class="svgstage" id="installSVG" viewBox="0 0 560 430"></svg>
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">
+            <span style="font-size:.82rem; color:var(--dim)">Underwater noise</span>
+            <span style="font-size:.82rem" id="marineMsg">Marine life nearby</span>
+          </div>
+          <div class="meter"><div class="fill" id="noiseFill"></div><div class="lbl" id="noiseLbl">0 dB</div></div>
+          <div style="font-size:2.2rem; margin:14px 0; text-align:center">
+            <span class="marine" id="m1">🐋</span>
+            <span class="marine" id="m2">🐬</span>
+            <span class="marine" id="m3">🐟</span>
+            <span class="marine" id="m4">🦭</span>
+          </div>
+
+          <button class="btn active" id="installRun" style="width:100%; justify-content:center; text-align:center">▶ Run installation</button>
+
+          <table>
+            <tr><th>Property</th><th>Hammered</th><th>Suction</th></tr>
+            <tr><td>Noise</td><td style="color:var(--hot)"><b>~190 dB</b></td><td style="color:var(--good)"><b>~120 dB</b></td></tr>
+            <tr><td>Install time</td><td>6–10 hrs</td><td>1–3 hrs</td></tr>
+            <tr><td>Noise mitigation</td><td>Bubble curtain</td><td>None needed</td></tr>
+            <tr><td>Removable?</td><td>Hard</td><td>Reversible</td></tr>
+          </table>
+          <div class="note">Suction works by pumping <span class="hl">water out</span> of an upturned steel bucket. The pressure difference sucks it into the seabed — no hammer, no vibration, and it can be pumped back out at decommissioning.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== 4. CABLES ===================== -->
+<section id="cables">
+  <div class="wrap">
+    <div class="eyebrow">04 — Power cables & the 'Living Stone'</div>
+    <h2>Getting the electricity ashore</h2>
+    <p class="lead">Each turbine feeds an <span class="hl">inter-array cable</span>; a substation gathers the power and a giant <span class="hl">export cable</span> carries it to land. Cables are ploughed into the seabed to protect them. Drag the trenching depth.</p>
+
+    <div class="panel" style="margin-top:24px">
+      <div class="two">
+        <svg class="svgstage" id="cableSVG" viewBox="0 0 600 420"></svg>
+        <div>
+          <div class="seg">
+            <button class="btn active" data-cable="array">Inter-array (66 kV)</button>
+            <button class="btn" data-cable="export">Export (220 kV)</button>
+          </div>
+          <div class="ctrl">
+            <label>Burial depth <b id="burialVal">1.5 m</b></label>
+            <input type="range" id="burialSlider" min="0" max="3" step="0.1" value="1.5">
+          </div>
+          <div style="margin-top:14px; display:flex; align-items:center; gap:10px">
+            <span style="font-size:.82rem; color:var(--dim)">Protection level</span>
+            <span class="tag" id="protTag">GOOD</span>
+          </div>
+          <div class="meter" style="margin-top:8px"><div class="fill" id="protFill"></div><div class="lbl" id="protLbl"></div></div>
+          <div class="readout" style="grid-template-columns:1fr 1fr">
+            <div class="stat"><div class="k">Cable type</div><div class="v" id="cName" style="font-size:1.05rem">Inter-array</div></div>
+            <div class="stat"><div class="k">Risk: anchors & trawlers</div><div class="v" id="cRisk" style="font-size:1.05rem">—</div></div>
+          </div>
+          <div class="note" id="cableNote">DEME's <span class="hl">Living Stone</span> carries 10,000 t of cable and uses a <span class="hl">dual-lane system</span>: it lays one cable while preparing the next on deck — no downtime.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== 5. ROCK PLACEMENT / SCOUR ===================== -->
+<section id="rock">
+  <div class="wrap">
+    <div class="eyebrow">05 — Rock placement & scour protection</div>
+    <h2>Why we dump rocks around a turbine</h2>
+    <p class="lead">Fast currents dig holes (<span class="hl">scour</span>) around any structure on the seabed — undermining it. A fallpipe vessel drops graded rock through a 2 km pipe with pinpoint accuracy. Toggle the protection and run the current.</p>
+
+    <div class="panel" style="margin-top:24px">
+      <div class="two">
+        <svg class="svgstage" id="rockSVG" viewBox="0 0 600 430"></svg>
+        <div>
+          <div class="seg">
+            <button class="btn active" id="scourOn">Scour protection ON</button>
+            <button class="btn" id="scourOff">OFF</button>
+          </div>
+          <div class="ctrl">
+            <label>Current strength <b id="curVal">Medium</b></label>
+            <input type="range" id="curSlider" min="1" max="3" step="1" value="2">
+          </div>
+          <button class="btn active" id="rockRun" style="width:100%; justify-content:center; text-align:center; margin-top:12px">▶ Run 10 years of current</button>
+          <div class="readout" style="grid-template-columns:1fr 1fr">
+            <div class="stat"><div class="k">Scour depth</div><div class="v" id="scourDepth">0.0 <small>m</small></div></div>
+            <div class="stat"><div class="k">Foundation status</div><div class="v" id="scourStat" style="font-size:1.05rem; color:var(--good)">Stable</div></div>
+          </div>
+          <div class="note">A heave-compensated ROV rides below the fallpipe so rock lands precisely even in big waves and depths beyond <span class="hl">2,000 m</span>. The same vessels cover cables and pipelines.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== 6. TURBINE PHYSICS ===================== -->
+<section id="power">
+  <div class="wrap">
+    <div class="eyebrow">06 — Why turbines keep getting bigger</div>
+    <h2>The physics of power capture</h2>
+    <p class="lead">Power scales with the <span class="hl">square of the rotor</span> and the <span class="hl">cube of the wind speed</span>. That brutal maths is why a modern offshore turbine dwarfs an onshore one. Play with both.</p>
+
+    <div class="panel" style="margin-top:24px">
+      <div class="two">
+        <svg class="svgstage" id="powerSVG" viewBox="0 0 560 460"></svg>
+        <div>
+          <div class="ctrl">
+            <label>Rotor diameter <b id="pdiaVal">150 m</b></label>
+            <input type="range" id="pdiaSlider" min="80" max="280" value="150">
+          </div>
+          <div class="ctrl" style="margin-top:14px">
+            <label>Wind speed <b id="pwindVal">10 m/s</b></label>
+            <input type="range" id="pwindSlider" min="3" max="25" value="10">
+          </div>
+          <div class="readout">
+            <div class="stat"><div class="k">Power output</div><div class="v" id="pPower">— <small>MW</small></div></div>
+            <div class="stat"><div class="k">Homes powered</div><div class="v" id="pHomes">—</div></div>
+            <div class="stat"><div class="k">Swept area</div><div class="v" id="pArea" style="font-size:1.1rem">—</div></div>
+          </div>
+          <div class="note" id="powerNote">Double the rotor → <span class="hl">4×</span> the area. A modern 15 MW offshore turbine sweeps an area bigger than three football pitches.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== 7. FLOATING WIND ===================== -->
+<section id="floating">
+  <div class="wrap">
+    <div class="eyebrow">07 — Floating offshore wind</div>
+    <h2>When the water's too deep to touch the bottom</h2>
+    <p class="lead">Beyond ~60 m, you float the turbine and tether it with mooring lines to anchors (often suction piles!). Three rival designs each balance stability differently. Click them.</p>
+
+    <div class="seg" id="floatSeg"></div>
+    <div class="panel">
+      <div class="two">
+        <svg class="svgstage" id="floatSVG" viewBox="0 0 560 460"></svg>
+        <div>
+          <h3 id="flName" style="color:var(--accent)"></h3>
+          <p id="flDesc" style="color:var(--dim); margin-top:8px"></p>
+          <div style="margin-top:14px">
+            <div style="font-size:.8rem; color:var(--dim); margin-bottom:6px">Stability comes from…</div>
+            <div class="meter"><div class="fill" id="flStab" style="background:var(--accent)"></div><div class="lbl" id="flStabLbl"></div></div>
+          </div>
+          <div class="pill-row" id="flPros"></div>
+          <div class="pill-row" id="flCons"></div>
+          <div class="note">DEME ran the engineering on Equinor's <span class="hl">Hywind Tampen</span> — 11 floating concrete <em>spar</em> foundations off Norway, the model selected for the deepest sites.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== 8. EPCI LIFECYCLE ===================== -->
+<section id="epci">
+  <div class="wrap">
+    <div class="eyebrow">08 — Building the whole thing</div>
+    <h2>An EPCI project, start to finish</h2>
+    <p class="lead">EPCI = <b>E</b>ngineering, <b>P</b>rocurement, <b>C</b>onstruction &amp; <b>I</b>nstallation — a single turnkey contractor doing it all. Click each phase.</p>
+
+    <div class="timeline" id="timeline"></div>
+    <div class="panel tl-detail" id="tlDetail" style="margin-top:18px"></div>
+
+    <div class="cards">
+      <div class="card"><div class="ico">🛰️</div><h3>Geosciences</h3><p>Geotechnical & geophysical surveys map the seabed, soils and unexploded ordnance before anyone builds.</p></div>
+      <div class="card"><div class="ico">🏗️</div><h3>Foundations</h3><p>Monopiles, jackets, gravity bases or suction piles installed by DP2 jack-up & heavy-lift vessels.</p></div>
+      <div class="card"><div class="ico">🔌</div><h3>Cables</h3><p>Inter-array + export cables laid, trenched and protected — terminated and tested before go-live.</p></div>
+      <div class="card"><div class="ico">🪨</div><h3>Rock & scour</h3><p>Fallpipe vessels armour the seabed and protect cables against currents and trawlers.</p></div>
+      <div class="card"><div class="ico">🌬️</div><h3>Turbines</h3><p>2,700+ WTGs installed to date, including next-gen mega turbines far from shore.</p></div>
+      <div class="card"><div class="ico">♻️</div><h3>Decommissioning</h3><p>At end of life, structures are removed, transported, disposed and recycled to high standards.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<footer>
+  <div class="wrap">
+    <p>Built as an interactive learning aid — concepts &amp; figures based on the publicly described activities of DEME Group's Offshore division.</p>
+    <p style="margin-top:8px; opacity:.6">Drag · click · run. Every number reacts. ⚓</p>
+  </div>
+</footer>
+
+<script>
+/* ============================================================ HELPERS */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const lerp=(a,b,t)=>a+(b-a)*t, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function el(tag,attrs={},kids=[]){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const k in attrs)e.setAttribute(k,attrs[k]); kids.forEach(c=>e.appendChild(c)); return e;}
+
+/* ============================================================ HERO FARM */
+(function(){
+  const g=$('#heroFarm');
+  const xs=[120,300,470,640,820,1010,1210];
+  xs.forEach((x,i)=>{
+    const scale=lerp(1,.45,i/xs.length), base=435+i*4, op=lerp(.95,.4,i/xs.length);
+    const tg=el('g',{transform:`translate(${x},${base}) scale(${scale})`,opacity:op});
+    tg.appendChild(el('rect',{x:-4,y:-150,width:8,height:150,fill:'#cdd9e1'}));
+    const hub=el('g',{transform:'translate(0,-150)'});
+    hub.appendChild(el('circle',{r:7,fill:'#eef4f8'}));
+    const blades=el('g',{class:'blades'});
+    for(let b=0;b<3;b++)blades.appendChild(el('path',{d:'M0,0 L6,-70 L-6,-70 Z',fill:'#dde8ef',transform:`rotate(${b*120})`}));
+    blades.appendChild(el('animateTransform',{attributeName:'transform',type:'rotate',from:'0',to:'360',dur:(7+i)+'s',repeatCount:'indefinite'}));
+    hub.appendChild(blades); tg.appendChild(hub); g.appendChild(tg);
+  });
+})();
+/* gentle wave drift */
+let wt=0;
+(function waves(){wt+=0.02;
+  const w1=$('#w1'),w2=$('#w2');
+  if(w1)w1.setAttribute('transform',`translate(${Math.sin(wt)*18-18},0)`);
+  if(w2)w2.setAttribute('transform',`translate(${Math.cos(wt*.8)*22-22},0)`);
+  requestAnimationFrame(waves);})();
+
+/* ============================================================ 1. DEPTH SCENE */
+const depthSVG=$('#depthSVG');
+function foundationFor(d){
+  if(d<=35) return 'monopile';
+  if(d<=60) return 'jacket';
+  return 'floating';
+}
+function drawDepth(){
+  const d=+$('#depthSlider').value, rotor=+$('#rotorSlider').value;
+  $('#depthVal').textContent=d+' m'; $('#rotorVal').textContent=rotor+' m';
+  const W=640,H=460, seaTop=70;
+  // seabed y maps depth 5..120 -> 150..420
+  const bedY=clamp(lerp(150,420,(d-5)/115),150,420);
+  const ft=foundationFor(d);
+  const info={
+    monopile:{tag:'SHALLOW',col:'var(--mono)',name:'Monopile',desc:'A single steel tube hammered into the seabed — the workhorse of shallow-water wind.',len:(d+25),cost:1.0},
+    jacket:{tag:'TRANSITIONAL',col:'var(--jacket)',name:'Jacket',desc:'A lattice steel tower on multiple piles — spreads load in deeper or harder-soil sites.',len:(d+30),cost:1.8},
+    floating:{tag:'DEEP WATER',col:'var(--float)',name:'Floating platform',desc:'The turbine floats, held by mooring lines to seabed anchors. Unlocks the deepest sites.',len:0,cost:2.6}
+  }[ft];
+  $('#zoneTag').textContent=info.tag; $('#zoneTag').style.background=info.col; $('#zoneTag').style.color='#04141f';
+  $('#recName').textContent=info.name; $('#recName').style.color=info.col;
+  $('#recDesc').textContent=info.desc;
+  $('#sFound').textContent=info.name; $('#sFound').style.color=info.col;
+  $('#sLen').innerHTML= ft==='floating' ? '<small>mooring</small>' : info.len+' <small>m</small>';
+  $('#sCost').innerHTML= info.cost.toFixed(1)+'<small>×</small>';
+  $('#depthNote').innerHTML = ft==='floating'
+    ? 'At <span class="hl">'+d+' m</span> the seabed is too deep for economic fixed steel — this is <span class="hl">floating</span> territory, anchored by mooring lines.'
+    : 'At <span class="hl">'+d+' m</span> a bottom-fixed <span class="hl">'+info.name.toLowerCase()+'</span> is the economical choice. Past ~60 m the industry switches to floating.';
+
+  // build scene
+  let s=`<defs>
+    <linearGradient id="dsea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e4a66"/><stop offset="1" stop-color="#062231"/></linearGradient>
+  </defs>`;
+  s+=`<rect width="${W}" height="${seaTop}" fill="#0a2740"/>`;                    // sky
+  s+=`<rect y="${seaTop}" width="${W}" height="${H-seaTop}" fill="url(#dsea)"/>`;  // water
+  // depth ruler
+  for(let m=0;m<=120;m+=20){const y=clamp(lerp(150,420,(m-5)/115),seaTop,H);
+    s+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#ffffff" stroke-opacity=".05"/>`;
+    s+=`<text x="6" y="${y-3}" fill="#9bb0bf" font-size="10">${m} m</text>`;}
+  s+=`<line x1="0" y1="${seaTop}" x2="${W}" y2="${seaTop}" stroke="#7fd8ff" stroke-opacity=".5" stroke-dasharray="4 4"/>`;
+  // seabed
+  s+=`<path d="M0,${bedY} Q160,${bedY-12} 320,${bedY} T640,${bedY} V${H} H0 Z" fill="#3a3324"/>`;
+  s+=`<path d="M0,${bedY} Q160,${bedY-12} 320,${bedY} T640,${bedY}" fill="none" stroke="#c2a878" stroke-width="2"/>`;
+
+  const cx=330;
+  const rotorPx=clamp(lerp(34,90,(rotor-80)/200),34,92);
+  const towerTop = ft==='floating' ? seaTop+40 : seaTop+34;
+  if(ft==='floating'){
+    // platform
+    s+=`<rect x="${cx-46}" y="${seaTop+2}" width="92" height="26" rx="6" fill="${info.col}"/>`;
+    // mooring lines
+    s+=`<line x1="${cx-44}" y1="${seaTop+26}" x2="120" y2="${bedY}" stroke="#5a6b78" stroke-width="2"/>`;
+    s+=`<line x1="${cx+44}" y1="${seaTop+26}" x2="540" y2="${bedY}" stroke="#5a6b78" stroke-width="2"/>`;
+    s+=`<line x1="${cx}" y1="${seaTop+26}" x2="${cx}" y2="${bedY}" stroke="#5a6b78" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    // anchors
+    [120,540,cx].forEach(ax=>{s+=`<rect x="${ax-7}" y="${bedY-4}" width="14" height="12" rx="2" fill="var(--suction)"/>`;});
+  } else if(ft==='monopile'){
+    s+=`<rect x="${cx-7}" y="${seaTop+30}" width="14" height="${bedY-seaTop+18}" fill="${info.col}"/>`;
+    s+=`<rect x="${cx-9}" y="${seaTop+28}" width="18" height="10" rx="2" fill="#ffd28a"/>`;     // transition piece
+  } else { // jacket lattice
+    const topY=seaTop+34, w=46;
+    s+=`<line x1="${cx-w}" y1="${bedY}" x2="${cx-14}" y2="${topY}" stroke="${info.col}" stroke-width="4"/>`;
+    s+=`<line x1="${cx+w}" y1="${bedY}" x2="${cx+14}" y2="${topY}" stroke="${info.col}" stroke-width="4"/>`;
+    for(let k=0;k<4;k++){const t0=k/4,t1=(k+1)/4;
+      const lx0=lerp(cx-w,cx-14,t0),ly0=lerp(bedY,topY,t0),rx0=lerp(cx+w,cx+14,t0),rx1=lerp(cx+w,cx+14,t1),ly1=lerp(bedY,topY,t1),lx1=lerp(cx-w,cx-14,t1);
+      s+=`<line x1="${lx0}" y1="${ly0}" x2="${rx1}" y2="${ly1}" stroke="${info.col}" stroke-width="2" opacity=".8"/>`;
+      s+=`<line x1="${rx0}" y1="${ly0}" x2="${lx1}" y2="${ly1}" stroke="${info.col}" stroke-width="2" opacity=".8"/>`;}
+    s+=`<rect x="${cx-16}" y="${topY-8}" width="32" height="10" rx="2" fill="#ffd28a"/>`;
+  }
+  // tower + turbine above water
+  s+=`<rect x="${cx-4}" y="${seaTop-150}" width="8" height="180" fill="#cdd9e1"/>`;
+  s+=`<g transform="translate(${cx},${seaTop-150})"><circle r="6" fill="#eef4f8"/>`;
+  s+=`<g><path d="M0,0 L5,-${rotorPx} L-5,-${rotorPx} Z" fill="#dde8ef"/><path d="M0,0 L5,-${rotorPx} L-5,-${rotorPx} Z" fill="#dde8ef" transform="rotate(120)"/><path d="M0,0 L5,-${rotorPx} L-5,-${rotorPx} Z" fill="#dde8ef" transform="rotate(240)"/>`;
+  s+=`<animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="6s" repeatCount="indefinite"/></g></g>`;
+  // depth bracket
+  s+=`<line x1="${W-30}" y1="${seaTop}" x2="${W-30}" y2="${bedY}" stroke="${info.col}" stroke-width="2"/>`;
+  s+=`<text x="${W-26}" y="${(seaTop+bedY)/2}" fill="${info.col}" font-size="13" font-weight="700">${d} m</text>`;
+  depthSVG.innerHTML=s;
+}
+$('#depthSlider').addEventListener('input',drawDepth);
+$('#rotorSlider').addEventListener('input',drawDepth);
+
+/* ============================================================ 2. FOUNDATIONS */
+const FOUND={
+  monopile:{name:'Monopile',col:'var(--mono)',depth:'0 – 35 m',install:'Hammer / drill',
+    desc:'One large-diameter steel tube (up to 10 m wide, XL piles even larger) driven into the seabed. Simple, mass-producible, dominant in shallow water.',
+    pros:['Cheapest','Fast to install','Proven'],cons:['Noisy to hammer','Depth-limited','Hard soils tricky']},
+  jacket:{name:'Jacket',col:'var(--jacket)',depth:'35 – 60 m',install:'Pin piles',
+    desc:'A welded steel lattice standing on 3–4 smaller pin piles. Lighter for its strength in deeper water and stiffer for very large turbines.',
+    pros:['Stiff & light','Good in deep water','Suits big turbines'],cons:['Expensive fabrication','Many welds','Complex install']},
+  gravity:{name:'Gravity base',col:'var(--grav)',depth:'0 – 30 m',install:'Set down + ballast',
+    desc:'A massive concrete base that simply sits on a prepared, levelled seabed, held by its own weight. No piling — but needs soft-soil improvement first.',
+    pros:['No pile-driving noise','Reusable seabed prep','Concrete = cheap material'],cons:['Very heavy to transport','Needs flat seabed','Soil prep required']},
+  suction:{name:'Suction bucket',col:'var(--suction)',depth:'0 – 55 m',install:'Pump out water',
+    desc:'An upturned steel bucket sucked into the seabed by pumping out the trapped water. Silent, vibration-free and fully reversible.',
+    pros:['Silent install','No noise mitigation','Removable / reusable'],cons:['Soil-dependent','Newer technology','Limited very-hard soils']},
+  floating:{name:'Floating',col:'var(--float)',depth:'60 m+',install:'Tow + moor',
+    desc:'The turbine sits on a buoyant hull moored to the seabed. Built and commissioned in port, then towed out — opens the vast deep-water resource.',
+    pros:['Any depth','Port assembly','Huge new areas'],cons:['Mooring complexity','Dynamic cables','Still maturing']}
+};
+const foundSeg=$('#foundSeg');
+Object.keys(FOUND).forEach((k,i)=>{
+  const b=document.createElement('button'); b.className='btn'+(i===0?' active':''); b.textContent=FOUND[k].name; b.dataset.f=k;
+  b.onclick=()=>{$$('#foundSeg .btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); drawFound(k);};
+  foundSeg.appendChild(b);
+});
+function drawFound(k){
+  const f=FOUND[k];
+  $('#fName').textContent=f.name; $('#fName').style.color=f.col;
+  $('#fDesc').textContent=f.desc; $('#fDepth').textContent=f.depth; $('#fInstall').textContent=f.install;
+  $('#fPros').innerHTML=f.pros.map(p=>`<span class="pill pro">✓ ${p}</span>`).join('');
+  $('#fCons').innerHTML=f.cons.map(p=>`<span class="pill con">✕ ${p}</span>`).join('');
+  // diagram
+  const W=560,H=460,seaTop=60,bedY=300,cx=280,col=getComputedStyle(document.documentElement).getPropertyValue('--'+ (k==='gravity'?'grav':k==='suction'?'suction':k));
+  let s=`<rect width="${W}" height="${seaTop}" fill="#0a2740"/><rect y="${seaTop}" width="${W}" height="${H-seaTop}" fill="#0c3a52"/>`;
+  s+=`<line x1="0" y1="${seaTop}" x2="${W}" y2="${seaTop}" stroke="#7fd8ff" stroke-opacity=".4" stroke-dasharray="4 4"/>`;
+  s+=`<rect y="${bedY}" width="${W}" height="${H-bedY}" fill="#3a3324"/><line x1="0" y1="${bedY}" x2="${W}" y2="${bedY}" stroke="#c2a878" stroke-width="2"/>`;
+  // tower
+  s+=`<rect x="${cx-4}" y="${seaTop-130}" width="8" height="${ (k==='floating'?160:bedY-seaTop+130) }" fill="#cdd9e1"/>`;
+  s+=`<g transform="translate(${cx},${seaTop-130})"><g><path d="M0,0 L5,-60 L-5,-60 Z" fill="#dde8ef"/><path d="M0,0 L5,-60 L-5,-60 Z" fill="#dde8ef" transform="rotate(120)"/><path d="M0,0 L5,-60 L-5,-60 Z" fill="#dde8ef" transform="rotate(240)"/><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="6s" repeatCount="indefinite"/></g><circle r="6" fill="#eef"/></g>`;
+  if(k==='monopile'){s+=`<rect x="${cx-9}" y="${seaTop+10}" width="18" height="${bedY-seaTop+50}" fill="${col}"/>`;
+    // hammer hint
+    s+=`<text x="${cx+24}" y="${bedY+30}" fill="#9bb0bf" font-size="11">driven ~30 m deep ↓</text>`;}
+  else if(k==='jacket'){const w=70,topY=seaTop+10;
+    s+=`<line x1="${cx-w}" y1="${bedY+40}" x2="${cx-16}" y2="${topY}" stroke="${col}" stroke-width="5"/><line x1="${cx+w}" y1="${bedY+40}" x2="${cx+16}" y2="${topY}" stroke="${col}" stroke-width="5"/>`;
+    for(let i=0;i<4;i++){const t0=i/4,t1=(i+1)/4;
+      s+=`<line x1="${lerp(cx-w,cx-16,t0)}" y1="${lerp(bedY+40,topY,t0)}" x2="${lerp(cx+w,cx+16,t1)}" y2="${lerp(bedY+40,topY,t1)}" stroke="${col}" stroke-width="2.5" opacity=".85"/>`;
+      s+=`<line x1="${lerp(cx+w,cx+16,t0)}" y1="${lerp(bedY+40,topY,t0)}" x2="${lerp(cx-w,cx-16,t1)}" y2="${lerp(bedY+40,topY,t1)}" stroke="${col}" stroke-width="2.5" opacity=".85"/>`;}
+    [cx-w,cx+w].forEach(px=>s+=`<rect x="${px-3}" y="${bedY}" width="6" height="44" fill="#8a96a0"/>`);}
+  else if(k==='gravity'){s+=`<path d="M${cx-70},${bedY} L${cx-30},${bedY-70} L${cx+30},${bedY-70} L${cx+70},${bedY} Z" fill="${col}"/>`;
+    s+=`<rect x="${cx-30}" y="${bedY-110}" width="60" height="42" fill="${col}"/>`;
+    s+=`<rect x="${cx-78}" y="${bedY}" width="156" height="8" fill="#7d6a4a"/><text x="${cx+84}" y="${bedY+6}" fill="#9bb0bf" font-size="10">levelled bed</text>`;}
+  else if(k==='suction'){s+=`<rect x="${cx-34}" y="${bedY-6}" width="68" height="50" rx="4" fill="${col}"/><rect x="${cx-30}" y="${bedY-30}" width="60" height="26" fill="${col}" opacity=".5"/>`;
+    s+=`<path d="M${cx},${seaTop+40} L${cx},${bedY-30}" stroke="#dde8ef" stroke-width="3"/><text x="${cx-10}" y="${seaTop+34}" fill="var(--suction)" font-size="12">💧 pump</text>`;
+    s+=`<text x="${cx+44}" y="${bedY+24}" fill="#9bb0bf" font-size="11">suction ↓ silent</text>`;}
+  else if(k==='floating'){s+=`<rect x="${cx-50}" y="${seaTop-6}" width="100" height="30" rx="8" fill="${col}"/>`;
+    s+=`<rect x="${cx-50}" y="${seaTop+24}" width="14" height="70" fill="${col}" opacity=".8"/><rect x="${cx+36}" y="${seaTop+24}" width="14" height="70" fill="${col}" opacity=".8"/><rect x="${cx-12}" y="${seaTop+24}" width="24" height="120" fill="${col}" opacity=".8"/>`;
+    s+=`<line x1="${cx-46}" y1="${seaTop+90}" x2="90" y2="${bedY}" stroke="#5a6b78" stroke-width="2"/><line x1="${cx+44}" y1="${seaTop+90}" x2="470" y2="${bedY}" stroke="#5a6b78" stroke-width="2"/>`;
+    [90,470].forEach(ax=>s+=`<rect x="${ax-8}" y="${bedY-4}" width="16" height="14" rx="2" fill="var(--suction)"/>`);
+    s+=`<text x="${cx+60}" y="${seaTop+120}" fill="#9bb0bf" font-size="10">mooring lines</text>`;}
+  $('#foundSVG').innerHTML=s;
+}
+
+/* ============================================================ 3. INSTALL */
+let installMode='hammer', installAnim=null;
+$$('[data-install]').forEach(b=>b.onclick=()=>{
+  $$('[data-install]').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+  installMode=b.dataset.install; stopInstall(); setNoise(0); drawInstall(0);
+});
+function setNoise(db){
+  const f=$('#noiseFill'),l=$('#noiseLbl');
+  const pct=clamp((db-90)/(195-90)*100,0,100); f.style.width=pct+'%';
+  f.style.background= db>165?'var(--hot)': db>140?'var(--accent2)':'var(--good)';
+  l.textContent=Math.round(db)+' dB';
+  const stressed=db>150;
+  ['m1','m2','m3','m4'].forEach((id,i)=>{const m=$('#'+id);
+    if(installMode==='hammer'&&stressed){m.textContent=['💥','🐬','🐟','🦭'][i]; m.style.transform=`translateX(${(i%2?1:-1)*8}px)`;}
+    else {m.textContent=['🐋','🐬','🐟','🦭'][i]; m.style.transform='none';}});
+  $('#marineMsg').textContent = stressed&&installMode==='hammer' ? '⚠️ fleeing the noise' :
+     installMode==='suction'?'😌 undisturbed':'Marine life nearby';
+  $('#marineMsg').style.color = stressed&&installMode==='hammer'?'var(--hot)':'var(--dim)';
+}
+function drawInstall(progress){ // progress 0..1 how far pile is in
+  const W=560,H=430,seaTop=50,bedY=250,cx=280;
+  let s=`<rect width="${W}" height="${seaTop}" fill="#0a2740"/><rect y="${seaTop}" width="${W}" height="${H-seaTop}" fill="#0c3a52"/>`;
+  s+=`<line x1="0" y1="${seaTop}" x2="${W}" y2="${seaTop}" stroke="#7fd8ff" stroke-opacity=".4" stroke-dasharray="4 4"/>`;
+  s+=`<rect y="${bedY}" width="${W}" height="${H-bedY}" fill="#3a3324"/><line x1="0" y1="${bedY}" x2="${W}" y2="${bedY}" stroke="#c2a878" stroke-width="2"/>`;
+  // vessel on surface
+  s+=`<rect x="${cx-120}" y="${seaTop-26}" width="240" height="26" rx="4" fill="#13314a"/><rect x="${cx-120}" y="${seaTop-26}" width="240" height="6" fill="#1d4a6b"/>`;
+  s+=`<rect x="${cx+70}" y="${seaTop-70}" width="10" height="48" fill="#9fb3c8"/>`; // crane mast
+  if(installMode==='hammer'){
+    const depthIn = progress*70;
+    s+=`<rect x="${cx-10}" y="${seaTop+10}" width="20" height="${bedY+depthIn-seaTop-10}" fill="var(--mono)"/>`;
+    // hammer block
+    const hammerY = seaTop+10 - 30 + Math.sin(progress*40)*6*(progress<1?1:0);
+    s+=`<rect x="${cx-16}" y="${hammerY}" width="32" height="26" rx="3" fill="#ff7043"/>`;
+    // noise rings
+    if(progress<1){for(let r=0;r<3;r++){const rad=20+((wt*40+r*40)%120);
+      s+=`<circle cx="${cx}" cy="${bedY}" r="${rad}" fill="none" stroke="var(--hot)" stroke-width="2" stroke-opacity="${clamp(1-rad/130,0,.7)}"/>`;}}
+  } else {
+    s+=`<rect x="${cx-30}" y="${bedY - 40 + progress*44}" width="60" height="50" rx="4" fill="var(--suction)"/>`;
+    s+=`<rect x="${cx-26}" y="${bedY-64+progress*44}" width="52" height="26" fill="var(--suction)" opacity=".5"/>`;
+    s+=`<path d="M${cx},${seaTop} L${cx},${bedY-40+progress*44}" stroke="#dde8ef" stroke-width="3"/>`;
+    s+=`<text x="${cx+8}" y="${seaTop+18}" fill="var(--suction)" font-size="13">💧 pumping out</text>`;
+    // tiny calm bubbles
+    s+=`<circle cx="${cx-40}" cy="${bedY-20-(wt*20%60)}" r="3" fill="#7fd8ff" opacity=".4"/>`;
+  }
+  $('#installSVG').innerHTML=s;
+}
+function stopInstall(){ if(installAnim){cancelAnimationFrame(installAnim); installAnim=null;} $('#installRun').textContent='▶ Run installation';}
+$('#installRun').onclick=()=>{
+  if(installAnim){stopInstall(); return;}
+  $('#installRun').textContent='⏸ Stop';
+  let t=0; const peak=installMode==='hammer'?190:120;
+  (function step(){t+=0.012; const p=clamp(t,0,1);
+    drawInstall(p);
+    const db=installMode==='hammer'? (p<1? peak : 95) : (p<1?peak:95);
+    setNoise(db);
+    if(p<1){installAnim=requestAnimationFrame(step);} else {setTimeout(()=>{setNoise(95);},200); stopInstall();}
+  })();
+};
+
+/* ============================================================ 4. CABLES */
+let cableType='array';
+$$('[data-cable]').forEach(b=>b.onclick=()=>{
+  $$('[data-cable]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); cableType=b.dataset.cable; drawCable();});
+$('#burialSlider').addEventListener('input',drawCable);
+function drawCable(){
+  const dep=+$('#burialSlider').value; $('#burialVal').textContent=dep.toFixed(1)+' m';
+  const isExp=cableType==='export';
+  $('#cName').textContent=isExp?'Export (220 kV)':'Inter-array (66 kV)';
+  // protection score
+  const score=clamp(dep/2.5,0,1);
+  const tag = score>0.75?'EXCELLENT': score>0.5?'GOOD': score>0.25?'FAIR':'EXPOSED';
+  const tcol = score>0.75?'var(--good)': score>0.5?'var(--accent)': score>0.25?'var(--accent2)':'var(--hot)';
+  $('#protTag').textContent=tag; $('#protTag').style.background=tcol; $('#protTag').style.color='#04141f';
+  $('#protFill').style.width=(score*100)+'%'; $('#protFill').style.background=tcol;
+  $('#protLbl').textContent=Math.round(score*100)+'% protected';
+  $('#cRisk').textContent= dep<0.6?'High':dep<1.2?'Moderate':'Low';
+  $('#cRisk').style.color = dep<0.6?'var(--hot)':dep<1.2?'var(--accent2)':'var(--good)';
+  $('#cableNote').innerHTML = dep<0.6
+    ? '⚠️ Too shallow — a dragging <span class="hl">anchor or trawl board</span> could sever the cable. Industry targets ~1–1.5 m of cover.'
+    : 'DEME\'s <span class="hl">Living Stone</span> carries 10,000 t of cable and uses a <span class="hl">dual-lane system</span>: it lays one cable while preparing the next on deck — no downtime.';
+  // diagram
+  const W=600,H=420,seaTop=50,bedY=170,cx=300;
+  let s=`<rect width="${W}" height="${seaTop}" fill="#0a2740"/><rect y="${seaTop}" width="${W}" height="${bedY-seaTop}" fill="#0c3a52"/>`;
+  s+=`<line x1="0" y1="${seaTop}" x2="${W}" y2="${seaTop}" stroke="#7fd8ff" stroke-opacity=".4" stroke-dasharray="4 4"/>`;
+  s+=`<rect y="${bedY}" width="${W}" height="${H-bedY}" fill="#3a3324"/><line x1="0" y1="${bedY}" x2="${W}" y2="${bedY}" stroke="#c2a878" stroke-width="2"/>`;
+  // Living Stone vessel
+  s+=`<rect x="${cx-150}" y="${seaTop-30}" width="300" height="30" rx="5" fill="#13314a"/><rect x="${cx-150}" y="${seaTop-30}" width="300" height="6" fill="#1d4a6b"/>`;
+  s+=`<text x="${cx-145}" y="${seaTop-12}" fill="#7fd8ff" font-size="11" font-weight="700">Living Stone</text>`;
+  // dual carousels
+  s+=`<circle cx="${cx-70}" cy="${seaTop-15}" r="13" fill="none" stroke="#5ee08a" stroke-width="3"/>`;
+  s+=`<circle cx="${cx-30}" cy="${seaTop-15}" r="13" fill="none" stroke="#36d1c4" stroke-width="3"/>`;
+  // cable path down and trenched
+  const cableY=bedY+dep/3*100;
+  const thick=isExp?7:4, ccol=isExp?'#ffb74d':'#36d1c4';
+  s+=`<path d="M${cx},${seaTop} C${cx+40},${seaTop+60} ${cx+80},${bedY-20} ${cx+120},${cableY}" fill="none" stroke="${ccol}" stroke-width="${thick}"/>`;
+  // trench
+  s+=`<rect x="${cx+114}" y="${bedY}" width="12" height="${cableY-bedY}" fill="#2a2418" opacity=".7"/>`;
+  s+=`<line x1="${cx+360}" y1="${cableY}" x2="${cx+120}" y2="${cableY}" stroke="${ccol}" stroke-width="${thick}"/>`;
+  // plough
+  s+=`<path d="M${cx+120},${bedY} L${cx+150},${bedY} L${cx+135},${cableY+6} Z" fill="#9fb3c8"/>`;
+  // burial depth marker
+  s+=`<line x1="${cx+170}" y1="${bedY}" x2="${cx+170}" y2="${cableY}" stroke="#fff" stroke-opacity=".4"/>`;
+  s+=`<text x="${cx+176}" y="${(bedY+cableY)/2}" fill="#fff" font-size="11">${dep.toFixed(1)} m</text>`;
+  // hazard
+  if(dep<0.6){s+=`<text x="${cx-140}" y="${bedY+30}" fill="var(--hot)" font-size="13">⚓ anchor risk!</text>`;
+    s+=`<path d="M${cx-110},${bedY} l10,18 l-20,0 z" fill="#888"/>`;}
+  $('#cableSVG').innerHTML=s;
+}
+
+/* ============================================================ 5. ROCK / SCOUR */
+let scourProt=true, rockAnim=null;
+$('#scourOn').onclick=()=>{scourProt=true; $('#scourOn').classList.add('active'); $('#scourOff').classList.remove('active'); drawRock(0);};
+$('#scourOff').onclick=()=>{scourProt=false; $('#scourOff').classList.add('active'); $('#scourOn').classList.remove('active'); drawRock(0);};
+$('#curSlider').addEventListener('input',()=>{$('#curVal').textContent=['','Gentle','Medium','Strong'][+$('#curSlider').value]; drawRock(0);});
+function drawRock(t){ // t 0..1 erosion progress
+  const W=600,H=430,seaTop=40,bedY=250,cx=300;
+  const cur=+$('#curSlider').value;
+  const maxScour = scourProt ? 0.4 : (cur*1.6); // metres
+  const scour = maxScour*t;
+  const scourPx = scour/4*100;
+  $('#scourDepth').innerHTML=scour.toFixed(1)+' <small>m</small>';
+  const danger = scour>2.5;
+  $('#scourStat').textContent = danger?'⚠️ Undermined': scour>1.2?'Monitor':'Stable';
+  $('#scourStat').style.color = danger?'var(--hot)': scour>1.2?'var(--accent2)':'var(--good)';
+  let s=`<rect width="${W}" height="${seaTop}" fill="#0a2740"/><rect y="${seaTop}" width="${W}" height="${H-seaTop}" fill="#0c3a52"/>`;
+  // fallpipe vessel
+  s+=`<rect x="${cx-110}" y="${seaTop-24}" width="200" height="24" rx="4" fill="#13314a"/>`;
+  s+=`<text x="${cx-105}" y="${seaTop-8}" fill="#7fd8ff" font-size="10" font-weight="700">Fallpipe vessel</text>`;
+  // flexible fallpipe
+  s+=`<path d="M${cx-60},${seaTop} q-20,80 0,150 t0,${bedY-seaTop-150}" fill="none" stroke="#5a6b78" stroke-width="8" opacity=".8"/>`;
+  s+=`<rect x="${cx-72}" y="${bedY-60}" width="24" height="30" rx="3" fill="#ffb74d"/><text x="${cx-110}" y="${bedY-66}" fill="#ffb74d" font-size="10">ROV</text>`;
+  // current arrows
+  for(let i=0;i<cur+1;i++){const ay=seaTop+50+i*40, off=(wt*60)%120;
+    s+=`<line x1="${(off+i*30)%W}" y1="${ay}" x2="${(off+i*30)%W+30}" y2="${ay}" stroke="#7fd8ff" stroke-width="2" opacity=".35"/>`;}
+  // seabed with scour pit
+  s+=`<path d="M0,${bedY} H${cx-70} Q${cx-40},${bedY+scourPx} ${cx},${bedY+scourPx} Q${cx+40},${bedY+scourPx} ${cx+70},${bedY} H${W} V${H} H0 Z" fill="#3a3324"/>`;
+  s+=`<path d="M0,${bedY} H${cx-70} Q${cx-40},${bedY+scourPx} ${cx},${bedY+scourPx} Q${cx+40},${bedY+scourPx} ${cx+70},${bedY} H${W}" fill="none" stroke="#c2a878" stroke-width="2"/>`;
+  // monopile
+  s+=`<rect x="${cx-12}" y="${seaTop+20}" width="24" height="${bedY+scourPx-seaTop+30}" fill="var(--mono)"/>`;
+  if(danger)s+=`<rect x="${cx-12}" y="${seaTop+20}" width="24" height="${bedY+scourPx-seaTop+30}" fill="var(--hot)" opacity=".3"/>`;
+  // rock berm if protected
+  if(scourProt){s+=`<path d="M${cx-70},${bedY} Q${cx},${bedY-26} ${cx+70},${bedY}" fill="#6b7a85"/>`;
+    for(let i=0;i<22;i++){const rx=cx-64+Math.random()*128, ry=bedY-Math.random()*20;
+      s+=`<circle cx="${rx}" cy="${ry}" r="${2+Math.random()*3}" fill="#7d8b95"/>`;}
+    s+=`<text x="${cx+78}" y="${bedY-8}" fill="#9fb3c8" font-size="10">rock armour</text>`;}
+  $('#rockSVG').innerHTML=s;
+}
+$('#rockRun').onclick=()=>{
+  if(rockAnim){cancelAnimationFrame(rockAnim); rockAnim=null; $('#rockRun').textContent='▶ Run 10 years of current'; return;}
+  $('#rockRun').textContent='⏸ Stop'; let t=0;
+  (function step(){t+=0.01; drawRock(clamp(t,0,1));
+    if(t<1){rockAnim=requestAnimationFrame(step);} else {rockAnim=null; $('#rockRun').textContent='↻ Replay';}})();
+};
+
+/* ============================================================ 6. POWER PHYSICS */
+function drawPower(){
+  const dia=+$('#pdiaSlider').value, wind=+$('#pwindSlider').value;
+  $('#pdiaVal').textContent=dia+' m'; $('#pwindVal').textContent=wind+' m/s';
+  const r=dia/2, area=Math.PI*r*r;
+  // P = 0.5 * rho * A * v^3 * Cp ; rho=1.225, Cp=0.45
+  let P=0.5*1.225*area*Math.pow(wind,3)*0.45/1e6; // MW
+  // cap at rated & cut-out behaviour
+  const rated = 0.5*1.225*area*Math.pow(12,3)*0.45/1e6;
+  if(wind>=12) P=rated;            // rated power plateau
+  if(wind<3) P=0;                  // cut-in
+  if(wind>25) P=0;                 // cut-out
+  $('#pPower').innerHTML=P.toFixed(1)+' <small>MW</small>';
+  $('#pHomes').textContent=Math.round(P*1000*0.45*8760/4000/1).toLocaleString(); // rough homes
+  $('#pArea').innerHTML=Math.round(area).toLocaleString()+' <small>m²</small>';
+  $('#powerNote').innerHTML = wind<3 ? 'Below <span class="hl">cut-in</span> (~3 m/s) the blades can\'t overcome friction — zero output.'
+    : wind>25 ? 'Above <span class="hl">cut-out</span> (~25 m/s) the turbine shuts down and feathers its blades to avoid damage.'
+    : wind>=12 ? 'At <span class="hl">rated wind</span> the turbine caps output to protect the generator — extra wind is spilled by pitching the blades.'
+    : 'Power rises with the <span class="hl">cube</span> of wind speed: a 25% faster wind delivers ~2× the power.';
+  // viz: turbine scaled + football pitch reference
+  const W=560,H=460, cx=200, base=400;
+  const px=clamp(dia*0.9,72,250);
+  let s=`<rect width="${W}" height="${H}" fill="#0a2740"/>`;
+  for(let i=0;i<6;i++)s+=`<line x1="0" y1="${40+i*70}" x2="${W}" y2="${40+i*70}" stroke="#ffffff" stroke-opacity=".04"/>`;
+  s+=`<rect y="${base}" width="${W}" height="${H-base}" fill="#0c3a52"/>`;
+  // tower
+  s+=`<rect x="${cx-5}" y="${base-px-20}" width="10" height="${px+20}" fill="#cdd9e1"/>`;
+  // rotor circle (swept area)
+  s+=`<circle cx="${cx}" cy="${base-px-20}" r="${px/2}" fill="none" stroke="var(--accent)" stroke-opacity=".3" stroke-dasharray="3 4"/>`;
+  // blades, spin speed tied to wind
+  const dur=clamp(12-wind*0.4,1.5,12);
+  s+=`<g transform="translate(${cx},${base-px-20})"><g><path d="M0,0 L5,-${px/2} L-5,-${px/2} Z" fill="#dde8ef"/><path d="M0,0 L5,-${px/2} L-5,-${px/2} Z" fill="#dde8ef" transform="rotate(120)"/><path d="M0,0 L5,-${px/2} L-5,-${px/2} Z" fill="#dde8ef" transform="rotate(240)"/>`;
+  if(wind>=3&&wind<=25)s+=`<animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="${dur}s" repeatCount="indefinite"/>`;
+  s+=`</g><circle r="6" fill="#eef"/></g>`;
+  // power bar
+  const barH=clamp(P/15*200,2,210);
+  s+=`<rect x="${W-110}" y="${base-210}" width="56" height="210" rx="6" fill="#0a1b29" stroke="#1b3a52"/>`;
+  s+=`<rect x="${W-110}" y="${base-barH}" width="56" height="${barH}" rx="6" fill="var(--accent)"/>`;
+  s+=`<text x="${W-82}" y="${base+18}" fill="#9bb0bf" font-size="11" text-anchor="middle">Power</text>`;
+  s+=`<text x="${W-82}" y="${base-barH-8}" fill="var(--accent)" font-size="13" font-weight="700" text-anchor="middle">${P.toFixed(1)} MW</text>`;
+  // human for scale
+  s+=`<circle cx="40" cy="${base-12}" r="3" fill="#9fb3c8"/><rect x="38" y="${base-9}" width="4" height="9" fill="#9fb3c8"/><text x="30" y="${base+16}" fill="#9bb0bf" font-size="9">1.8 m</text>`;
+  $('#powerSVG').innerHTML=s;
+}
+$('#pdiaSlider').addEventListener('input',drawPower);
+$('#pwindSlider').addEventListener('input',drawPower);
+
+/* ============================================================ 7. FLOATING */
+const FLOAT={
+  spar:{name:'Spar buoy',desc:'A long, slender ballasted cylinder hanging deep below the surface — like a fishing float. Heavy ballast at the bottom keeps it upright. Used at Hywind Tampen.',
+    stab:90,stabLbl:'Deep ballast (low centre of gravity)',pros:['Very stable','Simple shape','Proven (Hywind)'],cons:['Needs deep water to assemble','Hard to tow upright','Big draught']},
+  semi:{name:'Semi-submersible',desc:'Several buoyant columns linked by pontoons. Floats high, so it can be fully built in port and towed out level — the most flexible design.',
+    stab:60,stabLbl:'Wide footprint (waterplane area)',pros:['Port assembly','Shallow draught','Tow out level'],cons:['Lots of steel','Motion in waves','Complex structure']},
+  tlp:{name:'Tension-leg platform',desc:'A buoyant hull pulled DOWN by taut vertical tendons anchored to the seabed. Extremely stiff — barely moves — but the moorings are demanding.',
+    stab:75,stabLbl:'Taut tendons (mooring tension)',pros:['Minimal motion','Small footprint','Compact hull'],cons:['Tendon loads high','Tricky install','Anchor-critical']}
+};
+const floatSeg=$('#floatSeg');
+Object.keys(FLOAT).forEach((k,i)=>{const b=document.createElement('button'); b.className='btn'+(i===0?' active':''); b.textContent=FLOAT[k].name;
+  b.onclick=()=>{$$('#floatSeg .btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); drawFloat(k);}; floatSeg.appendChild(b);});
+function drawFloat(k){
+  const f=FLOAT[k];
+  $('#flName').textContent=f.name; $('#flDesc').textContent=f.desc;
+  $('#flStab').style.width=f.stab+'%'; $('#flStabLbl').textContent=f.stabLbl;
+  $('#flPros').innerHTML=f.pros.map(p=>`<span class="pill pro">✓ ${p}</span>`).join('');
+  $('#flCons').innerHTML=f.cons.map(p=>`<span class="pill con">✕ ${p}</span>`).join('');
+  const W=560,H=460,seaTop=120,bedY=420,cx=280,col='#ff8a9b';
+  let s=`<rect width="${W}" height="${seaTop}" fill="#0a2740"/><rect y="${seaTop}" width="${W}" height="${H-seaTop}" fill="#0c3a52"/>`;
+  s+=`<line x1="0" y1="${seaTop}" x2="${W}" y2="${seaTop}" stroke="#7fd8ff" stroke-opacity=".4" stroke-dasharray="4 4"/>`;
+  s+=`<rect y="${bedY}" width="${W}" height="${H-bedY}" fill="#3a3324"/><line x1="0" y1="${bedY}" x2="${W}" y2="${bedY}" stroke="#c2a878" stroke-width="2"/>`;
+  // turbine
+  s+=`<rect x="${cx-4}" y="${seaTop-110}" width="8" height="130" fill="#cdd9e1"/>`;
+  s+=`<g transform="translate(${cx},${seaTop-110})"><g><path d="M0,0 L5,-55 L-5,-55 Z" fill="#dde8ef"/><path d="M0,0 L5,-55 L-5,-55 Z" fill="#dde8ef" transform="rotate(120)"/><path d="M0,0 L5,-55 L-5,-55 Z" fill="#dde8ef" transform="rotate(240)"/><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="6s" repeatCount="indefinite"/></g><circle r="6" fill="#eef"/></g>`;
+  if(k==='spar'){s+=`<rect x="${cx-14}" y="${seaTop+10}" width="28" height="230" rx="10" fill="${col}"/>`;
+    s+=`<rect x="${cx-14}" y="${seaTop+190}" width="28" height="50" rx="6" fill="#8a5a64"/><text x="${cx+22}" y="${seaTop+225}" fill="#9bb0bf" font-size="10">ballast</text>`;
+    s+=`<line x1="${cx-12}" y1="${seaTop+200}" x2="120" y2="${bedY}" stroke="#5a6b78" stroke-width="2"/><line x1="${cx+12}" y1="${seaTop+200}" x2="440" y2="${bedY}" stroke="#5a6b78" stroke-width="2"/>`;}
+  else if(k==='semi'){s+=`<rect x="${cx-70}" y="${seaTop+4}" width="28" height="60" rx="6" fill="${col}"/><rect x="${cx+42}" y="${seaTop+4}" width="28" height="60" rx="6" fill="${col}"/><rect x="${cx-14}" y="${seaTop+4}" width="28" height="60" rx="6" fill="${col}"/>`;
+    s+=`<rect x="${cx-70}" y="${seaTop+58}" width="140" height="12" rx="4" fill="${col}" opacity=".8"/>`;
+    s+=`<line x1="${cx-56}" y1="${seaTop+66}" x2="120" y2="${bedY}" stroke="#5a6b78" stroke-width="2"/><line x1="${cx+56}" y1="${seaTop+66}" x2="440" y2="${bedY}" stroke="#5a6b78" stroke-width="2"/>`;}
+  else {s+=`<rect x="${cx-30}" y="${seaTop+4}" width="60" height="44" rx="8" fill="${col}"/>`;
+    s+=`<line x1="${cx-22}" y1="${seaTop+48}" x2="${cx-22}" y2="${bedY}" stroke="#7fd8ff" stroke-width="3"/><line x1="${cx+22}" y1="${seaTop+48}" x2="${cx+22}" y2="${bedY}" stroke="#7fd8ff" stroke-width="3"/>`;
+    s+=`<text x="${cx+30}" y="${(seaTop+bedY)/2}" fill="#7fd8ff" font-size="10">taut tendons</text>`;}
+  // anchors
+  [120,440].forEach(ax=>s+=`<rect x="${ax-8}" y="${bedY-4}" width="16" height="14" rx="2" fill="var(--suction)"/>`);
+  if(k==='tlp')[cx-22,cx+22].forEach(ax=>s+=`<rect x="${ax-7}" y="${bedY-4}" width="14" height="14" rx="2" fill="var(--suction)"/>`);
+  $('#floatSVG').innerHTML=s;
+}
+
+/* ============================================================ 8. TIMELINE */
+const PHASES=[
+  {t:'Engineering',d:'Site data and turbine choice drive the design of foundations, layout and cable routes. DEME also runs FEED studies (e.g. Hywind Tampen).'},
+  {t:'Surveys',d:'Geotechnical & geophysical campaigns map soil, seabed features and unexploded ordnance. A seabed-clearance pass removes boulders, wrecks and UXO.'},
+  {t:'Foundations',d:'Monopiles, jackets, gravity bases or suction piles are transported and installed by DP2 jack-up and heavy-lift vessels.'},
+  {t:'Cables',d:'Inter-array and export cables are laid, trenched and buried, then crossings are rock-protected. Finally cables are terminated and tested.'},
+  {t:'Turbines',d:'Towers, nacelles and blades are lifted into place — the precision endgame. DEME has installed 2,700+ WTGs to date.'},
+  {t:'Scour & protect',d:'Fallpipe vessels place graded rock for scour protection around foundations and over cables and pipelines.'},
+  {t:'Commission',d:'Everything is energised and tested; clean power starts flowing to shore through the export cable and landfall.'},
+  {t:'Decommission',d:'Decades later: removal, transport, onshore disposal and recycling — the full circular life-cycle.'}
+];
+const tl=$('#timeline');
+PHASES.forEach((p,i)=>{const d=document.createElement('div'); d.className='tl-step'+(i===0?' on':'');
+  d.innerHTML=`<span class="tl-dot"></span><div class="num">PHASE ${i+1}</div><div class="ti">${p.t}</div>`;
+  d.onclick=()=>{$$('.tl-step').forEach(x=>x.classList.remove('on')); d.classList.add('on');
+    $('#tlDetail').innerHTML=`<h3 style="color:var(--accent)">${i+1}. ${p.t}</h3><p style="color:var(--dim); margin-top:6px">${p.d}</p>`;};
+  tl.appendChild(d);});
+$('#tlDetail').innerHTML=`<h3 style="color:var(--accent)">1. ${PHASES[0].t}</h3><p style="color:var(--dim); margin-top:6px">${PHASES[0].d}</p>`;
+
+/* ============================================================ NAV DOTS */
+const secs=['hero','depth','foundations','install','cables','rock','power','floating','epci'];
+const nd=$('#navdots');
+secs.forEach(id=>{const a=document.createElement('a'); a.href='#'+id; a.title=id; nd.appendChild(a);});
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){
+  const i=secs.indexOf(e.target.id); $$('#navdots a').forEach((a,j)=>a.classList.toggle('active',j===i));}}),{threshold:.5});
+secs.forEach(id=>{const s=document.getElementById(id); if(s)obs.observe(s);});
+
+/* ============================================================ INIT */
+drawDepth(); drawFound('monopile'); drawInstall(0); setNoise(0); drawCable(); drawRock(0); drawPower(); drawFloat('spar');
+/* keep noise rings & currents animating live */
+(function liveLoop(){ if(!installAnim) drawInstall(installMode==='hammer'?0:0); requestAnimationFrame(()=>{}); })();
+</script>
+</body>
+</html>
