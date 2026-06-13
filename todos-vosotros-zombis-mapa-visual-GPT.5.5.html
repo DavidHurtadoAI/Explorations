@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Todos ustedes, zombis - mapa visual cronológico creado con GPT.5.5</title>
+<style>
+  :root{
+    --bg:#FFFCF0;
+    --panel:#F2F0E6;
+    --line:#E6E4D9;
+    --ink:#100F0F;
+    --muted:#6F6E69;
+    --blue:#205EA6;
+    --red:#AF3029;
+    --green:#66800B;
+    --orange:#BC5215;
+    --purple:#5E409D;
+    --cyan:#24837B;
+    --yellow:#F0C674;
+    --highlight:#F6E2A0;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    overflow:hidden;
+  }
+  .app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) 124px}
+  header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    padding:12px 18px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  h1{margin:0;font-size:18px;font-weight:650;letter-spacing:0}
+  .source{font-size:12px;color:var(--muted);white-space:nowrap}
+  main{display:grid;grid-template-columns:minmax(320px,42%) minmax(420px,1fr);min-height:0}
+  #textPanel{
+    overflow:auto;
+    padding:20px 24px 26px;
+    border-right:1px solid var(--line);
+    line-height:1.64;
+    font-size:14.5px;
+  }
+  #textPanel p{margin:0 0 15px}
+  .sentence{
+    border-radius:4px;
+    transition:background-color .15s ease,opacity .15s ease;
+  }
+  .sentence.is-highlight{background:var(--highlight)}
+  .viz{min-width:0;display:grid;grid-template-rows:auto minmax(0,1fr);background:var(--panel)}
+  .tabs{display:flex;gap:6px;padding:9px 14px 0;border-bottom:1px solid var(--line)}
+  .tab{
+    border:1px solid var(--line);
+    border-bottom:0;
+    background:var(--bg);
+    color:var(--muted);
+    padding:7px 13px;
+    font:inherit;
+    font-size:13px;
+    line-height:1;
+    border-radius:6px 6px 0 0;
+    cursor:pointer;
+  }
+  .tab.active{background:var(--panel);color:var(--ink);font-weight:650;border-color:var(--muted)}
+  .canvasWrap{position:relative;min-height:0}
+  .view{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .hidden{display:none}
+  svg{width:100%;height:100%}
+  text{font-family:inherit}
+  .node,.edgeGroup,.locNode,.copyNode,.movePath,.timelineEvent{transition:opacity .15s ease}
+  .is-dim{opacity:.16}
+  .edgePath{fill:none;stroke:var(--muted);stroke-width:1.25}
+  .edgeLabel{font-size:10.5px;fill:var(--muted);text-anchor:middle;paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round}
+  .edgeControl{font-weight:750;fill:var(--blue);cursor:pointer;stroke:none}
+  .node{cursor:grab}
+  .node:active{cursor:grabbing}
+  .node circle{fill:var(--bg);stroke-width:1.6}
+  .emoji{font-size:27px;text-anchor:middle;dominant-baseline:central}
+  .nodeName{font-size:11px;text-anchor:middle;fill:var(--ink)}
+  .locNode circle{fill:var(--bg);stroke:var(--muted);stroke-width:1.2;stroke-dasharray:3 4}
+  .locName{font-size:12px;text-anchor:middle;fill:var(--ink);font-weight:650}
+  .copyNode circle{fill:var(--bg);stroke-width:1.3}
+  .copyLabel{font-size:9px;text-anchor:middle;fill:var(--muted)}
+  .moveLine{fill:none;stroke-width:1.3;stroke-dasharray:4 4}
+  .moveNum{font-size:9px;font-weight:750;text-anchor:middle}
+  .hint{
+    position:absolute;
+    left:14px;
+    bottom:10px;
+    color:var(--muted);
+    font-size:11px;
+    pointer-events:none;
+  }
+  #entityCard{
+    position:absolute;
+    top:18px;
+    right:18px;
+    width:230px;
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px 14px 14px;
+    display:none;
+    z-index:4;
+  }
+  #entityCard h2{margin:0 18px 9px 0;font-size:14px}
+  #entityCard button{
+    position:absolute;
+    top:7px;
+    right:8px;
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:15px;
+  }
+  .trait{margin-top:7px;font-size:11px;color:var(--muted)}
+  .bar{height:6px;margin-top:3px;border-radius:5px;background:var(--line);overflow:hidden}
+  .bar span{display:block;height:100%;background:var(--blue)}
+  #timeline{
+    position:relative;
+    border-top:1px solid var(--line);
+    background:var(--bg);
+  }
+  .timelineTitle{
+    position:absolute;
+    top:7px;
+    left:15px;
+    z-index:2;
+    color:var(--muted);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    pointer-events:none;
+  }
+  .axis{stroke:var(--line);stroke-width:1}
+  .tick{stroke:var(--muted);stroke-width:2}
+  .tick.selected{stroke:var(--blue);stroke-width:3}
+  .timelineEmoji{font-size:12px;text-anchor:middle;pointer-events:none}
+  .timelineVerb{font-size:8.5px;fill:var(--muted);text-anchor:end;pointer-events:none}
+  .eventHit{fill:transparent;cursor:pointer}
+  .rangeGhost{fill:rgba(32,94,166,.08);stroke:var(--blue);stroke-width:1;display:none}
+  @media (max-width:900px){
+    .app{grid-template-rows:auto minmax(0,1fr) 130px}
+    header{align-items:flex-start;flex-direction:column;gap:4px}
+    .source{white-space:normal}
+    main{grid-template-columns:1fr;grid-template-rows:40% minmax(0,60%)}
+    #textPanel{border-right:0;border-bottom:1px solid var(--line)}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Todos ustedes, zombis - mapa visual cronológico creado con GPT.5.5</h1>
+    <div class="source">Texto base: Wikipedia, sección "Orden cronológico de los acontecimientos"</div>
+  </header>
+  <main>
+    <section id="textPanel" aria-label="Texto de la historia"></section>
+    <section class="viz" aria-label="Visualizaciones">
+      <nav class="tabs" aria-label="Vistas">
+        <button class="tab active" type="button" data-view="graph">Entidades y acciones</button>
+        <button class="tab" type="button" data-view="map">Localizaciones</button>
+      </nav>
+      <div class="canvasWrap">
+        <svg id="graphView" class="view" viewBox="0 0 920 560" role="img" aria-label="Grafo de entidades y acciones"></svg>
+        <svg id="mapView" class="view hidden" viewBox="0 0 920 560" role="img" aria-label="Mapa de localizaciones"></svg>
+        <aside id="entityCard" aria-live="polite">
+          <button type="button" aria-label="Cerrar ficha">×</button>
+          <h2></h2>
+          <div class="traits"></div>
+        </aside>
+        <div class="hint">Pasa por frases, entidades o eventos. Rueda del ratón: zoom. Clic o arrastre en la línea inferior fija una selección.</div>
+      </div>
+    </section>
+  </main>
+  <section id="timeline" aria-label="Timeline de eventos">
+    <div class="timelineTitle">Línea de eventos</div>
+    <svg id="timelineSvg" role="img" aria-label="Eventos en orden narrado"></svg>
+  </section>
+</div>
+<script>
+const DATA = {
+  sentences: [
+    {id:"s0", p:0, text:"Ya que la historia se relata desde un punto de vista inconexo, referenciado por otros puntos posteriores,. esta es la historia cronológica de \"Jane\", de acuerdo a la historia, aunque la historia misma es un ejemplo clásico de una paradoja temporal."},
+    {id:"s1", p:1, text:"El 20 de septiembre de 1945, el camarero deja a la bebé Jane en un orfanato donde se cría."},
+    {id:"s2", p:1, text:"Ella sueña con unirse a una de las \"organizaciones de confort\" que se dedican a los servicios R&R (descanso y recuperación) para los astronautas."},
+    {id:"s3", p:2, text:"Casi 18 años después, el hombre que se llama a sí mismo \"la Madre Soltera\" es dejado por el camarero el 3 de abril de 1963."},
+    {id:"s4", p:2, text:"Él se encuentra con la joven Jane de 17 años (quien es intersexual), y después de algunas semanas de citas la seduce."},
+    {id:"s5", p:2, text:"Desde el punto de vista de Jane, él desaparece; en realidad ha sido recuperado por el camarero, quien lo lleva a 1985."},
+    {id:"s6", p:3, text:"Jane se queda embarazada."},
+    {id:"s7", p:3, text:"Después de dar a luz por medio de una cesárea, se descubre que ella es un \"hermafrodita verdadero\" que ha sido severamente dañada por el embarazo y el parto; al despertar se entera de que ella ha sido sujeta (sin su consentimiento) a un \"cambio de sexo\", que reasigna su sexo a masculino."},
+    {id:"s8", p:4, text:"El 10 de marzo de 1964, el camarero secuestra al bebé y se lo lleva hacia el pasado en el orfanato."},
+    {id:"s9", p:4, text:"Jane, ahora como hombre, trabaja como taquígrafo y después como escritor."},
+    {id:"s10", p:4, text:"Siempre que alguien le pregunta sobre su ocupación, él responde, truculentamente, \"yo soy una madre soltera—a cuatro centavos de dólar por palabra. Escribo historias confesionales\"."},
+    {id:"s11", p:4, text:"Él frecuenta y se hace un cliente regular en el bar donde trabaja el camarero, narrador de la historia."},
+    {id:"s12", p:5, text:"El 7 de noviembre de 1970, el camarero conoce a la Madre Soltera, lo lleva a la parte de atrás del bar, y de vuelta a 1963 para \"encontrar\" al hombre que la dejó embarazada."},
+    {id:"s13", p:5, text:"El camarero vuelve a su bar, segundos después de entrar en el cuarto de atrás, y le grita a un cliente que toca I'm My Own Grandpa en la sinfonola."},
+    {id:"s14", p:5, text:"Desde su propio punto de vista, ha llevado a cabo la misión de asegurar su propia existencia."},
+    {id:"s15", p:6, text:"El 12 de agosto de 1985, el camarero trae a la Madre Soltera de 1970, directamente después de su breve visita en 1963, a la base en las Montañas Rocosas y lo enlista en la Agencia Temporal."},
+    {id:"s16", p:7, text:"El 12 de enero de 1993, el camarero que también es Jane/madre/padre/Madre Soltera, vuelve a su base desde 1970 a pensar sobre su vida."}
+  ],
+  entities: [
+    {id:"camarero", name:"El camarero", emoji:"🍸", color:"#205EA6", traits:[["calculador",9],["metódico",8],["circular",10]]},
+    {id:"madre", name:"La Madre Soltera", emoji:"✍️", color:"#AF3029", traits:[["resentido",8],["adaptable",8],["fracturado",9]]},
+    {id:"jane", name:"Jane joven", emoji:"👩", color:"#BC5215", traits:[["vulnerable",8],["soñadora",7],["aislada",7]]},
+    {id:"bebe", name:"Bebé Jane", emoji:"🍼", color:"#66800B", traits:[["indefensa",10],["origen",10],["paradójica",9]]},
+    {id:"medicos", name:"Los médicos", emoji:"🩺", color:"#24837B", traits:[["pragmáticos",8],["decisivos",7],["clínicos",7]]},
+    {id:"cliente", name:"El cliente", emoji:"🎵", color:"#5E409D", traits:[["ajeno",7],["inoportuno",6]]},
+    {id:"cancion", name:"I'm My Own Grandpa", emoji:"🎼", color:"#6F6E69", traits:[["irónica",10],["reveladora",8]]}
+  ],
+  locations: [
+    {id:"orfanato", name:"Orfanato de 1945", emoji:"🏠", x:140, y:135},
+    {id:"pasado1963", name:"Encuentro de 1963", emoji:"🕰️", x:405, y:125},
+    {id:"hospital", name:"Hospital de 1964", emoji:"🏥", x:680, y:145},
+    {id:"bar1970", name:"Bar de 1970", emoji:"🍺", x:185, y:405},
+    {id:"cuarto", name:"Cuarto posterior", emoji:"🚪", x:455, y:400},
+    {id:"agencia", name:"Base de la Agencia Temporal", emoji:"🏢", x:710, y:395}
+  ],
+  events: [
+    {id:"e0", verb:"deja", source:"camarero", target:"bebe", location:"orfanato", sentenceId:"s1"},
+    {id:"e1", verb:"se cría", source:"bebe", target:"bebe", location:"orfanato", sentenceId:"s1"},
+    {id:"e2", verb:"sueña", source:"jane", target:"jane", location:"orfanato", sentenceId:"s2"},
+    {id:"e3", verb:"es dejado", source:"camarero", target:"madre", location:"pasado1963", sentenceId:"s3"},
+    {id:"e4", verb:"se encuentra", source:"madre", target:"jane", location:"pasado1963", sentenceId:"s4"},
+    {id:"e5", verb:"seduce", source:"madre", target:"jane", location:"pasado1963", sentenceId:"s4"},
+    {id:"e6", verb:"desaparece", source:"madre", target:"jane", location:"pasado1963", sentenceId:"s5"},
+    {id:"e7", verb:"recupera", source:"camarero", target:"madre", location:"pasado1963", sentenceId:"s5"},
+    {id:"e8", verb:"lleva", source:"camarero", target:"madre", location:"agencia", sentenceId:"s5"},
+    {id:"e9", verb:"embaraza", source:"madre", target:"jane", location:"pasado1963", sentenceId:"s6"},
+    {id:"e10", verb:"da a luz", source:"jane", target:"bebe", location:"hospital", sentenceId:"s7"},
+    {id:"e11", verb:"descubren", source:"medicos", target:"jane", location:"hospital", sentenceId:"s7"},
+    {id:"e12", verb:"reasignan", source:"medicos", target:"jane", location:"hospital", sentenceId:"s7"},
+    {id:"e13", verb:"secuestra", source:"camarero", target:"bebe", location:"hospital", sentenceId:"s8"},
+    {id:"e14", verb:"lleva", source:"camarero", target:"bebe", location:"orfanato", sentenceId:"s8"},
+    {id:"e15", verb:"trabaja", source:"madre", target:"madre", location:"bar1970", sentenceId:"s9"},
+    {id:"e16", verb:"responde", source:"madre", target:"madre", location:"bar1970", sentenceId:"s10"},
+    {id:"e17", verb:"frecuenta", source:"madre", target:"camarero", location:"bar1970", sentenceId:"s11"},
+    {id:"e18", verb:"conoce", source:"camarero", target:"madre", location:"bar1970", sentenceId:"s12"},
+    {id:"e19", verb:"lleva", source:"camarero", target:"madre", location:"cuarto", sentenceId:"s12"},
+    {id:"e20", verb:"devuelve", source:"camarero", target:"madre", location:"pasado1963", sentenceId:"s12"},
+    {id:"e21", verb:"vuelve", source:"camarero", target:"camarero", location:"bar1970", sentenceId:"s13"},
+    {id:"e22", verb:"toca", source:"cliente", target:"cancion", location:"bar1970", sentenceId:"s13"},
+    {id:"e23", verb:"grita", source:"camarero", target:"cliente", location:"bar1970", sentenceId:"s13"},
+    {id:"e24", verb:"asegura", source:"camarero", target:"camarero", location:"bar1970", sentenceId:"s14"},
+    {id:"e25", verb:"trae", source:"camarero", target:"madre", location:"agencia", sentenceId:"s15"},
+    {id:"e26", verb:"enlista", source:"camarero", target:"madre", location:"agencia", sentenceId:"s15"},
+    {id:"e27", verb:"piensa", source:"camarero", target:"camarero", location:"agencia", sentenceId:"s16"}
+  ]
+};
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+const $ = selector => document.querySelector(selector);
+const $$ = selector => [...document.querySelectorAll(selector)];
+function svgEl(tag, attrs = {}, parent){
+  const node = document.createElementNS(SVG_NS, tag);
+  for(const [key,value] of Object.entries(attrs)) node.setAttribute(key, value);
+  if(parent) parent.appendChild(node);
+  return node;
+}
+
+const entities = new Map(DATA.entities.map(item => [item.id, item]));
+const locations = new Map(DATA.locations.map(item => [item.id, item]));
+const sentenceById = new Map(DATA.sentences.map(item => [item.id, item]));
+const eventById = new Map(DATA.events.map(item => [item.id, item]));
+const sentenceEvents = new Map(DATA.sentences.map(item => [item.id, []]));
+const entityEvents = new Map(DATA.entities.map(item => [item.id, []]));
+const locationEvents = new Map(DATA.locations.map(item => [item.id, []]));
+
+DATA.events.forEach(event => {
+  sentenceEvents.get(event.sentenceId).push(event.id);
+  entityEvents.get(event.source).push(event.id);
+  entityEvents.get(event.target).push(event.id);
+  if(locations.has(event.location)) locationEvents.get(event.location).push(event.id);
+});
+
+function knownLocation(id){
+  return locations.has(id);
+}
+
+function involvement(eventIds){
+  const result = {
+    events:new Set(eventIds),
+    sentences:new Set(),
+    entities:new Set(),
+    locations:new Set()
+  };
+  eventIds.forEach(id => {
+    const event = eventById.get(id);
+    if(!event) return;
+    result.sentences.add(event.sentenceId);
+    result.entities.add(event.source);
+    result.entities.add(event.target);
+    if(knownLocation(event.location)) result.locations.add(event.location);
+  });
+  return result;
+}
+
+let hover = null;
+let selection = new Set();
+function activeInvolvement(){
+  if(hover) return hover;
+  if(selection.size) return involvement([...selection]);
+  return null;
+}
+function setHover(eventIds){
+  hover = involvement(eventIds);
+  applyHighlight();
+}
+function clearHover(){
+  hover = null;
+  applyHighlight();
+}
+function bindHover(node, eventIds){
+  const enter = () => setHover(typeof eventIds === "function" ? eventIds() : eventIds);
+  node.addEventListener("pointerenter", enter);
+  node.addEventListener("mouseenter", enter);
+  node.addEventListener("pointerleave", clearHover);
+  node.addEventListener("mouseleave", clearHover);
+}
+
+const sentenceSpans = new Map();
+function renderText(){
+  const panel = $("#textPanel");
+  let currentParagraph = null;
+  let currentIndex = -1;
+  DATA.sentences.forEach(sentence => {
+    if(sentence.p !== currentIndex){
+      currentIndex = sentence.p;
+      currentParagraph = document.createElement("p");
+      panel.appendChild(currentParagraph);
+    }
+    const span = document.createElement("span");
+    span.className = "sentence";
+    span.dataset.id = sentence.id;
+    span.textContent = sentence.text;
+    const enterSentence = () => {
+      const events = sentenceEvents.get(sentence.id);
+      if(events.length) setHover(events);
+      else {
+        hover = {events:new Set(), sentences:new Set([sentence.id]), entities:new Set(), locations:new Set()};
+        applyHighlight();
+      }
+    };
+    span.addEventListener("pointerenter", enterSentence);
+    span.addEventListener("mouseenter", enterSentence);
+    span.addEventListener("pointerleave", clearHover);
+    span.addEventListener("mouseleave", clearHover);
+    currentParagraph.appendChild(span);
+    currentParagraph.appendChild(document.createTextNode(" "));
+    sentenceSpans.set(sentence.id, span);
+  });
+}
+
+let graphNodes = [];
+let graphNodeById = new Map();
+let edgeGroups = [];
+let mapLocations = [];
+let mapCopies = [];
+let mapMoves = [];
+let timelineItems = [];
+
+function buildEdgeGroups(){
+  const groups = new Map();
+  DATA.events.forEach(event => {
+    const key = `${event.source}->${event.target}`;
+    if(!groups.has(key)) groups.set(key, {source:event.source, target:event.target, events:[], index:0});
+    groups.get(key).events.push(event.id);
+  });
+  edgeGroups = [...groups.values()];
+}
+
+function runForceLayout(){
+  const width = 920;
+  const height = 560;
+  graphNodes = DATA.entities.map((entity, index) => ({
+    id:entity.id,
+    entity,
+    x:width/2 + Math.cos(index * Math.PI * 2 / DATA.entities.length) * 275,
+    y:height/2 + Math.sin(index * Math.PI * 2 / DATA.entities.length) * 190
+  }));
+  graphNodeById = new Map(graphNodes.map(node => [node.id, node]));
+  const springs = edgeGroups.filter(group => group.source !== group.target)
+    .map(group => [graphNodeById.get(group.source), graphNodeById.get(group.target)])
+    .filter(pair => pair[0] && pair[1]);
+
+  for(let iteration = 0; iteration < 180; iteration++){
+    for(let a = 0; a < graphNodes.length; a++){
+      for(let b = a + 1; b < graphNodes.length; b++){
+        const first = graphNodes[a];
+        const second = graphNodes[b];
+        let dx = second.x - first.x;
+        let dy = second.y - first.y;
+        let distanceSq = dx * dx + dy * dy || 1;
+        let distance = Math.sqrt(distanceSq);
+        const force = 19000 / distanceSq;
+        dx /= distance;
+        dy /= distance;
+        first.x -= dx * force;
+        first.y -= dy * force;
+        second.x += dx * force;
+        second.y += dy * force;
+      }
+    }
+    springs.forEach(([first, second]) => {
+      let dx = second.x - first.x;
+      let dy = second.y - first.y;
+      let distance = Math.sqrt(dx * dx + dy * dy) || 1;
+      const force = (distance - 230) * .018;
+      dx /= distance;
+      dy /= distance;
+      first.x += dx * force;
+      first.y += dy * force;
+      second.x -= dx * force;
+      second.y -= dy * force;
+    });
+    graphNodes.forEach(node => {
+      node.x += (width / 2 - node.x) * .01;
+      node.y += (height / 2 - node.y) * .01;
+      node.x = Math.max(70, Math.min(width - 70, node.x));
+      node.y = Math.max(70, Math.min(height - 85, node.y));
+    });
+  }
+}
+
+function renderGraph(){
+  const svg = $("#graphView");
+  svg.innerHTML = "";
+  const defs = svgEl("defs", {}, svg);
+  const arrow = svgEl("marker", {id:"arrowGraph", viewBox:"0 0 10 10", refX:"9", refY:"5", markerWidth:"7", markerHeight:"7", orient:"auto-start-reverse"}, defs);
+  svgEl("path", {d:"M0,0 L10,5 L0,10 Z", fill:"#6F6E69"}, arrow);
+  const edgesLayer = svgEl("g", {}, svg);
+  const nodesLayer = svgEl("g", {}, svg);
+
+  edgeGroups.forEach(group => {
+    const item = svgEl("g", {class:"edgeGroup"}, edgesLayer);
+    group.g = item;
+    group.path = svgEl("path", {class:"edgePath", "marker-end":"url(#arrowGraph)"}, item);
+    group.label = svgEl("text", {class:"edgeLabel"}, item);
+    group.verbNode = document.createTextNode("");
+    group.label.appendChild(group.verbNode);
+    if(group.events.length > 1){
+      const previous = svgEl("tspan", {class:"edgeControl", dx:"7"}, group.label);
+      previous.textContent = "‹";
+      group.counter = svgEl("tspan", {dx:"3", fill:"#6F6E69"}, group.label);
+      const next = svgEl("tspan", {class:"edgeControl", dx:"3"}, group.label);
+      next.textContent = "›";
+      previous.addEventListener("click", event => {
+        event.stopPropagation();
+        group.index = (group.index - 1 + group.events.length) % group.events.length;
+        updateEdgeLabel(group);
+        applyHighlight();
+      });
+      next.addEventListener("click", event => {
+        event.stopPropagation();
+        group.index = (group.index + 1) % group.events.length;
+        updateEdgeLabel(group);
+        applyHighlight();
+      });
+    }
+    bindHover(item, () => [group.events[group.index]]);
+    updateEdgeLabel(group);
+  });
+
+  graphNodes.forEach(node => {
+    const item = svgEl("g", {class:"node", transform:`translate(${node.x},${node.y})`}, nodesLayer);
+    node.g = item;
+    svgEl("circle", {r:27, cx:0, cy:0, stroke:node.entity.color}, item);
+    const emoji = svgEl("text", {class:"emoji", x:0, y:1}, item);
+    emoji.textContent = node.entity.emoji;
+    const name = svgEl("text", {class:"nodeName", x:0, y:44}, item);
+    name.textContent = node.entity.name;
+    bindHover(item, () => [...new Set(entityEvents.get(node.id))]);
+    item.addEventListener("click", event => {
+      event.stopPropagation();
+      showEntityCard(node.entity);
+    });
+
+    let drag = null;
+    item.addEventListener("pointerdown", event => {
+      const point = svgPoint(svg, event);
+      drag = {dx:node.x - point.x, dy:node.y - point.y};
+      item.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+    item.addEventListener("pointermove", event => {
+      if(!drag) return;
+      const point = svgPoint(svg, event);
+      node.x = point.x + drag.dx;
+      node.y = point.y + drag.dy;
+      item.setAttribute("transform", `translate(${node.x},${node.y})`);
+      updateEdges();
+    });
+    item.addEventListener("pointerup", () => { drag = null; });
+    item.addEventListener("pointercancel", () => { drag = null; });
+  });
+  svg.addEventListener("click", hideEntityCard);
+  updateEdges();
+}
+
+function svgPoint(svg, event){
+  const point = svg.createSVGPoint();
+  point.x = event.clientX;
+  point.y = event.clientY;
+  return point.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+function enableWheelZoom(svg){
+  const base = svg.viewBox.baseVal;
+  const original = {x:base.x, y:base.y, width:base.width, height:base.height};
+  const minScale = .28;
+  const maxScale = 1.8;
+  svg.addEventListener("wheel", event => {
+    event.preventDefault();
+    const rect = svg.getBoundingClientRect();
+    if(!rect.width || !rect.height) return;
+    const pointerX = (event.clientX - rect.left) / rect.width;
+    const pointerY = (event.clientY - rect.top) / rect.height;
+    const viewBox = svg.viewBox.baseVal;
+    const worldX = viewBox.x + pointerX * viewBox.width;
+    const worldY = viewBox.y + pointerY * viewBox.height;
+    const factor = event.deltaY < 0 ? .86 : 1.16;
+    const minWidth = original.width * minScale;
+    const maxWidth = original.width * maxScale;
+    const nextWidth = Math.max(minWidth, Math.min(maxWidth, viewBox.width * factor));
+    const nextHeight = nextWidth * (original.height / original.width);
+    let nextX = worldX - pointerX * nextWidth;
+    let nextY = worldY - pointerY * nextHeight;
+    nextX = Math.max(original.x + original.width - nextWidth, Math.min(original.x, nextX));
+    nextY = Math.max(original.y + original.height - nextHeight, Math.min(original.y, nextY));
+    svg.setAttribute("viewBox", `${nextX} ${nextY} ${nextWidth} ${nextHeight}`);
+  }, {passive:false});
+}
+
+function updateEdgeLabel(group){
+  const event = eventById.get(group.events[group.index]);
+  group.verbNode.textContent = event.verb;
+  if(group.counter) group.counter.textContent = `${group.index + 1}/${group.events.length}`;
+}
+
+function updateEdges(){
+  edgeGroups.forEach(group => {
+    const source = graphNodeById.get(group.source);
+    const target = graphNodeById.get(group.target);
+    if(!source || !target) return;
+    if(group.source === group.target){
+      const x = source.x;
+      const y = source.y;
+      group.path.setAttribute("d", `M ${x - 13} ${y - 23} C ${x - 50} ${y - 86}, ${x + 50} ${y - 86}, ${x + 13} ${y - 23}`);
+      group.label.setAttribute("x", x);
+      group.label.setAttribute("y", y - 76);
+      return;
+    }
+    let dx = target.x - source.x;
+    let dy = target.y - source.y;
+    const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+    dx /= distance;
+    dy /= distance;
+    const px = -dy;
+    const py = dx;
+    const reciprocal = edgeGroups.some(other => other.source === group.target && other.target === group.source);
+    const offset = reciprocal ? 22 : 0;
+    const sx = source.x + dx * 31;
+    const sy = source.y + dy * 31;
+    const ex = target.x - dx * 35;
+    const ey = target.y - dy * 35;
+    const mx = (sx + ex) / 2 + px * offset;
+    const my = (sy + ey) / 2 + py * offset;
+    group.path.setAttribute("d", `M ${sx} ${sy} Q ${mx} ${my} ${ex} ${ey}`);
+    group.label.setAttribute("x", (sx + ex) / 2 + px * (offset + 12));
+    group.label.setAttribute("y", (sy + ey) / 2 + py * (offset + 12) + 4);
+  });
+}
+
+function showEntityCard(entity){
+  const card = $("#entityCard");
+  card.querySelector("h2").textContent = `${entity.emoji} ${entity.name}`;
+  const traits = card.querySelector(".traits");
+  traits.innerHTML = "";
+  entity.traits.forEach(([name, value]) => {
+    const label = document.createElement("div");
+    label.className = "trait";
+    label.textContent = `${name} · ${value}/10`;
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    const fill = document.createElement("span");
+    fill.style.width = `${value * 10}%`;
+    bar.appendChild(fill);
+    traits.appendChild(label);
+    traits.appendChild(bar);
+  });
+  card.style.display = "block";
+}
+function hideEntityCard(){
+  $("#entityCard").style.display = "none";
+}
+$("#entityCard button").addEventListener("click", hideEntityCard);
+
+function renderMap(){
+  const svg = $("#mapView");
+  svg.innerHTML = "";
+  mapLocations = [];
+  mapCopies = [];
+  mapMoves = [];
+  const defs = svgEl("defs", {}, svg);
+  const arrow = svgEl("marker", {id:"arrowMap", viewBox:"0 0 10 10", refX:"9", refY:"5", markerWidth:"6", markerHeight:"6", orient:"auto-start-reverse"}, defs);
+  svgEl("path", {d:"M0,0 L10,5 L0,10 Z", fill:"context-stroke"}, arrow);
+  const moveLayer = svgEl("g", {}, svg);
+  const locLayer = svgEl("g", {}, svg);
+  const copyLayer = svgEl("g", {}, svg);
+
+  DATA.locations.forEach(location => {
+    const group = svgEl("g", {class:"locNode", transform:`translate(${location.x},${location.y})`}, locLayer);
+    svgEl("circle", {r:47}, group);
+    const emoji = svgEl("text", {class:"emoji", x:0, y:0}, group);
+    emoji.textContent = location.emoji;
+    const name = svgEl("text", {class:"locName", x:0, y:70}, group);
+    name.textContent = location.name;
+    bindHover(group, () => locationEvents.get(location.id));
+    mapLocations.push({id:location.id, g:group});
+  });
+
+  const copyPositions = new Map();
+  DATA.entities.forEach((entity, entityIndex) => {
+    const route = [];
+    DATA.events.forEach(event => {
+      if((event.source === entity.id || event.target === entity.id) && knownLocation(event.location)){
+        if(route[route.length - 1] !== event.location) route.push(event.location);
+      }
+    });
+    const uniqueLocations = [...new Set(route)];
+    uniqueLocations.forEach(locationId => {
+      const location = locations.get(locationId);
+      const siblings = [...copyPositions.keys()].filter(key => key.endsWith(`|${locationId}`)).length;
+      const angle = -Math.PI / 2 + siblings * .78 + entityIndex * .11;
+      const x = location.x + Math.cos(angle) * 78;
+      const y = location.y + Math.sin(angle) * 78;
+      copyPositions.set(`${entity.id}|${locationId}`, {x,y});
+      const group = svgEl("g", {class:"copyNode", transform:`translate(${x},${y})`}, copyLayer);
+      svgEl("circle", {r:14, stroke:entity.color}, group);
+      const emoji = svgEl("text", {class:"emoji", x:0, y:0, style:"font-size:16px"}, group);
+      emoji.textContent = entity.emoji;
+      const label = svgEl("text", {class:"copyLabel", x:0, y:27}, group);
+      label.textContent = entity.name.replace(/^(El|La|Los) /, "");
+      bindHover(group, () => [...new Set(entityEvents.get(entity.id))]);
+      mapCopies.push({entity:entity.id, location:locationId, g:group});
+    });
+    for(let index = 0; index < route.length - 1; index++){
+      const from = route[index];
+      const to = route[index + 1];
+      if(from === to) continue;
+      const start = copyPositions.get(`${entity.id}|${from}`);
+      const end = copyPositions.get(`${entity.id}|${to}`);
+      if(!start || !end) continue;
+      drawMove(moveLayer, entity, start, end, index + 1);
+    }
+  });
+}
+
+function drawMove(layer, entity, start, end, number){
+  let dx = end.x - start.x;
+  let dy = end.y - start.y;
+  const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+  dx /= distance;
+  dy /= distance;
+  const px = -dy;
+  const py = dx;
+  const sx = start.x + dx * 17;
+  const sy = start.y + dy * 17;
+  const ex = end.x - dx * 19;
+  const ey = end.y - dy * 19;
+  const mx = (sx + ex) / 2 + px * 14;
+  const my = (sy + ey) / 2 + py * 14;
+  const group = svgEl("g", {class:"movePath"}, layer);
+  svgEl("path", {class:"moveLine", d:`M ${sx} ${sy} Q ${mx} ${my} ${ex} ${ey}`, stroke:entity.color, "marker-end":"url(#arrowMap)"}, group);
+  const label = svgEl("text", {class:"moveNum", x:mx, y:my - 4, fill:entity.color}, group);
+  label.textContent = number;
+  bindHover(group, () => [...new Set(entityEvents.get(entity.id))]);
+  mapMoves.push({entity:entity.id, g:group});
+}
+
+function renderTimeline(){
+  const svg = $("#timelineSvg");
+  svg.innerHTML = "";
+  timelineItems = [];
+  const width = Math.max(720, Math.round(svg.getBoundingClientRect().width || 920));
+  const height = 124;
+  const top = 31;
+  const bottom = 120;
+  const left = 22;
+  const right = width - 22;
+  const usable = right - left;
+  const step = usable / DATA.events.length;
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svgEl("line", {class:"axis", x1:left, y1:66, x2:right, y2:66}, svg);
+  const rangeGhost = svgEl("rect", {class:"rangeGhost", x:0, y:top, width:0, height:bottom - top}, svg);
+
+  DATA.events.forEach((event, index) => {
+    const x = left + step * index + step / 2;
+    const group = svgEl("g", {class:"timelineEvent", "data-event-id":event.id}, svg);
+    const line = svgEl("line", {class:"tick", x1:x, y1:46, x2:x, y2:84}, group);
+    const source = entities.get(event.source);
+    const target = entities.get(event.target);
+    const topEmoji = svgEl("text", {class:"timelineEmoji", x:x, y:39}, group);
+    topEmoji.textContent = source.emoji;
+    if(event.target !== event.source){
+      const bottomEmoji = svgEl("text", {class:"timelineEmoji", x:x, y:101}, group);
+      bottomEmoji.textContent = target.emoji;
+    }
+    const verb = svgEl("text", {class:"timelineVerb", transform:`translate(${x + 2},116) rotate(-18)`}, group);
+    verb.textContent = event.verb;
+    const hit = svgEl("rect", {class:"eventHit", x:x - step * .38, y:top, width:Math.max(10, step * .76), height:bottom - top, "data-event-id":event.id}, group);
+    bindHover(hit, [event.id]);
+    timelineItems.push({id:event.id, g:group, line, x});
+  });
+
+  let dragStart = null;
+  let dragging = false;
+  svg.onpointerdown = event => {
+    dragStart = timelineX(svg, event);
+    dragging = false;
+    svg.setPointerCapture(event.pointerId);
+  };
+  svg.onpointermove = event => {
+    if(dragStart === null) return;
+    const current = timelineX(svg, event);
+    if(Math.abs(current - dragStart) > 5){
+      dragging = true;
+      const x = Math.min(dragStart, current);
+      const w = Math.abs(current - dragStart);
+      rangeGhost.setAttribute("x", x);
+      rangeGhost.setAttribute("width", w);
+      rangeGhost.style.display = "block";
+      const lo = Math.min(dragStart, current);
+      const hi = Math.max(dragStart, current);
+      selection = new Set(timelineItems.filter(item => item.x >= lo && item.x <= hi).map(item => item.id));
+      applyHighlight();
+    }
+  };
+  svg.onpointerup = event => {
+    if(dragging){
+      rangeGhost.style.display = "none";
+      dragStart = null;
+      applyHighlight();
+      return;
+    }
+    const target = event.target.closest ? event.target.closest(".eventHit") : null;
+    if(target && target.dataset.eventId) selection = new Set([target.dataset.eventId]);
+    else selection = new Set();
+    dragStart = null;
+    applyHighlight();
+  };
+  svg.onpointercancel = () => {
+    dragStart = null;
+    rangeGhost.style.display = "none";
+  };
+  applyHighlight();
+}
+
+function timelineX(svg, event){
+  const rect = svg.getBoundingClientRect();
+  const viewBox = svg.viewBox.baseVal;
+  return (event.clientX - rect.left) * (viewBox.width / rect.width);
+}
+
+function switchView(view){
+  $$(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === view));
+  $("#graphView").classList.toggle("hidden", view !== "graph");
+  $("#mapView").classList.toggle("hidden", view !== "map");
+  hideEntityCard();
+  applyHighlight();
+}
+$$(".tab").forEach(tab => tab.addEventListener("click", () => switchView(tab.dataset.view)));
+
+function applyHighlight(){
+  const active = activeInvolvement();
+  sentenceSpans.forEach((span, id) => {
+    span.classList.toggle("is-highlight", !!active && active.sentences.has(id));
+  });
+  graphNodes.forEach(node => {
+    if(node.g) node.g.classList.toggle("is-dim", !!active && !active.entities.has(node.id));
+  });
+  edgeGroups.forEach(group => {
+    if(group.g) group.g.classList.toggle("is-dim", !!active && !group.events.some(id => active.events.has(id)));
+  });
+  mapLocations.forEach(item => {
+    item.g.classList.toggle("is-dim", !!active && !active.locations.has(item.id));
+  });
+  mapCopies.forEach(item => {
+    item.g.classList.toggle("is-dim", !!active && !active.entities.has(item.entity));
+  });
+  mapMoves.forEach(item => {
+    item.g.classList.toggle("is-dim", !!active && !active.entities.has(item.entity));
+  });
+  timelineItems.forEach(item => {
+    item.g.classList.toggle("is-dim", !!active && !active.events.has(item.id));
+    item.line.classList.toggle("selected", selection.has(item.id));
+  });
+}
+
+function boot(){
+  renderText();
+  buildEdgeGroups();
+  runForceLayout();
+  renderGraph();
+  renderMap();
+  enableWheelZoom($("#graphView"));
+  enableWheelZoom($("#mapView"));
+  renderTimeline();
+  applyHighlight();
+}
+window.addEventListener("resize", renderTimeline);
+boot();
+</script>
+</body>
+</html>

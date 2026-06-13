@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa visual — Todos vosotros, zombies</title>
+<style>
+:root{
+  --bg:#FFFCF0; --bg2:#F2F0E6; --ink:#100F0F; --sec:#6F6E69; --line:#DAD8CE;
+  --blue:#205EA6; --red:#AF3029; --green:#66800B; --orange:#BC5215;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+body{display:grid;grid-template-rows:auto 1fr auto;height:100vh;overflow:hidden}
+header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:14px}
+header h1{font-size:16px;margin:0;font-weight:650;letter-spacing:.2px}
+header .sub{font-size:12px;color:var(--sec)}
+.main{display:grid;grid-template-columns:minmax(280px,38%) 1fr;min-height:0}
+.textpane{overflow:auto;padding:18px 20px;border-right:1px solid var(--line);line-height:1.7;font-size:15px}
+.textpane .meta{font-size:11px;color:var(--sec);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.textpane span[data-id]{transition:background .15s ease,color .15s ease;border-radius:3px;padding:0 1px;cursor:default}
+.textpane span.on{background:#FCEBA4}
+.textpane span.dim{color:#B7B5AC}
+.vizpane{display:flex;flex-direction:column;min-width:0;min-height:0;position:relative}
+.tabs{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line)}
+.tab{font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--sec);padding:5px 12px;border-radius:999px;cursor:pointer}
+.tab.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stage{flex:1;position:relative;min-height:0}
+.view{position:absolute;inset:0;display:none}
+.view.show{display:block}
+svg{width:100%;height:100%;display:block;touch-action:none}
+.hint{position:absolute;left:12px;bottom:10px;font-size:11px;color:var(--sec);background:rgba(255,252,240,.8);padding:3px 8px;border-radius:6px;pointer-events:none}
+/* nodes */
+.enode circle{fill:var(--bg);stroke:var(--ink);stroke-width:1.4px;transition:opacity .15s}
+.enode .emj{font-size:26px;text-anchor:middle;dominant-baseline:central;cursor:grab;user-select:none}
+.enode .nm{font-size:12px;text-anchor:middle;fill:var(--ink);font-weight:600}
+.edge{fill:none;stroke:var(--sec);stroke-width:1.4px;transition:opacity .15s}
+.edgelabel{font-size:11px;fill:var(--sec);text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:3px;font-weight:600;user-select:none}
+.cyc{font-size:12px;fill:var(--blue);cursor:pointer;user-select:none;font-weight:700}
+.cnt{font-size:10px;fill:var(--sec);text-anchor:middle;user-select:none}
+.dim{opacity:.16}
+.on .edge,.edge.on{stroke:var(--blue);stroke-width:2.2px}
+.enode.on circle{stroke:var(--blue);stroke-width:2.4px}
+.lnode rect{fill:var(--bg2);stroke:var(--ink);stroke-width:1.3px}
+.lnode.on rect{stroke:var(--orange);stroke-width:2.4px}
+.lnode .lemj{font-size:24px;text-anchor:middle;dominant-baseline:central;user-select:none;cursor:grab}
+.lnode .lnm{font-size:11px;text-anchor:middle;fill:var(--ink);font-weight:600}
+.sat circle{fill:var(--bg);stroke:var(--sec);stroke-width:1.1px}
+.sat.on circle{stroke:var(--green);stroke-width:2px}
+.sat .semj{font-size:14px;text-anchor:middle;dominant-baseline:central;user-select:none}
+.traj{fill:none;stroke:var(--green);stroke-width:1.3px;stroke-dasharray:3 4;marker-end:url(#tarr);transition:opacity .15s}
+.trajn{font-size:9px;fill:var(--green);text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2.5px;font-weight:700}
+/* timeline */
+.timeline{border-top:1px solid var(--line);background:var(--bg);height:96px;display:flex;flex-direction:column}
+.tlhead{font-size:11px;color:var(--sec);padding:5px 12px 0;text-transform:uppercase;letter-spacing:.08em}
+.tlscroll{overflow-x:auto;overflow-y:hidden;flex:1}
+.tick{cursor:pointer}
+.tick line{stroke:var(--line);stroke-width:1.4px;transition:stroke .15s}
+.tick.on line{stroke:var(--blue);stroke-width:2.6px}
+.tick.sel line{stroke:var(--red);stroke-width:2.6px}
+.tick .te{font-size:13px;text-anchor:middle;user-select:none}
+.tick .tv{font-size:9px;fill:var(--sec);text-anchor:middle;user-select:none}
+.tick.dim{opacity:.22}
+/* card */
+.card{position:absolute;z-index:20;background:var(--bg);border:1px solid var(--ink);border-radius:10px;padding:12px 14px;width:210px;box-shadow:0 6px 22px rgba(16,15,15,.12);display:none}
+.card h3{margin:0 0 8px;font-size:14px}
+.card .tr{font-size:12px;margin:6px 0;color:var(--sec)}
+.card .bar{height:7px;background:var(--bg2);border-radius:4px;margin-top:3px;overflow:hidden}
+.card .bar i{display:block;height:100%;background:var(--blue)}
+.card .x{position:absolute;top:6px;right:9px;cursor:pointer;color:var(--sec);font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title"></h1>
+  <span class="sub">Mapa visual interactivo · pasa el cursor por el texto, el grafo o la línea de tiempo</span>
+</header>
+<div class="main">
+  <div class="textpane">
+    <div class="meta">El texto</div>
+    <div id="text"></div>
+  </div>
+  <div class="vizpane">
+    <div class="tabs">
+      <button class="tab active" data-view="ent">Entidades y acciones</button>
+      <button class="tab" data-view="loc">Localizaciones</button>
+    </div>
+    <div class="stage">
+      <div class="view show" id="view-ent">
+        <svg id="svgEnt"></svg>
+        <div class="hint">Arrastra nodos · rueda para zoom · doble clic para encuadrar · clic en un nodo: ficha</div>
+      </div>
+      <div class="view" id="view-loc">
+        <svg id="svgLoc"></svg>
+        <div class="hint">Arrastra las localizaciones · las flechas punteadas son trayectos</div>
+      </div>
+      <div class="card" id="card"></div>
+    </div>
+  </div>
+</div>
+<div class="timeline">
+  <div class="tlhead">Línea de tiempo — orden narrado</div>
+  <div class="tlscroll"><svg id="svgTl"></svg></div>
+</div>
+
+<script>
+const DATA = {"title": "—Todos vosotros, zombies—", "sentences": [{"id": "s0", "text": "La historia involucra una compleja serie de viajes a través del tiempo."}, {"id": "s1", "text": "Comienza con un joven que habla con el narrador, el camarero, en 1970."}, {"id": "s2", "text": "Los dos entablan conversación y se entienden entre sí, ya que ambos son hijos de padres que no están casados."}, {"id": "s3", "text": "El camarero comenta que nadie en su familia se casa nunca, incluyéndose él mismo."}, {"id": "s4", "text": "Lleva un anillo de Uróboros."}, {"id": "s5", "text": "El joven se hace llamar la Madre Soltera, porque escribe historias para revistas confesionales, muchas de las cuales están escritas presuntamente desde el punto de vista de una madre soltera."}, {"id": "s6", "text": "Engatusado por el camarero, la Madre Soltera explica por qué él comprende tan bien el punto de vista femenino: nació como una niña, en 1945, y se crio en un orfanato."}, {"id": "s7", "text": "A pesar de ser una adolescente bastante fea en 1963, fue seducida, fecundada, y abandonada por un hombre mayor."}, {"id": "s8", "text": "Durante el nacimiento de su hija, los médicos descubrieron que era intersexual, poseyendo órganos sexuales masculinos internos, así como órganos sexuales femeninos."}, {"id": "s9", "text": "Las complicaciones durante el parto dejaron los órganos femeninos inviables y ello obligó a los médicos a efectuar una cirugía de reasignación de sexo."}, {"id": "s10", "text": "El bebé fue secuestrado por un misterioso hombre mayor, y no lo volvió a ver."}, {"id": "s11", "text": "La Madre Soltera, entonces, tuvo que adaptarse a la vida como hombre, a pesar de que su crianza como mujer lo dejó descalificado para trabajos \"de hombres\"; su plan original había sido ir al espacio como trabajadora sexual para obreros y colonos."}, {"id": "s12", "text": "En su lugar, usó sus habilidades de secretaria para redactar y escribir manuscritos."}, {"id": "s13", "text": "Profesándole simpatía, el camarero le ofrece llevarlo hasta el individuo que la sedujo y abandonó, ya que la Madre Soltera desea vengarse de él."}, {"id": "s14", "text": "El camarero lo guía a un cuarto en la parte posterior del bar, donde usa una máquina del tiempo para llevarlos a 1963, donde deja al joven."}, {"id": "s15", "text": "El camarero de nuevo viaja once meses al futuro y secuestra a un bebé recién nacido, llevándoselo a 1945 y dejándolo en un orfanato."}, {"id": "s16", "text": "Él vuelve a 1963, y recoge a la Madre Soltera, que instintivamente atraído hacia su yo mujer más joven, la ha seducido y dejado embarazada."}, {"id": "s17", "text": "El camarero le anima a conectar los puntos, y a darse cuenta de que el seductor, la joven mujer, el bebé y el viajero del tiempo son todos él mismo."}, {"id": "s18", "text": "El camarero deja a la Madre Soltera en un puesto de avanzada de la Agencia Temporal, un cuerpo policiaco secreto que viaja en el tiempo para manipular eventos históricos, para proteger a la especie humana."}, {"id": "s19", "text": "Se ha creado y reclutado a sí mismo."}, {"id": "s20", "text": "Finalmente regresa a 1970, llegando poco tiempo después de su salida del bar."}, {"id": "s21", "text": "Él permite que un cliente toque la canción I'm My Own Grandpa (\"Yo soy mi propio abuelo\") en la sinfonola, después de haberle gritado al mismo cliente justo antes de dejar el bar."}, {"id": "s22", "text": "Después de cerrar el bar, viaja de nuevo en el tiempo hacia su base."}, {"id": "s23", "text": "Mientras se acuesta para tomar un merecido descanso, contempla la cicatriz que le dejó la cesárea que sufrió cuando dio luz a su hija, padre, madre e historia entera."}, {"id": "s24", "text": "Finalmente reflexiona, \"Sé de dónde vengo yo—pero ¿de dónde venís todos vosotros, zombies?\"."}], "entities": [{"id": "camarero", "name": "El camarero", "emoji": "🍸", "traits": [["omnisciente", 9], ["manipulador", 8], ["sereno", 7]]}, {"id": "joven", "name": "La Madre Soltera", "emoji": "🖋️", "traits": [["resentido", 8], ["perspicaz", 7], ["ingenuo", 6]]}, {"id": "jane", "name": "Jane (joven)", "emoji": "👧", "traits": [["curiosa", 7], ["vulnerable", 8], ["soñadora", 7]]}, {"id": "bebe", "name": "El bebé", "emoji": "🍼", "traits": [["inocente", 10], ["frágil", 9]]}, {"id": "medicos", "name": "Los médicos", "emoji": "🩺", "traits": [["clínicos", 7], ["decididos", 6]]}, {"id": "agencia", "name": "La Agencia Temporal", "emoji": "🛡️", "traits": [["secreta", 9], ["vigilante", 8]]}, {"id": "cliente", "name": "Un cliente", "emoji": "🎶", "traits": [["ajeno", 6]]}], "locations": [{"id": "bar", "name": "El bar, 1970", "emoji": "🍻"}, {"id": "cuarto", "name": "Cuarto trasero", "emoji": "⏳"}, {"id": "y1963", "name": "1963, la cita", "emoji": "💔"}, {"id": "hospital", "name": "El hospital", "emoji": "🏥"}, {"id": "orfanato", "name": "El orfanato, 1945", "emoji": "🏠"}, {"id": "base", "name": "La base temporal", "emoji": "🏔️"}], "events": [{"verb": "hablar", "source": "joven", "target": "camarero", "location": "bar", "sentenceId": "s1"}, {"verb": "conversar", "source": "camarero", "target": "joven", "location": "bar", "sentenceId": "s2"}, {"verb": "comentar", "source": "camarero", "target": "camarero", "location": "bar", "sentenceId": "s3"}, {"verb": "lucir anillo", "source": "camarero", "target": "camarero", "location": "bar", "sentenceId": "s4"}, {"verb": "escribir", "source": "joven", "target": "joven", "location": "bar", "sentenceId": "s5"}, {"verb": "explicar", "source": "joven", "target": "camarero", "location": "bar", "sentenceId": "s6"}, {"verb": "seducir", "source": "joven", "target": "jane", "location": "y1963", "sentenceId": "s7"}, {"verb": "abandonar", "source": "joven", "target": "jane", "location": "y1963", "sentenceId": "s7"}, {"verb": "descubrir", "source": "medicos", "target": "jane", "location": "hospital", "sentenceId": "s8"}, {"verb": "operar", "source": "medicos", "target": "jane", "location": "hospital", "sentenceId": "s9"}, {"verb": "secuestrar", "source": "camarero", "target": "bebe", "location": "hospital", "sentenceId": "s10"}, {"verb": "adaptarse", "source": "joven", "target": "joven", "location": "desconocida", "sentenceId": "s11"}, {"verb": "escribir", "source": "joven", "target": "joven", "location": "desconocida", "sentenceId": "s12"}, {"verb": "ofrecer", "source": "camarero", "target": "joven", "location": "bar", "sentenceId": "s13"}, {"verb": "guiar", "source": "camarero", "target": "joven", "location": "cuarto", "sentenceId": "s14"}, {"verb": "dejar", "source": "camarero", "target": "joven", "location": "y1963", "sentenceId": "s14"}, {"verb": "secuestrar", "source": "camarero", "target": "bebe", "location": "hospital", "sentenceId": "s15"}, {"verb": "dejar", "source": "camarero", "target": "bebe", "location": "orfanato", "sentenceId": "s15"}, {"verb": "recoger", "source": "camarero", "target": "joven", "location": "y1963", "sentenceId": "s16"}, {"verb": "seducir", "source": "joven", "target": "jane", "location": "y1963", "sentenceId": "s16"}, {"verb": "revelar", "source": "camarero", "target": "joven", "location": "bar", "sentenceId": "s17"}, {"verb": "enlistar", "source": "camarero", "target": "joven", "location": "base", "sentenceId": "s18"}, {"verb": "crearse", "source": "joven", "target": "joven", "location": "base", "sentenceId": "s19"}, {"verb": "regresar", "source": "camarero", "target": "camarero", "location": "bar", "sentenceId": "s20"}, {"verb": "permitir", "source": "camarero", "target": "cliente", "location": "bar", "sentenceId": "s21"}, {"verb": "gritar", "source": "camarero", "target": "cliente", "location": "bar", "sentenceId": "s21"}, {"verb": "viajar", "source": "camarero", "target": "camarero", "location": "base", "sentenceId": "s22"}, {"verb": "contemplar", "source": "camarero", "target": "camarero", "location": "base", "sentenceId": "s23"}, {"verb": "reflexionar", "source": "camarero", "target": "camarero", "location": "base", "sentenceId": "s24"}]};
+
+// ---------- índices ----------
+const E = {}; DATA.entities.forEach(e=>E[e.id]=e);
+const L = {}; DATA.locations.forEach(l=>L[l.id]=l);
+DATA.events.forEach((ev,i)=>ev._i=i);
+const evBySent = {};
+DATA.events.forEach(ev=>{ (evBySent[ev.sentenceId] ||= []).push(ev._i); });
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const n=document.createElementNS(SVGNS,tag);if(attrs)for(const k in attrs)n.setAttribute(k,attrs[k]);return n;}
+
+document.getElementById('title').textContent = DATA.title + ' · creado con Opus 4.8';
+
+// ---------- texto ----------
+const textBox=document.getElementById('text');
+DATA.sentences.forEach(s=>{
+  const sp=document.createElement('span');
+  sp.dataset.id=s.id; sp.textContent=s.text+' ';
+  sp.addEventListener('mouseenter',()=>focusEvents(evBySent[s.id]||[], s.id));
+  sp.addEventListener('mouseleave',restore);
+  textBox.appendChild(sp);
+});
+const spanEls={}; textBox.querySelectorAll('span[data-id]').forEach(sp=>spanEls[sp.dataset.id]=sp);
+
+// ---------- estado de resaltado ----------
+let selection=new Set();
+const entNodeEls={}, locNodeEls={}, satEls=[], trajEls=[], tickEls=[];
+let edgeGroups=[];
+
+function clearAll(){
+  for(const id in spanEls){spanEls[id].classList.remove('on','dim');}
+  for(const id in entNodeEls){entNodeEls[id].g.classList.remove('on','dim');}
+  edgeGroups.forEach(g=>{g.path.classList.remove('on');g.path.classList.remove('dim');if(g.lbl)g.lbl.classList.remove('dim');if(g.box)g.box.classList.remove('dim');});
+  for(const id in locNodeEls){locNodeEls[id].g.classList.remove('on','dim');}
+  satEls.forEach(s=>s.g.classList.remove('on','dim'));
+  trajEls.forEach(t=>{t.path.classList.remove('on','dim');t.num.classList.remove('dim');});
+  tickEls.forEach(t=>t.g.classList.remove('on','dim'));
+}
+function paint(evs,sents,ents,locs){
+  for(const id in spanEls){spanEls[id].classList.toggle('on',sents.has(id));spanEls[id].classList.toggle('dim',!sents.has(id));}
+  for(const id in entNodeEls){const on=ents.has(id);entNodeEls[id].g.classList.toggle('on',on);entNodeEls[id].g.classList.toggle('dim',!on);}
+  edgeGroups.forEach(g=>{const on=g.events.some(i=>evs.has(i));g.path.classList.toggle('on',on);g.path.classList.toggle('dim',!on);if(g.lbl)g.lbl.classList.toggle('dim',!on);if(g.box)g.box.classList.toggle('dim',!on);});
+  for(const id in locNodeEls){const on=locs.has(id);locNodeEls[id].g.classList.toggle('on',on);locNodeEls[id].g.classList.toggle('dim',!on);}
+  satEls.forEach(s=>{const on=ents.has(s.ent);s.g.classList.toggle('on',on);s.g.classList.toggle('dim',!on);});
+  trajEls.forEach(t=>{const on=ents.has(t.ent);t.path.classList.toggle('on',on);t.path.classList.toggle('dim',!on);t.num.classList.toggle('dim',!on);});
+  tickEls.forEach(t=>{const on=evs.has(t.idx);t.g.classList.toggle('on',on);t.g.classList.toggle('dim',!on);});
+}
+function focusEvents(evIdxs, sentExtra){
+  evIdxs=evIdxs||[];
+  if(evIdxs.length===0 && !sentExtra){ restore(); return; }
+  const evs=new Set(evIdxs), sents=new Set(), ents=new Set(), locs=new Set();
+  if(sentExtra) sents.add(sentExtra);
+  evIdxs.forEach(i=>{const ev=DATA.events[i];sents.add(ev.sentenceId);ents.add(ev.source);ents.add(ev.target);if(ev.location!=='desconocida')locs.add(ev.location);});
+  paint(evs,sents,ents,locs);
+}
+function restore(){
+  if(selection.size){ focusEvents([...selection]); }
+  else clearAll();
+}
+
+// ---------- GRAFO DE ENTIDADES ----------
+const svgE=document.getElementById('svgEnt');
+let worldE=el('g',{id:'worldE'});
+svgE.appendChild(el('defs')).appendChild(mkMarker('arr',getCss('--sec')));
+svgE.appendChild(worldE);
+function mkMarker(id,color){const m=el('marker',{id:id,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'});m.appendChild(el('path',{d:'M0 0 L10 5 L0 10 z',fill:color}));return m;}
+function getCss(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+
+const nodes=DATA.entities.map(e=>({id:e.id,e}));
+const N={}; nodes.forEach(n=>N[n.id]=n);
+// pares para muelles
+const pairKeys=new Set();
+DATA.events.forEach(ev=>{if(ev.source!==ev.target)pairKeys.add(ev.source+'>'+ev.target);});
+const springs=[...pairKeys].map(k=>{const [a,b]=k.split('>');return [a,b];});
+// layout de fuerzas
+nodes.forEach((n,i)=>{const a=i/nodes.length*6.283;n.x=480+Math.cos(a)*180+(Math.random()-.5)*40;n.y=240+Math.sin(a)*130+(Math.random()-.5)*40;});
+for(let it=0;it<260;it++){
+  for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
+    const a=nodes[i],b=nodes[j];let dx=a.x-b.x,dy=a.y-b.y;let d=Math.hypot(dx,dy)||.01;
+    const f=9000/(d*d); const ux=dx/d,uy=dy/d; a.x+=ux*f;a.y+=uy*f;b.x-=ux*f;b.y-=uy*f;
+  }
+  springs.forEach(([a,b])=>{const na=N[a],nb=N[b];let dx=nb.x-na.x,dy=nb.y-na.y,d=Math.hypot(dx,dy)||.01;const f=(d-150)*0.04;const ux=dx/d,uy=dy/d;na.x+=ux*f;na.y+=uy*f;nb.x-=ux*f;nb.y-=uy*f;});
+  nodes.forEach(n=>{n.x+=(480-n.x)*0.01;n.y+=(240-n.y)*0.01;});
+}
+// grupos de aristas
+const gmap={};
+DATA.events.forEach(ev=>{const k=ev.source+'>'+ev.target;(gmap[k]||=[]).push(ev._i);});
+edgeGroups=Object.keys(gmap).map(k=>{const [s,t]=k.split('>');return {source:s,target:t,events:gmap[k],ci:0};});
+// dibujar aristas
+edgeGroups.forEach(g=>{
+  g.path=el('path',{class:'edge','marker-end':'url(#arr)'});
+  if(g.source===g.target)g.path.removeAttribute('marker-end');
+  worldE.appendChild(g.path);
+  g.lbl=el('text',{class:'edgelabel'}); worldE.appendChild(g.lbl);
+  g.path.addEventListener('mouseenter',()=>focusEvents(g.events));
+  g.path.addEventListener('mouseleave',restore);
+  if(g.events.length>1){
+    g.box=el('g',{});
+    g.prev=el('text',{class:'cyc'});g.prev.textContent='‹';
+    g.next=el('text',{class:'cyc'});g.next.textContent='›';
+    g.cnt=el('text',{class:'cnt'});
+    g.box.appendChild(g.prev);g.box.appendChild(g.cnt);g.box.appendChild(g.next);
+    worldE.appendChild(g.box);
+    g.prev.addEventListener('click', e=>{e.stopPropagation();g.ci=(g.ci-1+g.events.length)%g.events.length;updateEdgeLabel(g);focusEvents([g.events[g.ci]]);});
+    g.next.addEventListener('click',e=>{e.stopPropagation();g.ci=(g.ci+1)%g.events.length;updateEdgeLabel(g);focusEvents([g.events[g.ci]]);});
+  }
+});
+// nodos
+nodes.forEach(n=>{
+  const grp=el('g',{class:'enode'});
+  const c=el('circle',{r:26,cx:0,cy:0});
+  const emj=el('text',{class:'emj',x:0,y:2});emj.textContent=n.e.emoji;
+  const nm=el('text',{class:'nm',x:0,y:42});nm.textContent=n.e.name;
+  grp.appendChild(c);grp.appendChild(emj);grp.appendChild(nm);
+  worldE.appendChild(grp);
+  entNodeEls[n.id]={g:grp};
+  grp.addEventListener('mouseenter',()=>{const evs=DATA.events.filter(ev=>ev.source===n.id||ev.target===n.id).map(ev=>ev._i);focusEvents(evs);});
+  grp.addEventListener('mouseleave',restore);
+  enableNodeDrag(grp,n,emj);
+});
+function updateEdgeLabel(g){
+  const ev=DATA.events[g.events[g.ci]];
+  g.lbl.textContent=ev.verb;
+  if(g.cnt)g.cnt.textContent=(g.ci+1)+'/'+g.events.length;
+}
+edgeGroups.forEach(updateEdgeLabel);
+
+function redrawEdges(){
+  edgeGroups.forEach(g=>{
+    const s=N[g.source],t=N[g.target];
+    if(g.source===g.target){
+      const x=s.x,y=s.y,r=26;
+      g.path.setAttribute('d',`M ${x-9} ${y-r+2} C ${x-52} ${y-r-52}, ${x+52} ${y-r-52}, ${x+9} ${y-r+2}`);
+      g.lx=x; g.ly=y-r-44;
+    }else{
+      let dx=t.x-s.x,dy=t.y-s.y,d=Math.hypot(dx,dy)||1;const ux=dx/d,uy=dy/d,r=26;
+      const x1=s.x+ux*r,y1=s.y+uy*r,x2=t.x-ux*(r+9),y2=t.y-uy*(r+9);
+      const sign=g.source<g.target?1:-1;const nx=-uy,ny=ux;const cv=22*sign;
+      const mx=(x1+x2)/2+nx*cv,my=(y1+y2)/2+ny*cv;
+      g.path.setAttribute('d',`M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`);
+      g.lx=mx; g.ly=my;
+    }
+    g.lbl.setAttribute('x',g.lx);g.lbl.setAttribute('y',g.ly-3);
+    if(g.box){
+      g.cnt.setAttribute('x',g.lx);g.cnt.setAttribute('y',g.ly+12);
+      g.prev.setAttribute('x',g.lx-22);g.prev.setAttribute('y',g.ly+13);
+      g.next.setAttribute('x',g.lx+18);g.next.setAttribute('y',g.ly+13);
+    }
+  });
+}
+function placeNodes(){nodes.forEach(n=>{entNodeEls[n.id].g.setAttribute('transform',`translate(${n.x} ${n.y})`);});redrawEdges();}
+placeNodes();
+
+// zoom & pan grafo entidades
+const camE={k:1,tx:0,ty:0,k0:1};
+function applyCamE(){worldE.setAttribute('transform',`translate(${camE.tx} ${camE.ty}) scale(${camE.k})`);}
+function fitView(svg,cam,pts){
+  const r=svg.getBoundingClientRect();if(!r.width)return;
+  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  pts.forEach(p=>{minx=Math.min(minx,p.x);miny=Math.min(miny,p.y);maxx=Math.max(maxx,p.x);maxy=Math.max(maxy,p.y);});
+  minx-=70;miny-=70;maxx+=70;maxy+=70;
+  const bw=maxx-minx,bh=maxy-miny;
+  const k=Math.min(r.width/bw,r.height/bh)*0.92;
+  cam.k=k;cam.k0=k;cam.tx=(r.width-bw*k)/2-minx*k;cam.ty=(r.height-bh*k)/2-miny*k;
+}
+function setupZoomPan(svg,world,cam,apply,pts){
+  svg.addEventListener('wheel',e=>{e.preventDefault();const r=svg.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;const wx=(mx-cam.tx)/cam.k,wy=(my-cam.ty)/cam.k;let nk=cam.k*(e.deltaY<0?1.12:0.89);nk=Math.max(cam.k0*0.4,Math.min(cam.k0*5,nk));cam.k=nk;cam.tx=mx-wx*nk;cam.ty=my-wy*nk;apply();},{passive:false});
+  let panning=false,sx,sy,stx,sty;
+  svg.addEventListener('pointerdown',e=>{if(e.target.closest('.enode')||e.target.closest('.lnode'))return;panning=true;sx=e.clientX;sy=e.clientY;stx=cam.tx;sty=cam.ty;svg.setPointerCapture(e.pointerId);});
+  svg.addEventListener('pointermove',e=>{if(!panning)return;cam.tx=stx+(e.clientX-sx);cam.ty=sty+(e.clientY-sy);apply();});
+  svg.addEventListener('pointerup',e=>{panning=false;});
+  svg.addEventListener('dblclick',e=>{fitView(svg,cam,pts);apply();});
+}
+
+function enableNodeDrag(grp,n,emj){
+  let dragging=false,moved=false,sx,sy,ox,oy;
+  grp.addEventListener('pointerdown',e=>{e.stopPropagation();dragging=true;moved=false;sx=e.clientX;sy=e.clientY;ox=n.x;oy=n.y;grp.setPointerCapture(e.pointerId);emj.style.cursor='grabbing';});
+  grp.addEventListener('pointermove',e=>{if(!dragging)return;const dx=(e.clientX-sx)/camE.k,dy=(e.clientY-sy)/camE.k;if(Math.abs(e.clientX-sx)+Math.abs(e.clientY-sy)>4)moved=true;n.x=ox+dx;n.y=oy+dy;placeNodes();});
+  grp.addEventListener('pointerup',e=>{dragging=false;emj.style.cursor='grab';if(!moved)showCard(n,e);});
+}
+
+// ficha de entidad
+const card=document.getElementById('card');
+function showCard(n,e){
+  const ent=n.e;
+  let html=`<span class="x">✕</span><h3>${ent.emoji} ${ent.name}</h3>`;
+  ent.traits.forEach(([t,v])=>{html+=`<div class="tr">${t} · ${v}/10<div class="bar"><i style="width:${v*10}%"></i></div></div>`;});
+  card.innerHTML=html;card.style.display='block';
+  const host=card.parentElement.getBoundingClientRect();
+  let lx=e.clientX-host.left+12, ly=e.clientY-host.top+12;
+  lx=Math.min(lx,host.width-card.offsetWidth-8); ly=Math.min(ly,host.height-card.offsetHeight-8);
+  card.style.left=Math.max(8,lx)+'px';card.style.top=Math.max(8,ly)+'px';
+  card.querySelector('.x').onclick=()=>card.style.display='none';
+}
+document.querySelector('.stage').addEventListener('pointerdown',e=>{if(!e.target.closest('.enode')&&!e.target.closest('#card'))card.style.display='none';});
+
+// ---------- MAPA DE LOCALIZACIONES ----------
+const svgL=document.getElementById('svgLoc');
+let worldL=el('g',{id:'worldL'});
+const defsL=el('defs');defsL.appendChild(mkMarker('tarr',getCss('--green')));
+svgL.appendChild(defsL);svgL.appendChild(worldL);
+
+const locOrder=DATA.locations.map(l=>l.id);
+const LN={};
+locOrder.forEach((id,i)=>{const cols=3;const cx=200+(i%cols)*230;const cy=150+Math.floor(i/cols)*210;LN[id]={id,x:cx,y:cy,l:L[id]};});
+// entidades presentes por localización
+const entsByLoc={};locOrder.forEach(id=>entsByLoc[id]=[]);
+DATA.events.forEach(ev=>{if(ev.location==='desconocida')return;[ev.source,ev.target].forEach(en=>{if(!entsByLoc[ev.location].includes(en))entsByLoc[ev.location].push(en);});});
+// trayectos por entidad (orden narrado, sin repetir consecutivos)
+const trajByEnt={};
+DATA.entities.forEach(e=>{const seq=[];DATA.events.forEach(ev=>{if(ev.location==='desconocida')return;if(ev.source===e.id||ev.target===e.id){if(seq[seq.length-1]!==ev.location)seq.push(ev.location);}});if(seq.length>1)trajByEnt[e.id]=seq;});
+
+const satPos={}; // ent|loc -> {x,y}
+function computeSat(){
+  locOrder.forEach(id=>{const list=entsByLoc[id];const ln=LN[id];const n=list.length;list.forEach((en,i)=>{const a=(i/Math.max(1,n))*6.283-1.57;satPos[en+'|'+id]={x:ln.x+Math.cos(a)*70,y:ln.y+Math.sin(a)*70};});});
+}
+computeSat();
+
+// dibujar trayectos (debajo)
+Object.keys(trajByEnt).forEach(en=>{
+  const seq=trajByEnt[en];
+  for(let k=0;k<seq.length-1;k++){
+    const path=el('path',{class:'traj'});
+    const num=el('text',{class:'trajn'});num.textContent=(k+1);
+    worldL.appendChild(path);worldL.appendChild(num);
+    trajEls.push({ent:en,from:seq[k],to:seq[k+1],path,num});
+  }
+});
+// nodos de localización
+locOrder.forEach(id=>{
+  const ln=LN[id];const grp=el('g',{class:'lnode'});
+  const w=120,h=56;
+  const rect=el('rect',{x:-w/2,y:-h/2,width:w,height:h,rx:10});
+  const emj=el('text',{class:'lemj',x:0,y:-6});emj.textContent=ln.l.emoji;
+  const nm=el('text',{class:'lnm',x:0,y:18});nm.textContent=ln.l.name;
+  grp.appendChild(rect);grp.appendChild(emj);grp.appendChild(nm);
+  worldL.appendChild(grp);locNodeEls[id]={g:grp};
+  grp.addEventListener('mouseenter',()=>{const evs=DATA.events.filter(ev=>ev.location===id).map(ev=>ev._i);focusEvents(evs);});
+  grp.addEventListener('mouseleave',restore);
+  enableLocDrag(grp,ln,emj);
+});
+// satélites (entidades pequeñas)
+locOrder.forEach(id=>{
+  entsByLoc[id].forEach(en=>{
+    const grp=el('g',{class:'sat'});
+    const c=el('circle',{r:14,cx:0,cy:0});
+    const t=el('text',{class:'semj',x:0,y:1});t.textContent=E[en].emoji;
+    grp.appendChild(c);grp.appendChild(t);worldL.appendChild(grp);
+    satEls.push({ent:en,loc:id,g:grp});
+    grp.addEventListener('mouseenter',()=>{const evs=DATA.events.filter(ev=>ev.source===en||ev.target===en).map(ev=>ev._i);focusEvents(evs);});
+    grp.addEventListener('mouseleave',restore);
+  });
+});
+function placeLoc(){
+  locOrder.forEach(id=>{locNodeEls[id].g.setAttribute('transform',`translate(${LN[id].x} ${LN[id].y})`);});
+  computeSat();
+  satEls.forEach(s=>{const p=satPos[s.ent+'|'+s.loc];s.g.setAttribute('transform',`translate(${p.x} ${p.y})`);});
+  trajEls.forEach(t=>{
+    const a=satPos[t.ent+'|'+t.from],b=satPos[t.ent+'|'+t.to];if(!a||!b)return;
+    let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1;const ux=dx/d,uy=dy/d;
+    const x1=a.x+ux*15,y1=a.y+uy*15,x2=b.x-ux*17,y2=b.y-uy*17;
+    const nx=-uy,ny=ux;const mx=(x1+x2)/2+nx*16,my=(y1+y2)/2+ny*16;
+    t.path.setAttribute('d',`M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`);
+    t.num.setAttribute('x',mx);t.num.setAttribute('y',my);
+  });
+}
+placeLoc();
+function enableLocDrag(grp,ln,emj){
+  let dragging=false,sx,sy,ox,oy;
+  grp.addEventListener('pointerdown',e=>{e.stopPropagation();dragging=true;sx=e.clientX;sy=e.clientY;ox=ln.x;oy=ln.y;grp.setPointerCapture(e.pointerId);emj.style.cursor='grabbing';});
+  grp.addEventListener('pointermove',e=>{if(!dragging)return;ln.x=ox+(e.clientX-sx)/camL.k;ln.y=oy+(e.clientY-sy)/camL.k;placeLoc();});
+  grp.addEventListener('pointerup',e=>{dragging=false;emj.style.cursor='grab';});
+}
+const camL={k:1,tx:0,ty:0,k0:1};
+function applyCamL(){worldL.setAttribute('transform',`translate(${camL.tx} ${camL.ty}) scale(${camL.k})`);}
+
+// ---------- TIMELINE ----------
+const svgT=document.getElementById('svgTl');
+const tlScroll=document.querySelector('.tlscroll');
+function buildTimeline(){
+  const n=DATA.events.length;const step=54;const pad=30;const W=pad*2+(n-1)*step;const H=70;
+  svgT.setAttribute('width',W);svgT.setAttribute('height',H);svgT.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  DATA.events.forEach((ev,i)=>{
+    const x=pad+i*step;const grp=el('g',{class:'tick'});grp.dataset.idx=i;
+    grp.appendChild(el('line',{x1:x,y1:20,x2:x,y2:46}));
+    const se=el('text',{class:'te',x:x,y:14});se.textContent=E[ev.source].emoji;grp.appendChild(se);
+    if(ev.target!==ev.source){const te=el('text',{class:'te',x:x+11,y:17,style:'font-size:10px'});te.textContent=E[ev.target].emoji;grp.appendChild(te);}
+    const tv=el('text',{class:'tv',x:x,y:60});tv.textContent=ev.verb;grp.appendChild(tv);
+    svgT.appendChild(grp);
+    tickEls.push({idx:i,g:grp});
+    grp.addEventListener('mouseenter',()=>{if(!dragSel)focusEvents([i]);});
+    grp.addEventListener('mouseleave',()=>{if(!dragSel)restore();});
+  });
+  // selección por clic / arrastre
+  let dragStart=null;
+  function idxFromX(clientX){const r=svgT.getBoundingClientRect();const x=clientX-r.left;return Math.round((x-pad)/step);}
+  svgT.addEventListener('pointerdown',e=>{
+    const tg=e.target.closest('.tick');
+    if(!tg){selection.clear();restore();return;}
+    dragSel=true;dragStart=+tg.dataset.idx;selection=new Set([dragStart]);applySel();svgT.setPointerCapture(e.pointerId);
+  });
+  svgT.addEventListener('pointermove',e=>{if(!dragSel)return;let cur=idxFromX(e.clientX);cur=Math.max(0,Math.min(n-1,cur));const a=Math.min(dragStart,cur),b=Math.max(dragStart,cur);selection=new Set();for(let i=a;i<=b;i++)selection.add(i);applySel();});
+  svgT.addEventListener('pointerup',e=>{dragSel=false;});
+}
+let dragSel=false;
+function applySel(){
+  tickEls.forEach(t=>t.g.classList.toggle('sel',selection.has(t.idx)));
+  restore();
+}
+buildTimeline();
+
+// ---------- pestañas ----------
+document.querySelectorAll('.tab').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const v=b.dataset.view;
+    document.getElementById('view-ent').classList.toggle('show',v==='ent');
+    document.getElementById('view-loc').classList.toggle('show',v==='loc');
+    if(v==='loc'){requestAnimationFrame(()=>{fitView(svgL,camL,Object.values(LN));applyCamL();});}
+    else{requestAnimationFrame(()=>{applyCamE();});}
+  });
+});
+
+// ---------- init zoom/pan + encuadre ----------
+setupZoomPan(svgE,worldE,camE,applyCamE,nodes);
+setupZoomPan(svgL,worldL,camL,applyCamL,Object.values(LN));
+function initViews(){fitView(svgE,camE,nodes);applyCamE();fitView(svgL,camL,Object.values(LN));applyCamL();}
+requestAnimationFrame(()=>{requestAnimationFrame(initViews);});
+window.addEventListener('resize',()=>{fitView(svgE,camE,nodes);applyCamE();fitView(svgL,camL,Object.values(LN));applyCamL();});
+</script>
+</body>
+</html>
