@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Simulador Hipoteca Segunda Vivienda 2026</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #1e40af;
+      --success: #16a34a;
+      --warning: #ca8a04;
+      --danger: #dc2626;
+      --gold: #b45309;
+      --radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.12);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --text: #f1f5f9;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --shadow: 0 2px 8px rgba(0,0,0,.4);
+        --shadow-md: 0 4px 16px rgba(0,0,0,.5);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #1e40af 100%);
+      color: #fff;
+      padding: 2.5rem 2rem 2rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      font-weight: 800;
+      margin-block-end: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .hero p {
+      font-size: 1rem;
+      opacity: .85;
+    }
+    .hero .badge-hero {
+      display: inline-block;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 20px;
+      padding: .25rem .85rem;
+      font-size: .8rem;
+      margin-block-start: .75rem;
+      letter-spacing: .03em;
+    }
+
+    /* LAYOUT */
+    .container {
+      max-inline-size: 1100px;
+      margin-inline: auto;
+      padding: 2rem 1.25rem;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-block-end: 1rem;
+      padding-block-end: .5rem;
+      border-block-end: 2px solid var(--border);
+    }
+
+    /* PROFILE CARD */
+    .profile-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-block-end: 2rem;
+      border-inline-start: 4px solid var(--accent);
+    }
+    .profile-card h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-block-end: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .profile-item {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      border: 1px solid var(--border);
+    }
+    .profile-item .pi-label {
+      font-size: .75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-block-end: .25rem;
+    }
+    .profile-item .pi-value {
+      font-size: .9rem;
+      font-weight: 600;
+    }
+    .pi-value.ok { color: var(--success); }
+    .pi-value.warn { color: var(--warning); }
+
+    /* CONTROLS */
+    .controls-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-block-end: 2rem;
+    }
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+    .control-group label {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .control-group input[type="range"] {
+      accent-color: var(--accent);
+      inline-size: 100%;
+      cursor: pointer;
+    }
+    .range-display {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .range-sub {
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      inline-size: 48px;
+      block-size: 26px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      inline-size: 0;
+      block-size: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--border);
+      border-radius: 26px;
+      transition: background .2s;
+    }
+    .toggle-slider::before {
+      position: absolute;
+      content: "";
+      block-size: 20px;
+      inline-size: 20px;
+      inset-inline-start: 3px;
+      inset-block-start: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform .2s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(22px); }
+    .toggle-label { font-size: .9rem; font-weight: 600; }
+
+    .euribor-input {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .euribor-input input[type="number"] {
+      inline-size: 80px;
+      padding: .35rem .6rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: .95rem;
+      font-weight: 600;
+      background: var(--bg);
+      color: var(--text);
+      text-align: center;
+    }
+
+    /* BANK CARDS */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+      gap: 1.5rem;
+      margin-block-end: 2rem;
+    }
+    @media (max-width: 520px) {
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+    .bank-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+    .bank-card.recommended {
+      border-color: var(--success);
+      box-shadow: 0 0 0 2px var(--success), var(--shadow-md);
+    }
+    .bank-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      color: #fff;
+    }
+    .bank-name-group { display: flex; flex-direction: column; gap: .15rem; }
+    .bank-name { font-size: 1.1rem; font-weight: 800; }
+    .bank-product { font-size: .8rem; opacity: .85; }
+    .bank-stars { font-size: 1.1rem; letter-spacing: .05em; }
+    .card-badge {
+      position: absolute;
+      inset-block-start: -1px;
+      inset-inline-end: 12px;
+      background: var(--success);
+      color: #fff;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .25rem .6rem;
+      border-radius: 0 0 6px 6px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .card-badge.gold { background: var(--gold); }
+    .bank-card-body { padding: 1.25rem; }
+    .rates-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-block-end: 1rem;
+      flex-wrap: wrap;
+    }
+    .rate-item { display: flex; flex-direction: column; }
+    .rate-label { font-size: .72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+    .rate-value { font-size: 1.4rem; font-weight: 800; color: var(--text); }
+    .rate-value.highlight { color: var(--accent); }
+    .payment-big {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-block-end: .25rem;
+    }
+    .payment-label { font-size: .8rem; color: var(--text-muted); }
+    .totals-row {
+      display: flex;
+      gap: 1rem;
+      margin-block: .75rem;
+      flex-wrap: wrap;
+    }
+    .total-item { font-size: .82rem; color: var(--text-muted); }
+    .total-item strong { color: var(--text); }
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-block: .75rem;
+    }
+    .meta-chip {
+      font-size: .75rem;
+      padding: .2rem .6rem;
+      border-radius: 20px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .meta-chip.warn { border-color: var(--warning); color: var(--warning); }
+    .pros-cons { margin-block-start: .75rem; border-block-start: 1px solid var(--border); padding-block-start: .75rem; }
+    .pros-cons ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: .3rem; }
+    .pros-cons li { font-size: .82rem; padding-inline-start: 1.2em; position: relative; }
+    .pros-cons li::before {
+      position: absolute;
+      inset-inline-start: 0;
+    }
+    .pros-cons .pro li::before { content: '✓'; color: var(--success); font-weight: 700; }
+    .pros-cons .con li::before { content: '✗'; color: var(--danger); }
+    .bonif-detail {
+      font-size: .75rem;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-radius: 6px;
+      padding: .5rem .75rem;
+      margin-block-start: .5rem;
+      border: 1px solid var(--border);
+    }
+    .bonif-detail strong { color: var(--text); display: block; margin-block-end: .15rem; }
+
+    .term-warning {
+      font-size: .78rem;
+      color: var(--warning);
+      background: rgba(202,138,4,.08);
+      border: 1px solid rgba(202,138,4,.3);
+      border-radius: 6px;
+      padding: .4rem .75rem;
+      margin-block-start: .5rem;
+    }
+
+    /* CHARTS */
+    .chart-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-block-end: 2rem;
+    }
+    .chart-section h3 { font-size: 1rem; font-weight: 700; margin-block-end: 1rem; }
+    .chart-wrap { overflow-x: auto; }
+    .chart-wrap svg { display: block; }
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem;
+      margin-block-start: .75rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .8rem;
+    }
+    .legend-dot {
+      inline-size: 12px;
+      block-size: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* AMORTIZATION TABLE */
+    .amort-section {
+      margin-block-end: 2rem;
+    }
+    .amort-bank {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-block-end: 1rem;
+      overflow: hidden;
+    }
+    .amort-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .9rem 1.25rem;
+      cursor: pointer;
+      user-select: none;
+      background: var(--surface);
+      border: none;
+      inline-size: 100%;
+      text-align: start;
+      color: var(--text);
+      font-family: inherit;
+    }
+    .amort-toggle:hover { background: var(--bg); }
+    .amort-toggle-title { font-weight: 700; font-size: .95rem; }
+    .amort-toggle-arrow { font-size: 1rem; transition: transform .2s; }
+    .amort-toggle-arrow.open { transform: rotate(180deg); }
+    .amort-content { display: none; padding: 0 1.25rem 1.25rem; }
+    .amort-content.open { display: block; }
+    .amort-table-wrap { overflow-x: auto; }
+    table.amort-table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      font-size: .82rem;
+    }
+    .amort-table th {
+      background: var(--bg);
+      padding: .5rem .75rem;
+      text-align: start;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      border-block-end: 2px solid var(--border);
+    }
+    .amort-table td {
+      padding: .45rem .75rem;
+      border-block-end: 1px solid var(--border);
+      color: var(--text);
+    }
+    .amort-table tr:last-child td { border-block-end: none; }
+    .amort-table tr:hover td { background: var(--bg); }
+    .show-more-btn {
+      margin-block-start: .75rem;
+      padding: .4rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text-muted);
+      font-size: .82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .show-more-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* SCORING TABLE */
+    .scoring-table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-block-end: 2rem;
+      overflow: hidden;
+    }
+    table.scoring-table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+    .scoring-table th {
+      background: var(--bg);
+      padding: .6rem 1rem;
+      text-align: start;
+      font-weight: 700;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--text-muted);
+      border-block-end: 2px solid var(--border);
+    }
+    .scoring-table td {
+      padding: .65rem 1rem;
+      border-block-end: 1px solid var(--border);
+    }
+    .scoring-table tr:last-child td { border-block-end: none; }
+    .score-stars { font-size: .95rem; }
+    .score-label-badge {
+      display: inline-block;
+      font-size: .7rem;
+      padding: .15rem .5rem;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+
+    /* RECOMMENDATION BOX */
+    .recommendation-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      border-inline-start: 5px solid var(--success);
+      margin-block-end: 2rem;
+    }
+    .recommendation-box h3 { font-size: 1rem; font-weight: 700; margin-block-end: .75rem; color: var(--success); }
+    .recommendation-box p { font-size: .9rem; line-height: 1.7; }
+
+    /* INFO BOXES */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-block-end: 2rem;
+    }
+    .info-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .info-box h4 {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-block-end: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .info-box ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: .35rem; }
+    .info-box li { font-size: .83rem; padding-inline-start: 1.1em; position: relative; }
+    .info-box li::before { content: '→'; position: absolute; inset-inline-start: 0; color: var(--text-muted); }
+    .info-box p { font-size: .83rem; }
+
+    /* DISCLAIMER */
+    .disclaimer {
+      background: var(--bg);
+      border-block-start: 1px solid var(--border);
+      padding: 1.25rem;
+      text-align: center;
+      font-size: .78rem;
+      color: var(--text-muted);
+    }
+
+    /* SVG text for dark mode */
+    @media (prefers-color-scheme: dark) {
+      .svg-axis-text { fill: #94a3b8; }
+      .svg-grid-line { stroke: #334155; }
+    }
+    .svg-axis-text { fill: #6b7280; }
+    .svg-grid-line { stroke: #e5e7eb; }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <h1>Simulador de Hipoteca · Segunda Vivienda 2026</h1>
+  <p>Perfil: David · 52 años · Asalariado + Autónomo (25+ años de trayectoria)</p>
+  <span class="badge-hero">Actualizado · Junio 2026</span>
+</header>
+
+<div class="container">
+
+  <!-- PERFIL DESTACADO -->
+  <section aria-labelledby="perfil-heading">
+    <h2 class="section-title" id="perfil-heading">Perfil del Solicitante</h2>
+    <div class="profile-card">
+      <h2>Fortalezas del Perfil · David, 52 años</h2>
+      <div class="profile-grid">
+        <div class="profile-item">
+          <div class="pi-label">Situación laboral</div>
+          <div class="pi-value ok">Asalariado + Autónomo (doble condición)</div>
+        </div>
+        <div class="profile-item">
+          <div class="pi-label">Antigüedad</div>
+          <div class="pi-value ok">25+ años · Máxima solvencia</div>
+        </div>
+        <div class="profile-item">
+          <div class="pi-label">Tipo de inmueble</div>
+          <div class="pi-value warn">Segunda vivienda → LTV máx. 70%</div>
+        </div>
+        <div class="profile-item">
+          <div class="pi-label">Aportación mínima estimada</div>
+          <div class="pi-value warn">30% valor + 10-12% gastos ≈ 40-42%</div>
+        </div>
+        <div class="profile-item">
+          <div class="pi-label">Límite de edad (Santander / CaixaBank)</div>
+          <div class="pi-value ok">Hasta 80 años → plazo máx. 28 años (cap 25 en 2ª viv.)</div>
+        </div>
+        <div class="profile-item">
+          <div class="pi-label">Límite de edad (BBVA / Sabadell)</div>
+          <div class="pi-value warn">Hasta 75 años → plazo máx. 23 años</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTROLES -->
+  <section aria-labelledby="controles-heading">
+    <h2 class="section-title" id="controles-heading">Parámetros del Simulador</h2>
+    <div class="controls-panel">
+      <div class="controls-grid">
+        <div class="control-group">
+          <label for="slider-price">Precio de la vivienda</label>
+          <input type="range" id="slider-price" min="100000" max="800000" step="5000" value="300000">
+          <div class="range-display" id="display-price">300.000 €</div>
+          <div class="range-sub">100.000 € — 800.000 €</div>
+        </div>
+        <div class="control-group">
+          <label for="slider-ltv">LTV (porcentaje a financiar)</label>
+          <input type="range" id="slider-ltv" min="50" max="70" step="5" value="70">
+          <div>
+            <span class="range-display" id="display-ltv">70%</span>
+            <span class="range-sub"> · Capital: <strong id="display-capital">210.000 €</strong></span>
+          </div>
+          <div class="range-sub">Máximo para 2ª vivienda: 70%</div>
+        </div>
+        <div class="control-group">
+          <label for="slider-term">Plazo en años</label>
+          <input type="range" id="slider-term" min="10" max="30" step="1" value="20">
+          <div class="range-display" id="display-term">20 años</div>
+          <div class="range-sub">10 — 30 años</div>
+        </div>
+        <div class="control-group">
+          <label>Bonificaciones máximas</label>
+          <div class="toggle-row">
+            <label class="toggle-switch" aria-label="Activar bonificaciones máximas">
+              <input type="checkbox" id="toggle-bonif" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label" id="bonif-label">Activadas</span>
+          </div>
+          <div class="range-sub">Con nómina + seguros contratados</div>
+        </div>
+        <div class="control-group">
+          <label for="euribor-input">Euríbor (para hipotecas variables)</label>
+          <div class="euribor-input">
+            <input type="number" id="euribor-input" min="0" max="10" step="0.05" value="2.50">
+            <span>%</span>
+          </div>
+          <div class="range-sub">Estimación junio 2026: 2,50%</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARATIVA DE BANCOS -->
+  <section aria-labelledby="comparativa-heading">
+    <h2 class="section-title" id="comparativa-heading">Comparativa de los 4 Bancos</h2>
+    <div class="cards-grid" id="cards-container">
+      <!-- Rendered by JS -->
+    </div>
+  </section>
+
+  <!-- CHART: BAR -->
+  <section aria-labelledby="bar-chart-heading">
+    <h2 class="section-title" id="bar-chart-heading">Cuota Mensual Comparativa</h2>
+    <div class="chart-section">
+      <h3>Cuota mensual por banco (€/mes)</h3>
+      <div class="chart-wrap">
+        <svg id="bar-chart" role="img" aria-label="Gráfico de barras de cuota mensual por banco"></svg>
+      </div>
+      <div class="chart-legend" id="bar-legend"></div>
+    </div>
+  </section>
+
+  <!-- CHART: LINE -->
+  <section aria-labelledby="line-chart-heading">
+    <h2 class="section-title" id="line-chart-heading">Capital Pendiente a lo Largo del Tiempo</h2>
+    <div class="chart-section">
+      <h3>Evolución del capital pendiente por banco</h3>
+      <div class="chart-wrap">
+        <svg id="line-chart" role="img" aria-label="Gráfico de líneas del capital pendiente por banco"></svg>
+      </div>
+      <div class="chart-legend" id="line-legend"></div>
+    </div>
+  </section>
+
+  <!-- AMORTIZACIÓN -->
+  <section aria-labelledby="amort-heading">
+    <h2 class="section-title" id="amort-heading">Tabla de Amortización por Banco</h2>
+    <div class="amort-section" id="amort-container">
+      <!-- Rendered by JS -->
+    </div>
+  </section>
+
+  <!-- ANÁLISIS -->
+  <section aria-labelledby="analisis-heading">
+    <h2 class="section-title" id="analisis-heading">Análisis por Perfil — ¿Cuál es la Mejor para David?</h2>
+
+    <div class="scoring-table-wrap">
+      <table class="scoring-table" id="scoring-table">
+        <thead>
+          <tr>
+            <th>Banco</th>
+            <th>TIN bonif.</th>
+            <th>TAE bonif.</th>
+            <th>Cuota estimada</th>
+            <th>Plazo máx. David</th>
+            <th>Vinculación</th>
+            <th>Puntuación</th>
+          </tr>
+        </thead>
+        <tbody id="scoring-tbody">
+          <!-- Rendered by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="recommendation-box">
+      <h3>Recomendación para el Perfil de David</h3>
+      <p>
+        <strong>Santander</strong> es la mejor opción para tu perfil por cuatro razones:
+        tipo más bajo del mercado (<strong>2,45% TIN</strong>), acepta la domiciliación de tus cuotas de autónomos (RETA)
+        como condición de bonificación, el plazo máximo de <strong>25 años para segunda vivienda</strong> es el más generoso
+        de los cuatro bancos para tus 52 años, y las bonificaciones son modulares (puedes conseguir el descuento
+        sin contratar una alarma domiciliaria, a diferencia de CaixaBank).
+      </p>
+      <p style="margin-block-start:.75rem; font-size:.85rem; color:var(--text-muted)">
+        Como segunda opción, <strong>Sabadell</strong> ofrece un equilibrio interesante (TIN 2,75%, TAE 3,58%) con
+        una gama completa de productos y bonificaciones transparentes. Ten en cuenta que su límite de edad a 75 años
+        reduce el plazo máximo a 23 años.
+      </p>
+    </div>
+  </section>
+
+  <!-- CONSIDERACIONES -->
+  <section aria-labelledby="consideraciones-heading">
+    <h2 class="section-title" id="consideraciones-heading">Consideraciones Importantes</h2>
+    <div class="info-grid">
+      <div class="info-box">
+        <h4>Documentación clave (autónomo + asalariado)</h4>
+        <ul>
+          <li>IRPF de los últimos 2 años (modelo 100)</li>
+          <li>Modelos 303 (trimestral) y 390 (anual) del IVA</li>
+          <li>Vida laboral actualizada (cotizaciones RETA)</li>
+          <li>3 últimas nóminas del empleo asalariado</li>
+          <li>Extractos bancarios de los últimos 3 meses</li>
+          <li>Escritura de la 1ª vivienda (si es en propiedad)</li>
+        </ul>
+      </div>
+      <div class="info-box">
+        <h4>Gastos de compra (segunda vivienda)</h4>
+        <ul>
+          <li>ITP: 6-10% del precio (varía por CCAA)</li>
+          <li>Notaría: ~0,3-0,5% del precio de escritura</li>
+          <li>Registro de la Propiedad: ~0,1-0,2%</li>
+          <li>Gestoría: ~500-1.000 € estimado</li>
+          <li>Tasación: ~300-600 € (exigida por el banco)</li>
+          <li><strong>Total estimado: 10-12% del precio de compra</strong></li>
+        </ul>
+      </div>
+      <div class="info-box">
+        <h4>Ratio de endeudamiento</h4>
+        <p>La cuota hipotecaria no debería superar el <strong>33-35% de tus ingresos netos mensuales</strong>. Con una cuota estimada de ~1.100-1.300 €/mes para 210.000 € a 20 años, necesitas ingresos netos de al menos 3.200-3.800 €/mes. Como doble cotizante (asalariado + RETA), el banco sumará ambas fuentes de ingresos para el cálculo.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- DISCLAIMER -->
+<footer class="disclaimer">
+  <p>Datos orientativos a junio 2026. Tipos sujetos a verificación y negociación con cada entidad. Este simulador no constituye asesoramiento financiero ni oferta vinculante. Consulte siempre con un experto hipotecario o la entidad bancaria.</p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── DATA ──────────────────────────────────────────────────────────────────
+  var USER_AGE = 52;
+  var EURIBOR_DEFAULT = 2.50;
+
+  var BANKS = [
+    {
+      id: 'santander',
+      name: 'Santander',
+      product: 'Hipoteca Fija Bonificada',
+      color: '#EC0000',
+      colorLight: '#fff0f0',
+      tinBonif: 2.45,
+      tinNoBonif: 3.55,
+      taeBonif: 3.07,
+      taeNoBonif: 3.74,
+      ltvMax: 70,
+      ageLimit: 80,
+      maxTerm2ndHome: 25,
+      openingFee: 0,
+      earlyFee1: 2.0,
+      earlyFee2: 1.5,
+      vinculacion: 'Media',
+      bonifDetail: 'Nómina/RETA (−0,50%) + seguros por prima (−0,10% c/100€) + cert. energético A/B (−0,10%). Máx. bonif: −1,10 pp',
+      hasMixed: false,
+      hasVariable: false,
+      score: 5,
+      scoreLabel: 'Mejor opción',
+      pros: ['TIN más bajo del mercado (2,45%)', 'Acepta domiciliación RETA (autónomos)', 'Plazo hasta 25 años para 2ª vivienda', 'Bonificaciones modulares y flexibles'],
+      cons: ['Solo hipoteca fija en web pública', 'Comisión amortización anticipada 2% (10 años)']
+    },
+    {
+      id: 'caixabank',
+      name: 'CaixaBank',
+      product: 'CasaFácil (Fija)',
+      color: '#002D6A',
+      colorLight: '#f0f4ff',
+      tinBonif: 2.80,
+      tinNoBonif: 3.80,
+      taeBonif: 4.26,
+      taeNoBonif: 4.34,
+      ltvMax: 70,
+      ageLimit: 80,
+      maxTerm2ndHome: 25,
+      openingFee: 0,
+      earlyFee1: 2.0,
+      earlyFee2: 1.5,
+      vinculacion: 'Muy alta',
+      bonifDetail: 'Nómina + 3 recibos + tarjeta CaixaBank + seguro hogar + seguro vida + alarma domiciliaria (Securitas Direct)',
+      hasMixed: false,
+      hasVariable: false,
+      score: 3,
+      scoreLabel: 'Alta vinculación',
+      pros: ['Sin comisión de apertura', 'Plazo hasta 25 años para 2ª vivienda'],
+      cons: ['TAE más alta del grupo (4,26%) por productos obligatorios', 'Exige alarma domiciliaria (inusual)', 'Vinculación muy agresiva (6 productos)', 'Solo hipoteca fija publicada']
+    },
+    {
+      id: 'bbva',
+      name: 'BBVA',
+      product: 'Hipoteca Fija',
+      color: '#004481',
+      colorLight: '#f0f6ff',
+      tinBonif: 2.85,
+      tinNoBonif: 3.85,
+      taeBonif: 3.75,
+      taeNoBonif: 4.59,
+      ltvMax: 70,
+      ageLimit: 75,
+      maxTerm2ndHome: null,
+      openingFee: 0,
+      earlyFee1: 2.0,
+      earlyFee2: 1.5,
+      vinculacion: 'Media',
+      bonifDetail: 'Nómina mín. 600€ o cuota autónomos SS + seguro hogar BBVA Allianz + seguro amortización BBVA Seguros (50% capital)',
+      hasMixed: true,
+      hasVariable: true,
+      varDiffBonif: 0.60,
+      varDiffNoBonif: 1.60,
+      mixedFixedTin: 2.85,
+      mixedFixedYears: 5,
+      mixedVarDiff: 1.60,
+      score: 4,
+      scoreLabel: 'Gama completa',
+      pros: ['Gama completa: fija, variable y mixta', 'Vinculación moderada (3 productos)', 'Sin gastos de notaría, gestoría ni registro', 'Herramienta Fast Track Hipoteca'],
+      cons: ['Plazo máximo 23 años para David (límite 75 años)', 'TIN más alto del grupo (2,85%)']
+    },
+    {
+      id: 'sabadell',
+      name: 'Sabadell',
+      product: 'Hipoteca Fija',
+      color: '#007DB7',
+      colorLight: '#f0faff',
+      tinBonif: 2.75,
+      tinNoBonif: 3.75,
+      taeBonif: 3.58,
+      taeNoBonif: 4.32,
+      ltvMax: 70,
+      ageLimit: 75,
+      maxTerm2ndHome: null,
+      openingFee: 0,
+      earlyFee1: 2.0,
+      earlyFee2: 1.5,
+      vinculacion: 'Media-Alta',
+      bonifDetail: 'Nómina/autónomos (−0,40%) + seguro hogar (−0,10%) + seguro vida (−0,40%) + protección pagos (−0,10%). Máx: −1,00 pp',
+      hasMixed: true,
+      hasVariable: true,
+      varDiffBonif: 0.50,
+      varDiffNoBonif: 1.10,
+      mixedFixedTin: 1.80,
+      mixedFixedYears: 3,
+      mixedVarDiff: 0.70,
+      score: 4,
+      scoreLabel: 'Buen equilibrio',
+      pros: ['TIN competitivo (2,75%) con buen equilibrio TAE (3,58%)', 'Gama completa: fija, variable y mixta', 'Portal Hipotecario digital ágil', 'Bonificaciones claras y transparentes'],
+      cons: ['Plazo máximo 23 años para David (límite 75 años)', 'Requiere 4 productos para máxima bonificación']
+    }
+  ];
+
+  // ── STATE ─────────────────────────────────────────────────────────────────
+  var state = {
+    price: 300000,
+    ltv: 70,
+    term: 20,
+    bonif: true,
+    euribor: EURIBOR_DEFAULT
+  };
+
+  // ── MATH ─────────────────────────────────────────────────────────────────
+  function calcMonthlyPayment(principal, annualRatePct, months) {
+    if (annualRatePct === 0) return principal / months;
+    var r = annualRatePct / 100 / 12;
+    return principal * r * Math.pow(1 + r, months) / (Math.pow(1 + r, months) - 1);
+  }
+
+  function calcAmortizationTable(principal, annualRatePct, months) {
+    var r = annualRatePct / 100 / 12;
+    var monthly = calcMonthlyPayment(principal, annualRatePct, months);
+    var remaining = principal;
+    var years = Math.ceil(months / 12);
+    var rows = [];
+    for (var yr = 1; yr <= years; yr++) {
+      var monthsInYear = Math.min(12, months - (yr - 1) * 12);
+      var annInterest = 0;
+      var annPrincipal = 0;
+      for (var m = 0; m < monthsInYear; m++) {
+        var interestPmt = remaining * r;
+        var principalPmt = monthly - interestPmt;
+        annInterest += interestPmt;
+        annPrincipal += principalPmt;
+        remaining -= principalPmt;
+        if (remaining < 0) remaining = 0;
+      }
+      rows.push({
+        year: yr,
+        monthlyPayment: monthly,
+        annualInterest: annInterest,
+        annualPrincipal: annPrincipal,
+        remaining: Math.max(0, remaining)
+      });
+    }
+    return rows;
+  }
+
+  function getEffectiveTin(bank, withBonif) {
+    return withBonif ? bank.tinBonif : bank.tinNoBonif;
+  }
+
+  function getMaxTerm(bank, userAge, requestedTerm) {
+    var fromAge = bank.ageLimit - userAge;
+    var fromPolicy = bank.maxTerm2ndHome != null ? bank.maxTerm2ndHome : 999;
+    return Math.min(fromAge, fromPolicy, requestedTerm);
+  }
+
+  // ── FORMAT HELPERS ────────────────────────────────────────────────────────
+  function fmtEur(n) {
+    return Math.round(n).toLocaleString('es-ES') + ' €';
+  }
+  function fmtPct(n) {
+    return n.toFixed(2).replace('.', ',') + '%';
+  }
+  function fmtStars(score) {
+    var s = '';
+    for (var i = 1; i <= 5; i++) { s += (i <= score) ? '★' : '☆'; }
+    return s;
+  }
+
+  // ── SVG HELPERS ───────────────────────────────────────────────────────────
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (var k in attrs) {
+      if (Object.prototype.hasOwnProperty.call(attrs, k)) {
+        el.setAttribute(k, attrs[k]);
+      }
+    }
+    return el;
+  }
+
+  // ── RENDER BANK CARDS ─────────────────────────────────────────────────────
+  function renderCards() {
+    var container = document.getElementById('cards-container');
+    container.innerHTML = '';
+
+    var capital = state.price * state.ltv / 100;
+    var payments = BANKS.map(function(b) {
+      var mt = getMaxTerm(b, USER_AGE, state.term);
+      var tin = getEffectiveTin(b, state.bonif);
+      return calcMonthlyPayment(capital, tin, mt * 12);
+    });
+    var minPayment = Math.min.apply(null, payments);
+
+    BANKS.forEach(function(bank, idx) {
+      var mt = getMaxTerm(bank, USER_AGE, state.term);
+      var tin = getEffectiveTin(bank, state.bonif);
+      var tae = state.bonif ? bank.taeBonif : bank.taeNoBonif;
+      var monthly = calcMonthlyPayment(capital, tin, mt * 12);
+      var totalPaid = monthly * mt * 12;
+      var totalInterest = totalPaid - capital;
+
+      var isRecommended = bank.id === 'santander';
+      var isCheapest = Math.abs(monthly - minPayment) < 0.01;
+      var termCapped = mt < state.term;
+
+      var card = document.createElement('article');
+      card.className = 'bank-card' + (isRecommended ? ' recommended' : '');
+
+      // Badges
+      if (isRecommended) {
+        var badge = document.createElement('div');
+        badge.className = 'card-badge';
+        badge.textContent = 'Recomendado para tu perfil';
+        card.appendChild(badge);
+      } else if (isCheapest) {
+        var badge2 = document.createElement('div');
+        badge2.className = 'card-badge gold';
+        badge2.textContent = 'Mejor cuota';
+        card.appendChild(badge2);
+      }
+
+      // Header
+      var header = document.createElement('div');
+      header.className = 'bank-card-header';
+      header.style.background = bank.color;
+      header.innerHTML = '<div class="bank-name-group"><div class="bank-name">' + bank.name + '</div><div class="bank-product">' + bank.product + '</div></div>' +
+        '<div class="bank-stars" style="color:#ffd700">' + fmtStars(bank.score) + '</div>';
+      card.appendChild(header);
+
+      // Body
+      var body = document.createElement('div');
+      body.className = 'bank-card-body';
+
+      // Rates
+      var ratesRow = document.createElement('div');
+      ratesRow.className = 'rates-row';
+      ratesRow.innerHTML =
+        '<div class="rate-item"><span class="rate-label">TIN</span><span class="rate-value highlight">' + fmtPct(tin) + '</span></div>' +
+        '<div class="rate-item"><span class="rate-label">TAE</span><span class="rate-value">' + fmtPct(tae) + '</span></div>' +
+        '<div class="rate-item"><span class="rate-label">Apertura</span><span class="rate-value">' + (bank.openingFee === 0 ? '0%' : bank.openingFee + '%') + '</span></div>';
+      body.appendChild(ratesRow);
+
+      // Payment
+      var payDiv = document.createElement('div');
+      payDiv.innerHTML = '<div class="payment-big">' + fmtEur(monthly) + '/mes</div><div class="payment-label">Cuota mensual · plazo ' + mt + ' años</div>';
+      body.appendChild(payDiv);
+
+      // Totals
+      var totals = document.createElement('div');
+      totals.className = 'totals-row';
+      totals.innerHTML =
+        '<div class="total-item">Total pagado: <strong>' + fmtEur(totalPaid) + '</strong></div>' +
+        '<div class="total-item">Intereses totales: <strong>' + fmtEur(totalInterest) + '</strong></div>';
+      body.appendChild(totals);
+
+      // Meta chips
+      var meta = document.createElement('div');
+      meta.className = 'card-meta';
+      meta.innerHTML =
+        '<span class="meta-chip">LTV 2ª viv.: ' + bank.ltvMax + '%</span>' +
+        '<span class="meta-chip' + (termCapped ? ' warn' : '') + '">Plazo efectivo: ' + mt + ' años' + (termCapped ? ' ⚠' : '') + '</span>' +
+        '<span class="meta-chip">Vinculación: ' + bank.vinculacion + '</span>';
+      body.appendChild(meta);
+
+      // Term warning
+      if (termCapped) {
+        var tw = document.createElement('div');
+        tw.className = 'term-warning';
+        tw.textContent = '⚠ Plazo solicitado (' + state.term + ' años) superaría el límite de edad (' + bank.ageLimit + ' años). Se aplica máximo de ' + mt + ' años.';
+        body.appendChild(tw);
+      }
+
+      // Bonif detail
+      var bd = document.createElement('div');
+      bd.className = 'bonif-detail';
+      bd.innerHTML = '<strong>Bonificaciones:</strong>' + bank.bonifDetail;
+      body.appendChild(bd);
+
+      // Pros/Cons
+      var pc = document.createElement('div');
+      pc.className = 'pros-cons';
+      var prosHtml = '<ul class="pro">' + bank.pros.map(function(p) { return '<li>' + p + '</li>'; }).join('') + '</ul>';
+      var consHtml = '<ul class="con">' + bank.cons.map(function(c) { return '<li>' + c + '</li>'; }).join('') + '</ul>';
+      pc.innerHTML = prosHtml + consHtml;
+      body.appendChild(pc);
+
+      card.appendChild(body);
+      container.appendChild(card);
+    });
+  }
+
+  // ── RENDER BAR CHART ─────────────────────────────────────────────────────
+  function renderBarChart() {
+    var svg = document.getElementById('bar-chart');
+    var legend = document.getElementById('bar-legend');
+    svg.innerHTML = '';
+    legend.innerHTML = '';
+
+    var capital = state.price * state.ltv / 100;
+    var W = Math.min(svg.parentElement.clientWidth || 700, 900);
+    var barH = 32;
+    var gap = 14;
+    var leftPad = 100;
+    var rightPad = 90;
+    var topPad = 20;
+
+    var rows = BANKS.map(function(b) {
+      var mt = getMaxTerm(b, USER_AGE, state.term);
+      var tinBonif = b.tinBonif;
+      var tinNoBonif = b.tinNoBonif;
+      return {
+        name: b.name,
+        color: b.color,
+        withBonif: calcMonthlyPayment(capital, tinBonif, mt * 12),
+        withoutBonif: calcMonthlyPayment(capital, tinNoBonif, mt * 12)
+      };
+    });
+
+    var numBars = BANKS.length * 2;
+    var totalH = topPad + numBars * (barH + gap) + 40;
+
+    svg.setAttribute('width', W);
+    svg.setAttribute('height', totalH);
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + totalH);
+
+    var allVals = [];
+    rows.forEach(function(r) { allVals.push(r.withBonif, r.withoutBonif); });
+    var maxVal = Math.max.apply(null, allVals) * 1.12;
+    var chartW = W - leftPad - rightPad;
+
+    // Grid lines + x labels
+    var steps = 5;
+    for (var i = 0; i <= steps; i++) {
+      var x = leftPad + (chartW * i / steps);
+      var gridLine = svgEl('line', { x1: x, y1: topPad, x2: x, y2: totalH - 30, 'stroke-width': 1, 'stroke-dasharray': '3,3' });
+      gridLine.setAttribute('class', 'svg-grid-line');
+      svg.appendChild(gridLine);
+      var lbl = svgEl('text', { x: x, y: totalH - 12, 'text-anchor': 'middle', 'font-size': '11' });
+      lbl.setAttribute('class', 'svg-axis-text');
+      lbl.textContent = Math.round(maxVal * i / steps).toLocaleString('es-ES');
+      svg.appendChild(lbl);
+    }
+
+    var yUnit = svgEl('text', { x: W - 4, y: totalH - 12, 'text-anchor': 'end', 'font-size': '10' });
+    yUnit.setAttribute('class', 'svg-axis-text');
+    yUnit.textContent = '€/mes';
+    svg.appendChild(yUnit);
+
+    rows.forEach(function(row, ri) {
+      var y1 = topPad + ri * 2 * (barH + gap);
+      var y2 = y1 + barH + gap;
+
+      // Bank label
+      var bankLbl = svgEl('text', { x: leftPad - 8, y: y1 + barH / 2 + 4, 'text-anchor': 'end', 'font-size': '12', 'font-weight': '700' });
+      bankLbl.setAttribute('class', 'svg-axis-text');
+      bankLbl.textContent = row.name;
+      svg.appendChild(bankLbl);
+
+      // Bar: with bonif
+      var w1 = (row.withBonif / maxVal) * chartW;
+      var rect1 = svgEl('rect', { x: leftPad, y: y1, width: w1, height: barH, rx: 4, fill: row.color, opacity: '1' });
+      svg.appendChild(rect1);
+      var val1 = svgEl('text', { x: leftPad + w1 + 6, y: y1 + barH / 2 + 5, 'font-size': '12', 'font-weight': '700' });
+      val1.setAttribute('class', 'svg-axis-text');
+      val1.textContent = Math.round(row.withBonif).toLocaleString('es-ES') + ' €';
+      svg.appendChild(val1);
+
+      // Label on bar
+      var lbl1 = svgEl('text', { x: leftPad + 8, y: y1 + barH / 2 + 5, 'font-size': '10', fill: '#fff' });
+      lbl1.textContent = 'Con bonif.';
+      svg.appendChild(lbl1);
+
+      // Bar: without bonif
+      var w2 = (row.withoutBonif / maxVal) * chartW;
+      var rect2 = svgEl('rect', { x: leftPad, y: y2, width: w2, height: barH, rx: 4, fill: row.color, opacity: '0.45' });
+      svg.appendChild(rect2);
+      var val2 = svgEl('text', { x: leftPad + w2 + 6, y: y2 + barH / 2 + 5, 'font-size': '12' });
+      val2.setAttribute('class', 'svg-axis-text');
+      val2.textContent = Math.round(row.withoutBonif).toLocaleString('es-ES') + ' €';
+      svg.appendChild(val2);
+
+      var lbl2 = svgEl('text', { x: leftPad + 8, y: y2 + barH / 2 + 5, 'font-size': '10', fill: '#555' });
+      lbl2.textContent = 'Sin bonif.';
+      svg.appendChild(lbl2);
+    });
+
+    // Legend
+    BANKS.forEach(function(b) {
+      var item = document.createElement('div');
+      item.className = 'legend-item';
+      item.innerHTML = '<div class="legend-dot" style="background:' + b.color + '"></div><span>' + b.name + '</span>';
+      legend.appendChild(item);
+    });
+  }
+
+  // ── RENDER LINE CHART ─────────────────────────────────────────────────────
+  function renderLineChart() {
+    var svg = document.getElementById('line-chart');
+    var legend = document.getElementById('line-legend');
+    svg.innerHTML = '';
+    legend.innerHTML = '';
+
+    var capital = state.price * state.ltv / 100;
+    var W = Math.min(svg.parentElement.clientWidth || 700, 900);
+    var H = 280;
+    var leftPad = 75;
+    var rightPad = 20;
+    var topPad = 20;
+    var bottomPad = 40;
+
+    svg.setAttribute('width', W);
+    svg.setAttribute('height', H);
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+    var chartW = W - leftPad - rightPad;
+    var chartH = H - topPad - bottomPad;
+
+    var maxTerm = state.term;
+    BANKS.forEach(function(b) {
+      var mt = getMaxTerm(b, USER_AGE, state.term);
+      if (mt > maxTerm) maxTerm = mt;
+    });
+
+    // Grid lines Y
+    var ySteps = 5;
+    for (var yi = 0; yi <= ySteps; yi++) {
+      var yPos = topPad + chartH - (chartH * yi / ySteps);
+      var gridY = svgEl('line', { x1: leftPad, y1: yPos, x2: leftPad + chartW, y2: yPos, 'stroke-width': 1, 'stroke-dasharray': '3,3' });
+      gridY.setAttribute('class', 'svg-grid-line');
+      svg.appendChild(gridY);
+      var val = capital * yi / ySteps;
+      var ylbl = svgEl('text', { x: leftPad - 6, y: yPos + 4, 'text-anchor': 'end', 'font-size': '10' });
+      ylbl.setAttribute('class', 'svg-axis-text');
+      ylbl.textContent = Math.round(val / 1000) + 'k';
+      svg.appendChild(ylbl);
+    }
+
+    // Grid lines X
+    var xSteps = Math.min(maxTerm, 10);
+    for (var xi = 0; xi <= xSteps; xi++) {
+      var xYear = Math.round(maxTerm * xi / xSteps);
+      var xPos = leftPad + (chartW * xi / xSteps);
+      var gridX = svgEl('line', { x1: xPos, y1: topPad, x2: xPos, y2: topPad + chartH, 'stroke-width': 1, 'stroke-dasharray': '3,3' });
+      gridX.setAttribute('class', 'svg-grid-line');
+      svg.appendChild(gridX);
+      var xlbl = svgEl('text', { x: xPos, y: topPad + chartH + 16, 'text-anchor': 'middle', 'font-size': '10' });
+      xlbl.setAttribute('class', 'svg-axis-text');
+      xlbl.textContent = xYear === 0 ? 'Año 0' : 'Año ' + xYear;
+      svg.appendChild(xlbl);
+    }
+
+    // Lines
+    BANKS.forEach(function(bank) {
+      var mt = getMaxTerm(bank, USER_AGE, state.term);
+      var tin = getEffectiveTin(bank, state.bonif);
+      var table = calcAmortizationTable(capital, tin, mt * 12);
+
+      var points = [{ year: 0, remaining: capital }];
+      table.forEach(function(row) { points.push({ year: row.year, remaining: row.remaining }); });
+
+      var pathD = points.map(function(pt, i) {
+        var px = leftPad + (pt.year / maxTerm) * chartW;
+        var py = topPad + chartH - (pt.remaining / capital) * chartH;
+        return (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1);
+      }).join(' ');
+
+      var path = svgEl('path', {
+        d: pathD,
+        fill: 'none',
+        stroke: bank.color,
+        'stroke-width': '2.5',
+        'stroke-linejoin': 'round',
+        'stroke-linecap': 'round'
+      });
+      svg.appendChild(path);
+
+      // End dot
+      var lastPt = points[points.length - 1];
+      var ex = leftPad + (lastPt.year / maxTerm) * chartW;
+      var ey = topPad + chartH - (lastPt.remaining / capital) * chartH;
+      var dot = svgEl('circle', { cx: ex.toFixed(1), cy: ey.toFixed(1), r: '4', fill: bank.color });
+      svg.appendChild(dot);
+
+      // Legend entry
+      var item = document.createElement('div');
+      item.className = 'legend-item';
+      item.innerHTML = '<div class="legend-dot" style="background:' + bank.color + '"></div><span>' + bank.name + ' (' + mt + ' años)</span>';
+      legend.appendChild(item);
+    });
+  }
+
+  // ── RENDER AMORTIZATION TABLES ────────────────────────────────────────────
+  function renderAmortTables() {
+    var container = document.getElementById('amort-container');
+    container.innerHTML = '';
+    var capital = state.price * state.ltv / 100;
+
+    BANKS.forEach(function(bank) {
+      var mt = getMaxTerm(bank, USER_AGE, state.term);
+      var tin = getEffectiveTin(bank, state.bonif);
+      var table = calcAmortizationTable(capital, tin, mt * 12);
+
+      var wrapper = document.createElement('div');
+      wrapper.className = 'amort-bank';
+
+      var toggleBtn = document.createElement('button');
+      toggleBtn.className = 'amort-toggle';
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      var arrowSpan = document.createElement('span');
+      arrowSpan.className = 'amort-toggle-arrow';
+      arrowSpan.textContent = '▼';
+      var titleSpan = document.createElement('span');
+      titleSpan.className = 'amort-toggle-title';
+      titleSpan.textContent = bank.name + ' · ' + bank.product + ' · TIN ' + fmtPct(tin) + ' · ' + mt + ' años';
+      toggleBtn.appendChild(titleSpan);
+      toggleBtn.appendChild(arrowSpan);
+
+      var content = document.createElement('div');
+      content.className = 'amort-content';
+
+      var tableWrap = document.createElement('div');
+      tableWrap.className = 'amort-table-wrap';
+
+      var tbl = document.createElement('table');
+      tbl.className = 'amort-table';
+      tbl.innerHTML = '<thead><tr><th>Año</th><th>Cuota anual</th><th>Intereses pagados</th><th>Capital amortizado</th><th>Capital pendiente</th></tr></thead>';
+      var tbody = document.createElement('tbody');
+
+      var showAll = false;
+      var PREVIEW = 5;
+
+      function renderRows() {
+        tbody.innerHTML = '';
+        var limit = showAll ? table.length : Math.min(PREVIEW, table.length);
+        for (var i = 0; i < limit; i++) {
+          var row = table[i];
+          var tr = document.createElement('tr');
+          tr.innerHTML =
+            '<td>' + row.year + '</td>' +
+            '<td>' + fmtEur(row.monthlyPayment * 12) + '</td>' +
+            '<td>' + fmtEur(row.annualInterest) + '</td>' +
+            '<td>' + fmtEur(row.annualPrincipal) + '</td>' +
+            '<td>' + fmtEur(row.remaining) + '</td>';
+          tbody.appendChild(tr);
+        }
+      }
+      renderRows();
+      tbl.appendChild(tbody);
+      tableWrap.appendChild(tbl);
+      content.appendChild(tableWrap);
+
+      if (table.length > PREVIEW) {
+        var moreBtn = document.createElement('button');
+        moreBtn.className = 'show-more-btn';
+        moreBtn.textContent = 'Ver tabla completa (' + table.length + ' años)';
+        moreBtn.addEventListener('click', function() {
+          showAll = !showAll;
+          renderRows();
+          moreBtn.textContent = showAll ? 'Ocultar filas' : 'Ver tabla completa (' + table.length + ' años)';
+        });
+        content.appendChild(moreBtn);
+      }
+
+      wrapper.appendChild(toggleBtn);
+      wrapper.appendChild(content);
+
+      toggleBtn.addEventListener('click', function() {
+        var isOpen = content.classList.contains('open');
+        content.classList.toggle('open', !isOpen);
+        arrowSpan.classList.toggle('open', !isOpen);
+        toggleBtn.setAttribute('aria-expanded', String(!isOpen));
+      });
+
+      container.appendChild(wrapper);
+    });
+  }
+
+  // ── RENDER SCORING TABLE ──────────────────────────────────────────────────
+  function renderScoringTable() {
+    var tbody = document.getElementById('scoring-tbody');
+    tbody.innerHTML = '';
+    var capital = state.price * state.ltv / 100;
+
+    BANKS.forEach(function(bank) {
+      var mt = getMaxTerm(bank, USER_AGE, state.term);
+      var tin = getEffectiveTin(bank, state.bonif);
+      var tae = state.bonif ? bank.taeBonif : bank.taeNoBonif;
+      var monthly = calcMonthlyPayment(capital, tin, mt * 12);
+
+      var tr = document.createElement('tr');
+      var badgeStyle = 'background:' + bank.color + ';color:#fff;';
+      tr.innerHTML =
+        '<td><strong>' + bank.name + '</strong></td>' +
+        '<td>' + fmtPct(tin) + '</td>' +
+        '<td>' + fmtPct(tae) + '</td>' +
+        '<td><strong>' + fmtEur(monthly) + '/mes</strong></td>' +
+        '<td>' + mt + ' años' + (mt < state.term ? ' ⚠' : '') + '</td>' +
+        '<td>' + bank.vinculacion + '</td>' +
+        '<td><span class="score-label-badge" style="' + badgeStyle + '">' + fmtStars(bank.score) + ' ' + bank.scoreLabel + '</span></td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── FULL RENDER ───────────────────────────────────────────────────────────
+  function renderAll() {
+    renderCards();
+    renderBarChart();
+    renderLineChart();
+    renderAmortTables();
+    renderScoringTable();
+  }
+
+  // ── CONTROLS ──────────────────────────────────────────────────────────────
+  function initControls() {
+    var sliderPrice = document.getElementById('slider-price');
+    var sliderLtv = document.getElementById('slider-ltv');
+    var sliderTerm = document.getElementById('slider-term');
+    var toggleBonif = document.getElementById('toggle-bonif');
+    var euriborInput = document.getElementById('euribor-input');
+    var displayPrice = document.getElementById('display-price');
+    var displayLtv = document.getElementById('display-ltv');
+    var displayCapital = document.getElementById('display-capital');
+    var displayTerm = document.getElementById('display-term');
+    var bonifLabel = document.getElementById('bonif-label');
+
+    function updateDisplays() {
+      displayPrice.textContent = Math.round(state.price).toLocaleString('es-ES') + ' €';
+      displayLtv.textContent = state.ltv + '%';
+      displayCapital.textContent = Math.round(state.price * state.ltv / 100).toLocaleString('es-ES') + ' €';
+      displayTerm.textContent = state.term + ' año' + (state.term !== 1 ? 's' : '');
+      bonifLabel.textContent = state.bonif ? 'Activadas' : 'Desactivadas';
+    }
+
+    sliderPrice.addEventListener('input', function() {
+      state.price = parseFloat(sliderPrice.value);
+      updateDisplays();
+      renderAll();
+    });
+
+    sliderLtv.addEventListener('input', function() {
+      state.ltv = parseFloat(sliderLtv.value);
+      updateDisplays();
+      renderAll();
+    });
+
+    sliderTerm.addEventListener('input', function() {
+      state.term = parseInt(sliderTerm.value, 10);
+      updateDisplays();
+      renderAll();
+    });
+
+    toggleBonif.addEventListener('change', function() {
+      state.bonif = toggleBonif.checked;
+      updateDisplays();
+      renderAll();
+    });
+
+    euriborInput.addEventListener('input', function() {
+      var v = parseFloat(euriborInput.value);
+      if (!isNaN(v)) {
+        state.euribor = v;
+        renderAll();
+      }
+    });
+
+    updateDisplays();
+  }
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', function() {
+    initControls();
+    renderAll();
+
+    // Re-render charts on resize
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        renderBarChart();
+        renderLineChart();
+      }, 120);
+    });
+  });
+})();
+</script>
+</body>
+</html>
