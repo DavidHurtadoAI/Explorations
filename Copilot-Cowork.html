@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Copilot Cowork · Modelo de pago por uso (créditos) — Guía + simulador</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --surface:#ffffff; --surface-2:#f0f3f9; --ink:#1b1f29; --ink-soft:#4a5160;
+    --line:#dfe4ee; --brand:#0f6cbd; --brand-deep:#0a4f8a; --brand-soft:#e8f1fb;
+    --green:#107c41; --green-soft:#e7f4ec; --amber:#9a6700; --amber-soft:#fff4d6;
+    --red:#b3261e; --red-soft:#fbeceb;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1420; --surface:#161c2b; --surface-2:#1c2435; --ink:#eef1f7; --ink-soft:#aab2c4;
+      --line:#2a3344; --brand:#4aa3e8; --brand-deep:#7cc0f0; --brand-soft:#15233a;
+      --green:#5dd28d; --green-soft:#10261a; --amber:#e8c266; --amber-soft:#2a2410;
+      --red:#f08a82; --red-soft:#2a1413;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.4);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.55; font-size:16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 20px 80px}
+  h1,h2,h3{line-height:1.2;margin:0 0 .4em}
+  h1{font-size:2rem;letter-spacing:-.01em}
+  h2{font-size:1.5rem;margin-top:.2em}
+  h3{font-size:1.12rem}
+  p{margin:.5em 0}
+  a{color:var(--brand)}
+  small{color:var(--ink-soft)}
+  .muted{color:var(--ink-soft)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin:18px 0}
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:820px){.g2,.g3,.g4{grid-template-columns:1fr}}
+ 
+  header.hero{background:linear-gradient(135deg,var(--brand-deep),var(--brand));color:#fff;border-radius:18px;padding:30px 30px 26px;box-shadow:var(--shadow)}
+  header.hero h1{color:#fff}
+  header.hero p{color:#eaf3fc;max-width:62ch}
+  .kicker{display:inline-block;text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:700;background:rgba(255,255,255,.16);padding:5px 11px;border-radius:999px;margin-bottom:12px}
+ 
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:999px;vertical-align:middle;white-space:nowrap;border:1px solid transparent}
+  .b-pub{background:var(--green-soft);color:var(--green);border-color:#9bd3b1}
+  .b-est{background:var(--amber-soft);color:var(--amber);border-color:#e7c66b}
+  .tag{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--brand-deep);background:var(--brand-soft);padding:3px 9px;border-radius:6px;margin-bottom:8px}
+ 
+  .controlbar{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin:14px 0;box-shadow:var(--shadow)}
+  nav.toc{display:flex;flex-wrap:wrap;gap:6px}
+  nav.toc a{font-size:.82rem;text-decoration:none;color:var(--ink-soft);padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
+  nav.toc a:hover{color:var(--brand);border-color:var(--brand)}
+ 
+  .stat{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .stat .n{font-size:1.7rem;font-weight:800;color:var(--brand-deep);letter-spacing:-.01em}
+  .stat .l{font-size:.82rem;color:var(--ink-soft)}
+  .pill{display:inline-block;font-weight:800;color:var(--brand-deep)}
+ 
+  .layer{display:flex;gap:16px;align-items:stretch}
+  .layer .box{flex:1;border-radius:12px;padding:18px;border:1px solid var(--line)}
+  .layer .box.fixed{background:var(--brand-soft)}
+  .layer .box.flex{background:var(--green-soft)}
+  .plus{display:flex;align-items:center;font-size:1.8rem;font-weight:800;color:var(--ink-soft)}
+  @media(max-width:820px){.layer{flex-direction:column}.plus{justify-content:center}}
+ 
+  .driver{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .driver .ic{font-size:1.5rem}
+  .driver h3{margin:.3em 0 .2em}
+ 
+  table{width:100%;border-collapse:collapse;font-size:.92rem;margin:.4em 0}
+  th,td{text-align:start;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:var(--surface-2);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
+  tbody tr:last-child td{border-bottom:none}
+  .tier-l{color:var(--green);font-weight:700}
+  .tier-m{color:var(--amber);font-weight:700}
+  .tier-h{color:var(--red);font-weight:700}
+ 
+  ul.clean{margin:.4em 0;padding-inline-start:1.2em}
+  ul.clean li{margin:.28em 0}
+ 
+  .sim{background:var(--surface);border:2px solid var(--brand);border-radius:18px;padding:0;overflow:hidden}
+  .sim-head{background:linear-gradient(135deg,var(--brand-deep),var(--brand));color:#fff;padding:18px 24px}
+  .sim-head h2{color:#fff;margin:0}
+  .sim-body{padding:22px 24px}
+  .field{margin:12px 0}
+  .field label{display:block;font-weight:600;font-size:.9rem;margin-bottom:5px}
+  .field .hint{font-size:.76rem;color:var(--ink-soft);font-weight:400}
+  input[type=number]{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2);color:var(--ink);font-size:1rem;font-family:inherit}
+  input[type=range]{width:100%;accent-color:var(--brand)}
+  .rngrow{display:flex;align-items:center;gap:12px}
+  .presets{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 2px}
+  .presets button{font-family:inherit;cursor:pointer;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:.84rem;font-weight:600}
+  .presets button:hover{border-color:var(--brand);color:var(--brand)}
+  .result{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:6px}
+  .bignum{font-size:2.4rem;font-weight:800;color:var(--brand-deep);letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums}
+  .subnum{font-size:1.05rem;font-weight:700;color:var(--ink)}
+  .rrow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums}
+  .rrow:last-child{border-bottom:none}
+  .rrow .v{font-weight:700}
+  .warn{display:none;background:var(--amber-soft);border:1px solid #e7c66b;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:.86rem}
+  .warn.show{display:block}
+ 
+  .bars{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+  .bar{display:flex;align-items:center;gap:10px;font-size:.85rem}
+  .bar .lab{width:74px;flex:none;color:var(--ink-soft)}
+  .bar .track2{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:8px;height:22px;overflow:hidden}
+  .bar .fill{height:100%;border-radius:7px 0 0 7px;transition:width .35s ease}
+  .bar .val{width:120px;flex:none;text-align:end;font-weight:700;font-variant-numeric:tabular-nums}
+  .fl{background:var(--green)} .fm{background:var(--amber)} .fh{background:var(--red)}
+ 
+  details{border:1px solid var(--line);border-radius:10px;padding:6px 14px;margin:10px 0;background:var(--surface)}
+  summary{cursor:pointer;font-weight:600;padding:6px 0}
+  .src{font-size:.82rem;color:var(--ink-soft)}
+  .src li{margin:.3em 0}
+  footer{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);font-size:.82rem;color:var(--ink-soft)}
+  .legend{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+  .legend div{display:flex;align-items:center;gap:7px;font-size:.85rem}
+  @media print{.controlbar{position:static}.sim{break-inside:avoid}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ 
+  <header class="hero">
+    <span class="kicker">Microsoft 365 Copilot · GA 16 jun 2026</span>
+    <h1>Copilot Cowork: el modelo de pago por uso, explicado</h1>
+    <p>Guía visual para entender <strong>créditos, límites y opciones de configuración</strong> del modelo de facturación por consumo de Copilot Cowork — con un <strong>simulador interactivo</strong> para estimar el coste mensual y anual de tu organización.</p>
+  </header>
+ 
+  <div class="controlbar">
+    <nav class="toc">
+      <a href="#resumen">Resumen</a>
+      <a href="#como">Cómo funciona</a>
+      <a href="#credito">El crédito</a>
+      <a href="#drivers">4 factores</a>
+      <a href="#tiers">Tipos de tarea</a>
+      <a href="#pago">Opciones de pago</a>
+      <a href="#modelos">Modelos</a>
+      <a href="#seguridad">Seguridad</a>
+      <a href="#gobierno">Controles admin</a>
+      <a href="#simulador">Simulador</a>
+      <a href="#fuentes">Fuentes</a>
+    </nav>
+  </div>
+ 
+  <!-- LEGEND -->
+  <div class="card">
+    <div class="legend">
+      <strong>Cómo leer este documento:</strong>
+      <div><span class="badge b-pub">🌐 Oficial</span> Dato publicado por Microsoft (blog M365, Microsoft Learn, guía de licencias).</div>
+      <div><span class="badge b-est">≈ Orientativo</span> Cifra ilustrativa o estimación de terceros — útil para modelar, no es un precio oficial garantizado.</div>
+    </div>
+    <p class="muted" style="margin-bottom:0"><small>Documento informativo elaborado a partir de información pública de Microsoft sobre Copilot Cowork. Las estimaciones del simulador no constituyen una oferta ni un precio garantizado; valida siempre con tu equipo de Microsoft y con el estimador oficial.</small></p>
+  </div>
+ 
+  <!-- RESUMEN -->
+  <section id="resumen" class="card">
+    <span class="tag">Resumen ejecutivo · 60 segundos</span>
+    <h2>Lo esencial</h2>
+    <div class="grid g2">
+      <div>
+        <ul class="clean">
+          <li><strong>La factura tiene dos capas.</strong> Necesitas una <strong>licencia M365 Copilot (USL)</strong> por usuario (precio fijo y predecible) <em>y, además,</em> pagas el <strong>uso de Cowork por consumo</strong>.</li>
+          <li><strong>La moneda es el “Copilot Credit”.</strong> En pago por uso (PayGo) cada crédito cuesta <strong>0,01 $</strong>. Cada tarea consume un número variable de créditos.</li>
+          <li><strong>El coste de una tarea depende de 4 factores:</strong> modelo usado, contexto recuperado, llamadas a herramientas y tiempo de ejecución.</li>
+          <li><strong>Apagado por defecto.</strong> Nadie genera gasto hasta que un administrador lo activa y fija límites.</li>
+        </ul>
+      </div>
+      <div>
+        <ul class="clean">
+          <li><strong>Tres tamaños de tarea:</strong> ligera, media y pesada. A más fuentes, razonamiento y entregables, más créditos.</li>
+          <li><strong>Tres formas de cubrir los créditos:</strong> pago por uso (PayGo), prepago (P3) y capacidad existente.</li>
+          <li><strong>La palanca de coste es el modelo.</strong> Elegir un modelo más económico para tareas rutinarias reduce el consumo de créditos.</li>
+          <li><strong>Control total para el admin.</strong> Panel de <em>Cost Management</em> con políticas, alertas y topes (hard caps) por tenant, grupo y usuario.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid g4" style="margin-top:6px">
+      <div class="stat"><div class="n">0,01 $</div><div class="l">por crédito (PayGo) <span class="badge b-pub">🌐</span></div></div>
+      <div class="stat"><div class="n">2 capas</div><div class="l">Licencia fija + uso variable</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">factores de coste por tarea</div></div>
+      <div class="stat"><div class="n">OFF</div><div class="l">por defecto hasta que TI lo active</div></div>
+    </div>
+  </section>
+ 
+  <!-- COMO FUNCIONA -->
+  <section id="como" class="card">
+    <span class="tag">Cómo funciona</span>
+    <h2>La factura tiene dos capas</h2>
+    <p>Entender estas dos capas es clave para presupuestar Cowork. La primera es <strong>predecible</strong>; la segunda <strong>flexiona</strong> con el uso real.</p>
+    <div class="layer">
+      <div class="box fixed">
+        <span class="badge b-pub">🌐 Oficial</span>
+        <h3>Capa 1 · Licencia M365 Copilot (USL)</h3>
+        <p class="muted">Coste <strong>fijo por usuario/mes</strong>. Es el requisito previo: sin esta licencia no hay Cowork.</p>
+        <ul class="clean">
+          <li>Copilot Chat y Copilot en Word, Excel, PowerPoint, Outlook y Teams</li>
+          <li>Motor de contexto <strong>Work IQ</strong></li>
+          <li>Sistema multimodelo + agentes (Researcher, Analyst, Agent Builder)</li>
+        </ul>
+        <p><strong>Precio de referencia: 30 $/usuario/mes</strong> <span class="badge b-est">≈ lista</span></p>
+      </div>
+      <div class="plus">+</div>
+      <div class="box flex">
+        <span class="badge b-pub">🌐 Oficial</span>
+        <h3>Capa 2 · Uso de Cowork (Copilot Credits)</h3>
+        <p class="muted">Coste <strong>variable por consumo</strong>. Solo pagas cuando Cowork ejecuta trabajo real.</p>
+        <ul class="clean">
+          <li>Se mide en <strong>Copilot Credits</strong></li>
+          <li>Cada tarea consume créditos según los 4 factores</li>
+          <li>Un equipo con pocas tareas ligeras apenas lo toca; uno con tareas pesadas todo el día verá consumo real</li>
+        </ul>
+        <p><strong>0,01 $/crédito</strong> en PayGo · o prepago P3</p>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:12px"><strong>Idea clave:</strong> el modelo premia el uso deliberado. Bien gestionado (tareas rutinarias “ligeras”, modelos económicos para el día a día, límites sensatos), el pago por tarea puede resultar más barato que una cuota plana, porque solo pagas cuando Cowork trabaja.</p>
+  </section>
+ 
+  <!-- EL CREDITO -->
+  <section id="credito" class="card">
+    <span class="tag">El crédito</span>
+    <h2>¿Qué es un Copilot Credit?</h2>
+    <div class="grid g2">
+      <div>
+        <p><span class="badge b-pub">🌐 Oficial</span> Un <strong>Copilot Credit</strong> es la unidad con la que Microsoft mide el consumo de Cowork. Es una <strong>moneda común</strong> de Microsoft: los mismos créditos alimentan otros servicios de facturación por uso (por ejemplo, la <em>Work IQ API</em>), no solo Cowork.</p>
+        <p>La aritmética es sencilla una vez conoces el número de créditos: <strong>créditos × 0,01 $ = coste de la tarea</strong>. Lo difícil es estimar cuántos créditos consume cada tarea — y eso lo fijan los 4 factores.</p>
+        <p class="muted"><strong>Existe porque el trabajo es variable.</strong> Una cuota plana no puede tarifar de forma justa una tarea que lee miles de archivos y se ejecuta durante minutos frente a otra que resume un solo correo.</p>
+      </div>
+      <div class="stat" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+        <div style="font-size:.85rem;color:var(--ink-soft)">En pago por uso (PayGo)</div>
+        <div style="font-size:3.2rem;font-weight:800;color:var(--brand-deep);line-height:1">0,01 $</div>
+        <div style="font-weight:700">= 1 Copilot Credit</div>
+        <div style="margin-top:8px;font-size:.8rem;color:var(--ink-soft)">100 créditos = 1 $ · 1.000 créditos = 10 $</div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- 4 DRIVERS -->
+  <section id="drivers" class="card">
+    <span class="tag">Los 4 factores</span>
+    <h2>Qué hace que una tarea cueste más o menos <span class="badge b-pub">🌐 Oficial</span></h2>
+    <p>El precio de cada tarea de Cowork se calcula a partir de cuatro entradas. Dos prompts aparentemente iguales pueden costar distinto porque estos cuatro factores varían según lo que la tarea realmente hace.</p>
+    <div class="grid g4">
+      <div class="driver"><div class="ic">🧠</div><h3>1 · Modelo</h3><p class="muted">Qué modelo ejecuta la tarea y cuánto “razona”. Un modelo frontera con razonamiento profundo consume mucho más que uno ligero. <strong>Es la mayor palanca de coste.</strong></p></div>
+      <div class="driver"><div class="ic">📚</div><h3>2 · Contexto</h3><p class="muted">Cuántos datos de tu organización recupera (archivos, correos, chats, registros) a través de Work IQ para fundamentar el trabajo.</p></div>
+      <div class="driver"><div class="ic">🔧</div><h3>3 · Herramientas</h3><p class="muted">Cuántas acciones, plugins o conectores invoca (enviar correos, agendar, actualizar documentos…). Cada llamada es trabajo medido.</p></div>
+      <div class="driver"><div class="ic">⏱️</div><h3>4 · Tiempo de ejecución</h3><p class="muted">Cuánto tiempo corre la tarea en la infraestructura cloud. Los trabajos largos y multipaso acumulan más <em>runtime</em> (incluido el tiempo perdido si el prompt es vago).</p></div>
+    </div>
+    <p class="muted" style="margin-top:12px"><strong>Intuición:</strong> tarea de un solo paso + modelo ligero + poco contexto = barata. Tarea larga, multiherramienta, con modelo top y fundamentada en todo tu buzón = el extremo caro.</p>
+  </section>
+ 
+  <!-- TIERS -->
+  <section id="tiers" class="card">
+    <span class="tag">Tipos de tarea</span>
+    <h2>Ligera, media y pesada</h2>
+    <p><span class="badge b-pub">🌐 Oficial</span> A partir del programa de previa (Frontier), Microsoft identificó <strong>tres patrones de tarea</strong>. Microsoft los describe de forma <strong>cualitativa</strong>; ha indicado que mostrará el precio por tarea “próximamente”.</p>
+    <p><span class="badge b-est">≈ Orientativo</span> Los <strong>rangos de créditos y dólares</strong> de la tabla son estimaciones de terceros (no cifras oficiales de Microsoft) y asumen un modelo frontera. <strong>Trátalos como orientativos</strong> — en el simulador podrás ajustarlos a tus propias cifras.</p>
+    <table>
+      <thead><tr><th>Tarea</th><th>Cómo es</th><th>Créditos ≈</th><th>Coste ≈ (0,01 $)</th></tr></thead>
+      <tbody>
+        <tr><td class="tier-l">Ligera</td><td>Pocas fuentes, razonamiento limitado, 1 entregable corto. <em>Ej.: “ordena mi bandeja de las últimas 24 h” o un estado de los lunes.</em></td><td>100–300</td><td>~1–3 $</td></tr>
+        <tr><td class="tier-m">Media</td><td>Varias fuentes, razonamiento estructurado, 2+ entregables. <em>Ej.: doc de preparación de reunión + Excel + diapositiva.</em></td><td>400–700</td><td>~4–7 $</td></tr>
+        <tr><td class="tier-h">Pesada</td><td>Agregación amplia, razonamiento profundo, muchos entregables. <em>Ej.: agrega 12 informes, construye un modelo financiero y produce un deck + memo.</em></td><td>700+</td><td>~7 $ y más</td></tr>
+      </tbody>
+    </table>
+  </section>
+ 
+  <!-- OPCIONES DE PAGO -->
+  <section id="pago" class="card">
+    <span class="tag">Opciones de pago</span>
+    <h2>Tres formas de cubrir los créditos <span class="badge b-pub">🌐 Oficial</span></h2>
+    <div class="grid g3">
+      <div class="driver">
+        <h3>Pago por uso (PayGo)</h3>
+        <p class="muted">Se factura por crédito a medida que se consume, a <strong>0,01 $</strong> cada uno. Ideal para uso <strong>variable o impredecible</strong>.</p>
+      </div>
+      <div class="driver">
+        <h3>Prepago (P3)</h3>
+        <p class="muted">Compras un bloque de créditos por adelantado. Útil para <strong>presupuestar y comprometer gasto</strong>. Microsoft ofrece planes de pre-compra; consulta a tu equipo de Microsoft las condiciones aplicables.</p>
+      </div>
+      <div class="driver">
+        <h3>Capacidad existente</h3>
+        <p class="muted">Si tu organización ya tiene capacidad asignada, el uso de Cowork puede consumirse de ahí. Para facturación a escala, el admin puede conectar una <strong>suscripción de Azure</strong>.</p>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- MODELOS -->
+  <section id="modelos" class="card">
+    <span class="tag">Modelos</span>
+    <h2>Qué modelos ejecutan tus tareas — y por qué importa para el coste</h2>
+    <p><span class="badge b-pub">🌐 Oficial</span> Como <strong>la elección de modelo afecta al consumo de créditos</strong>, un selector de modelos permite intercambiar capacidad por coste: enruta el trabajo rutinario a un modelo más barato y reserva el modelo pesado para los problemas difíciles. Cowork incorpora además <strong>extensibilidad mediante plugins</strong> y nuevos controles de gestión de coste.</p>
+    <table>
+      <thead><tr><th>Modelo</th><th>Estado en GA</th><th>Para qué</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Anthropic Opus 4.8</strong></td><td>Disponible en GA</td><td>Modelo frontera, máxima capacidad (y mayor consumo).</td></tr>
+        <tr><td><strong>Anthropic Sonnet 4.6</strong></td><td>Disponible en GA</td><td>Equilibrio capacidad/coste.</td></tr>
+        <tr><td><strong>Cowork 1</strong></td><td>“En las próximas semanas”</td><td>Modelo propio afinado y seguro, post-entrenado para resolver tareas a coste sustancialmente menor.</td></tr>
+        <tr><td><strong>GPT-5.5</strong></td><td>En Frontier</td><td>Opción adicional de modelo.</td></tr>
+      </tbody>
+    </table>
+    <p class="muted"><strong>Recomendación de coste:</strong> usa el modelo más económico que resuelva bien la tarea y reserva los modelos frontera para el trabajo realmente complejo.</p>
+  </section>
+ 
+  <!-- SEGURIDAD -->
+  <section id="seguridad" class="card">
+    <span class="tag">Seguridad y residencia de datos</span>
+    <h2>Seguridad, cumplimiento y EU Data Boundary <span class="badge b-pub">🌐 Oficial</span></h2>
+    <p>Copilot Cowork opera <strong>dentro del límite de confianza de Microsoft 365</strong>, con la misma seguridad, cumplimiento y gobierno que el resto de tu entorno. Pero hay un punto de <strong>residencia de datos</strong> que conviene entender desde el primer día.</p>
+    <div class="grid g2">
+      <div class="driver">
+        <h3>🛡️ Seguridad y cumplimiento empresarial</h3>
+        <ul class="clean">
+          <li>Gobernado por <strong>Microsoft Purview</strong>: registros de auditoría, eDiscovery, etiquetas de sensibilidad (con herencia), DLP, DSPM e Insider Risk.</li>
+          <li>Cumple los compromisos de Microsoft 365, incluido el <strong>RGPD</strong>.</li>
+          <li>Tus <strong>prompts, respuestas y datos de Graph no se usan para entrenar</strong> los modelos.</li>
+          <li>Protecciones integradas: bloqueo de contenido dañino, detección de material protegido y bloqueo de inyección de prompts.</li>
+          <li>Alojado en la nube: los archivos no se guardan en local y las tareas siguen aunque apagues el portátil.</li>
+        </ul>
+      </div>
+      <div class="driver">
+        <h3>🧩 Cowork necesita los modelos de Anthropic</h3>
+        <ul class="clean">
+          <li>En GA, Cowork se ejecuta sobre <strong>modelos de Anthropic</strong> (Opus 4.8, Sonnet 4.6). En la práctica, <strong>usar Cowork requiere tener habilitado Anthropic</strong>.</li>
+          <li>Anthropic está incorporado como <strong>subprocesador de Microsoft</strong>: su uso se rige por los <strong>Microsoft Product Terms</strong>, el <strong>DPA</strong>, la <strong>Enterprise Data Protection</strong> y el <strong>Customer Copyright Commitment</strong>, con compromiso de <strong>no entrenamiento</strong>.</li>
+          <li>Multimodelo: GPT-5.5 (Frontier) y Cowork 1 (próximamente) como alternativas, con selector de modelo.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" style="background:var(--amber-soft);border-color:#e7c66b;border-inline-start:5px solid var(--amber)">
+      <h3>⚠️ EU Data Boundary: el punto clave para clientes de la UE</h3>
+      <ul class="clean">
+        <li><strong>Los modelos de Anthropic están excluidos del EU Data Boundary (EUDB).</strong> Su procesamiento ocurre <strong>fuera del EUDB</strong> (y de los compromisos de procesamiento en país). Ninguna política de DLP cambia esto.</li>
+        <li>Para clientes de <strong>UE / EFTA / Reino Unido</strong>, los modelos de Anthropic están <strong>desactivados por defecto</strong> y requieren <strong>opt-in explícito</strong> de un administrador (Global Admin o AI Admin) en el centro de administración de Microsoft 365 (<em>Copilot → Settings → proveedores de IA que operan como subprocesadores de Microsoft</em>).</li>
+        <li>La activación puede <strong>acotarse por usuario o grupo de Entra ID</strong> — ideal para un <strong>piloto gobernado</strong> antes de extenderlo a toda la organización.</li>
+        <li>No disponible en <strong>nubes gubernamentales</strong> (GCC, GCC High, DoD) ni soberanas. El antiguo modo de “proveedor independiente” se retiró el 1 may 2026: hay que habilitar Anthropic como <strong>subprocesador</strong>.</li>
+        <li>Atención a los <strong>“Preview models with Data Retention”</strong>: tienen términos y retención de datos separados y deben habilitarse aparte.</li>
+      </ul>
+    </div>
+    <p class="muted"><strong>Qué significa para ti:</strong> como Cowork funciona sobre Anthropic, adoptarlo implica <strong>decidir tu postura de gobierno sobre el EUDB</strong>. Recomendación: define la postura antes de desplegar, arranca con un <strong>grupo piloto de Entra ID</strong>, documenta la excepción al EUDB y valídalo con tus equipos de seguridad y cumplimiento.</p>
+  </section>
+ 
+  <!-- GOBIERNO -->
+  <section id="gobierno" class="card">
+    <span class="tag">Controles de administración</span>
+    <h2>Cómo TI mantiene el gasto bajo control</h2>
+    <p><span class="badge b-pub">🌐 Oficial</span> Microsoft articula la gestión de coste en tres ideas: <strong>control</strong> (quién puede activar Cowork y cuánto puede gastar), <strong>visibilidad</strong> (dónde van los créditos) y <strong>eficiencia</strong> (la tarifa y el modelo adecuados para cada trabajo). Todo se gestiona desde el panel <strong>Cost Management</strong> del centro de administración de Microsoft 365.</p>
+    <div class="grid g2">
+      <div>
+        <h3>Configuración y políticas</h3>
+        <ul class="clean">
+          <li><strong>Apagado por defecto:</strong> nada ocurre hasta que un admin lo activa.</li>
+          <li>Habilitar facturación por uso con opciones flexibles: <strong>prepago (P3)</strong>, <strong>PayGo</strong> o <strong>capacidad existente</strong>.</li>
+          <li>Conectar a <strong>suscripciones de Azure</strong> para facturación a escala.</li>
+          <li><strong>Políticas de gasto</strong> y <strong>límites</strong> a nivel de <strong>tenant, grupo y usuario</strong>, incluidos <strong>topes duros (hard caps)</strong>.</li>
+          <li><strong>Alertas y presupuestos</strong> personalizables al acercarse a un límite.</li>
+          <li><strong>Solicitudes de crédito</strong> iniciadas por el usuario cuando necesita más.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Monitorización</h3>
+        <ul class="clean">
+          <li><strong>Pestaña Overview:</strong> instantánea en tiempo real del consumo y la capacidad restante. <em>“¿Dónde gastamos y vamos según lo previsto?”</em></li>
+          <li><strong>Pestaña Consumption:</strong> análisis por <strong>usuario, grupo, servicio o agente</strong>; identifica usuarios intensivos y motores de coste.</li>
+          <li>Tendencias de consumo a lo largo del tiempo para ajustar políticas y presupuesto.</li>
+        </ul>
+        <div class="warn show" style="display:block">
+          <strong>≈ Tope por defecto a revisar.</strong> <span class="badge b-est">≈ Orientativo</span> Algunas fuentes externas mencionan un límite por defecto de <strong>200 créditos/usuario/mes (~2 $)</strong> hasta que un admin lo cambie — un guardarraíl conservador, no una bolsa de créditos gratis. <strong>Verifícalo en tu centro de administración</strong>; no es una cifra confirmada oficialmente por Microsoft.
+        </div>
+      </div>
+    </div>
+    <details>
+      <summary>Periodo de gracia para clientes de la previa (Frontier)</summary>
+      <p class="src">Según información publicada, los tenants que tuvieron uso de Cowork en la previa Frontier disponen de un <strong>periodo de gracia de facturación hasta el 1 de julio de 2026</strong>. Conviene confirmar la fecha de corte con el administrador para que la primera factura no sorprenda.</p>
+    </details>
+  </section>
+ 
+  <!-- SIMULADOR -->
+  <section id="simulador">
+    <div class="sim">
+      <div class="sim-head">
+        <h2>🧮 Simulador de coste de Copilot Cowork</h2>
+        <p style="margin:.3em 0 0;color:#eaf3fc">Estima el coste mensual y anual ajustando usuarios, mezcla de tareas y precios. Todas las cifras de créditos son <strong>editables</strong> — sustitúyelas por las de tu propia prueba o por las del estimador oficial de Microsoft cuando lo tengas.</p>
+      </div>
+      <div class="sim-body">
+ 
+        <div class="presets">
+          <strong style="align-self:center;margin-inline-end:4px">Escenarios:</strong>
+          <button type="button" data-scn="piloto">Piloto (25 usuarios)</button>
+          <button type="button" data-scn="depto">Departamento (250)</button>
+          <button type="button" data-scn="despliegue">Despliegue (2.500)</button>
+        </div>
+ 
+        <div class="grid g2">
+          <!-- INPUTS LEFT -->
+          <div>
+            <div class="field">
+              <label for="users">Usuarios de Cowork</label>
+              <input type="number" id="users" min="1" step="1" value="250">
+            </div>
+            <div class="field">
+              <label for="days">Días laborables al mes <span class="hint">(habitual: 20–22)</span></label>
+              <input type="number" id="days" min="1" max="31" step="1" value="20">
+            </div>
+ 
+            <p style="font-weight:700;margin:14px 0 4px">Mezcla de tareas — por usuario y día</p>
+            <p class="hint" style="margin-top:0">Cuántas tareas de cada tipo lanza un usuario medio cada día.</p>
+ 
+            <div class="field">
+              <label>Tareas <span class="tier-l">ligeras</span>/día: <span id="olLight" class="pill">2</span></label>
+              <div class="rngrow"><input type="range" id="dLight" min="0" max="20" step="0.5" value="2"></div>
+            </div>
+            <div class="field">
+              <label>Tareas <span class="tier-m">medias</span>/día: <span id="olMed" class="pill">1</span></label>
+              <div class="rngrow"><input type="range" id="dMed" min="0" max="20" step="0.5" value="1"></div>
+            </div>
+            <div class="field">
+              <label>Tareas <span class="tier-h">pesadas</span>/día: <span id="olHeavy" class="pill">0.2</span></label>
+              <div class="rngrow"><input type="range" id="dHeavy" min="0" max="10" step="0.1" value="0.2"></div>
+            </div>
+          </div>
+ 
+          <!-- INPUTS RIGHT -->
+          <div>
+            <p style="font-weight:700;margin:0 0 4px">Créditos por tarea <span class="badge b-est">≈ editable</span></p>
+            <p class="hint" style="margin-top:0">Valores por defecto = punto medio de estimaciones orientativas. Ajústalos a tu realidad.</p>
+            <div class="grid g3" style="gap:10px">
+              <div class="field" style="margin:6px 0"><label for="cLight">Ligera</label><input type="number" id="cLight" min="1" step="10" value="200"></div>
+              <div class="field" style="margin:6px 0"><label for="cMed">Media</label><input type="number" id="cMed" min="1" step="10" value="550"></div>
+              <div class="field" style="margin:6px 0"><label for="cHeavy">Pesada</label><input type="number" id="cHeavy" min="1" step="10" value="1000"></div>
+            </div>
+ 
+            <div class="field">
+              <label for="price">Precio por crédito (USD)</label>
+              <input type="number" id="price" min="0" step="0.001" value="0.01">
+            </div>
+ 
+            <div class="grid g2" style="gap:10px">
+              <div class="field" style="margin:6px 0"><label for="seat">Licencia USL ($/usuario/mes)</label><input type="number" id="seat" min="0" step="1" value="30"></div>
+              <div class="field" style="margin:6px 0"><label for="fx">Tipo de cambio USD→EUR</label><input type="number" id="fx" min="0" step="0.01" value="0.92"></div>
+            </div>
+          </div>
+        </div>
+ 
+        <!-- RESULTS -->
+        <div class="result">
+          <div class="grid g2" style="align-items:center">
+            <div>
+              <div class="muted" style="font-size:.85rem">Coste de USO de Cowork (créditos)</div>
+              <div class="bignum"><span id="rUseUsdMo">—</span></div>
+              <div class="muted">al mes · <span id="rUseEurMo">—</span></div>
+              <div class="subnum" style="margin-top:6px"><span id="rUseUsdYr">—</span> / año</div>
+            </div>
+            <div>
+              <div class="rrow"><span>Créditos consumidos / mes</span><span class="v" id="rCredits">—</span></div>
+              <div class="rrow"><span>Coste de uso Cowork / mes</span><span class="v" id="rUse2">—</span></div>
+              <div class="rrow"><span>Licencias M365 Copilot / mes</span><span class="v" id="rSeat">—</span></div>
+              <div class="rrow"><span><strong>Coste TOTAL / mes</strong> (licencia + uso)</span><span class="v" id="rTotalMo">—</span></div>
+              <div class="rrow"><span><strong>Coste TOTAL / año</strong></span><span class="v" id="rTotalYr">—</span></div>
+              <div class="rrow"><span>Coste medio por usuario / mes</span><span class="v" id="rPerUser">—</span></div>
+              <div class="rrow"><span>Uso medio de créditos por usuario / mes</span><span class="v" id="rCredPerUser">—</span></div>
+            </div>
+          </div>
+ 
+          <div class="bars">
+            <div class="bar"><span class="lab tier-l">Ligeras</span><span class="track2"><span class="fill fl" id="barL" style="width:0"></span></span><span class="val" id="valL">—</span></div>
+            <div class="bar"><span class="lab tier-m">Medias</span><span class="track2"><span class="fill fm" id="barM" style="width:0"></span></span><span class="val" id="valM">—</span></div>
+            <div class="bar"><span class="lab tier-h">Pesadas</span><span class="track2"><span class="fill fh" id="barH" style="width:0"></span></span><span class="val" id="valH">—</span></div>
+          </div>
+          <p class="hint" style="margin-top:8px">Las barras muestran el reparto del <strong>coste de uso</strong> entre los tres tipos de tarea.</p>
+ 
+          <div class="warn" id="capWarn"></div>
+        </div>
+ 
+        <p class="hint" style="margin-top:12px"><strong>Cómo leerlo:</strong> el coste de <em>uso</em> es la parte nueva y variable; la <em>licencia</em> es la base fija que ya pagas. Sube las tareas pesadas o cambia los créditos por tarea para ver cómo se dispara el consumo — es exactamente el comportamiento que conviene gobernar con límites y modelos más económicos.</p>
+        <p class="hint"><strong>Aviso:</strong> herramienta orientativa. Microsoft no publica créditos oficiales por tarea; usa el <em>Customer Cowork Estimator</em> oficial y tus primeras semanas de consumo real para calibrar.</p>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- METODO PERSONAS -->
+  <section class="card">
+    <span class="tag">Método recomendado</span>
+    <h2>Estimar por “personas”, no tarea a tarea <span class="badge b-pub">🌐 Oficial</span></h2>
+    <p>El método que recomienda Microsoft es estimar <strong>por persona</strong>. Observando a clientes de la previa durante meses, Microsoft vio que los usuarios se agrupan en <strong>cuatro personas</strong>, cada una con su mezcla típica de tareas ligeras/medias/pesadas.</p>
+    <p>La cuenta es simple: <strong>agrupa usuarios por persona → multiplica cada grupo por su mezcla de tareas → multiplícalo por el precio del crédito → suma los grupos</strong>. No necesitas predecir cada tarea: basta con saber cuántos usuarios “pesados” frente a “ligeros” tienes. El <strong>Customer Cowork Estimator</strong> de Microsoft hace este cálculo por ti en unos minutos.</p>
+    <p class="hint">En el simulador de arriba puedes aproximar este método ajustando la “mezcla de tareas por usuario/día” para representar tu persona media, o calculando cada persona por separado y sumando.</p>
+  </section>
+ 
+  <!-- FUENTES -->
+  <section id="fuentes" class="card">
+    <span class="tag">Fuentes</span>
+    <h2>De dónde sale cada dato <span class="badge b-pub">🌐 Solo fuentes públicas</span></h2>
+    <ul class="src">
+      <li><strong>Microsoft 365 Blog</strong> — “Copilot Cowork is now generally available” (16 jun 2026): factura en dos capas, 4 factores, tareas ligera/media/pesada, multimodelo, método por personas (cuatro personas observadas), comparativa de coste frente a alternativas (benchmark del propio Microsoft).</li>
+      <li><strong>Microsoft Learn</strong> — “Understand usage-based billing and cost management for Copilot Credits”: Copilot Credits como moneda común, panel Cost Management, opciones PayGo / prepago (P3) / capacidad existente, conexión con Azure, políticas y límites tenant/grupo/usuario, alertas, hard caps, pestañas Overview/Consumption, Customer Cowork Estimator.</li>
+      <li><strong>Copilot Credits Licensing Guide</strong> (guía oficial de Microsoft) — cómo se consumen, se miden y se compran los créditos; confirma <strong>0,01 $/crédito en PayGo</strong>.</li>
+      <li><strong>Microsoft Learn</strong> — “Anthropic models in Microsoft Online Services” y “Copilot in Microsoft 365 apps with Anthropic models”: Anthropic como subprocesador de Microsoft, <strong>exclusión del EU Data Boundary</strong> (procesamiento fuera del EUDB), opt-in desactivado por defecto en UE/EFTA/UK, scoping por grupos de Entra ID, exclusión de nubes gubernamentales, Product Terms/DPA/EDP/CCC.</li>
+      <li><strong>Microsoft Learn</strong> — “Data, Privacy, and Security for Microsoft 365 Copilot”: cumplimiento RGPD y EU Data Boundary de M365 Copilot, no entrenamiento con tus datos, protecciones; los modelos de Anthropic quedan fuera del alcance del EUDB.</li>
+      <li><strong>Medios externos</strong> (p. ej. cowork.tips, aguidetocloud.com, microsoftnegotiations.com): rangos de créditos por tarea (estimaciones), 30 $/usuario/mes de la licencia como referencia, periodo de gracia y el límite por defecto reportado de 200 créditos/usuario/mes (no confirmado oficialmente).</li>
+    </ul>
+    <details>
+      <summary>Salvedades importantes</summary>
+      <ul class="src">
+        <li>Microsoft <strong>no ha publicado</strong> el número oficial de créditos que consume cada tarea (“visualización del precio por tarea próximamente”). Los rangos 100–300 / 400–700 / 700+ son <strong>estimaciones de terceros</strong>.</li>
+        <li>El “límite por defecto de 200 créditos/usuario/mes” procede de análisis de terceros; <strong>confírmalo en tu centro de administración</strong>.</li>
+        <li>El “30 $/usuario/mes” de la licencia USL es precio de lista de referencia; tu precio real depende de tu acuerdo con Microsoft.</li>
+        <li>Las comparativas de coste frente a otras soluciones publicadas por Microsoft son <strong>benchmarks del propio fabricante</strong>, no independientes.</li>
+      </ul>
+    </details>
+  </section>
+ 
+  <footer>
+    <p><strong>Copilot Cowork · Modelo de pago por uso (Copilot Credits).</strong> Documento informativo basado en información pública de Microsoft. Elaborado el 26 de junio de 2026.</p>
+    <p>Las estimaciones del simulador son orientativas y no constituyen una oferta ni un precio garantizado. Calibra con el <em>Customer Cowork Estimator</em> oficial, con tu equipo de Microsoft y con tu consumo real.</p>
+  </footer>
+ 
+</div>
+ 
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+ 
+  /* ---- Scenario presets ---- */
+  var scenarios = {
+    piloto:     {users:25,  days:20, dLight:1.5, dMed:0.7, dHeavy:0.1},
+    depto:      {users:250, days:20, dLight:2,   dMed:1,   dHeavy:0.2},
+    despliegue: {users:2500,days:21, dLight:2.5, dMed:1.2, dHeavy:0.3}
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('.presets button'), function(btn){
+    btn.addEventListener("click", function(){
+      var s = scenarios[btn.getAttribute("data-scn")];
+      if(!s) return;
+      $("users").value = s.users; $("days").value = s.days;
+      $("dLight").value = s.dLight; $("dMed").value = s.dMed; $("dHeavy").value = s.dHeavy;
+      recalc();
+    });
+  });
+ 
+  /* ---- Formatters ---- */
+  function fUSD(n){ return new Intl.NumberFormat('es-ES',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n); }
+  function fEUR(n){ return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n); }
+  function fNum(n){ return new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(n); }
+ 
+  function val(id){ var v = parseFloat($(id).value); return isNaN(v)?0:v; }
+ 
+  function recalc(){
+    var users = val("users"), days = val("days");
+    var dL = val("dLight"), dM = val("dMed"), dH = val("dHeavy");
+    var cL = val("cLight"), cM = val("cMed"), cH = val("cHeavy");
+    var price = val("price"), seat = val("seat"), fx = val("fx");
+ 
+    $("olLight").textContent = dL;
+    $("olMed").textContent = dM;
+    $("olHeavy").textContent = dH;
+ 
+    var tL = dL * days * users, tM = dM * days * users, tH = dH * days * users;
+    var krL = tL * cL, krM = tM * cM, krH = tH * cH;
+    var credits = krL + krM + krH;
+ 
+    var effPrice = price;
+    var useUsdMo = credits * effPrice;
+    var costL = krL * effPrice, costM = krM * effPrice, costH = krH * effPrice;
+ 
+    var seatMo = seat * users;
+    var totalMo = useUsdMo + seatMo;
+ 
+    $("rUseUsdMo").textContent = fUSD(useUsdMo);
+    $("rUseEurMo").textContent = fEUR(useUsdMo * fx) + " /mes";
+    $("rUseUsdYr").textContent = fUSD(useUsdMo * 12);
+    $("rCredits").textContent = fNum(credits) + " cr.";
+    $("rUse2").textContent = fUSD(useUsdMo);
+    $("rSeat").textContent = fUSD(seatMo);
+    $("rTotalMo").textContent = fUSD(totalMo);
+    $("rTotalYr").textContent = fUSD(totalMo * 12);
+    $("rPerUser").textContent = users>0 ? fUSD(totalMo/users) : "—";
+    var credPerUser = users>0 ? credits/users : 0;
+    $("rCredPerUser").textContent = fNum(credPerUser) + " cr.";
+ 
+    var maxC = Math.max(costL,costM,costH,1);
+    $("barL").style.width = (costL/maxC*100)+"%";
+    $("barM").style.width = (costM/maxC*100)+"%";
+    $("barH").style.width = (costH/maxC*100)+"%";
+    $("valL").textContent = fUSD(costL);
+    $("valM").textContent = fUSD(costM);
+    $("valH").textContent = fUSD(costH);
+ 
+    var w = $("capWarn");
+    if(credPerUser > 200){
+      w.classList.add("show");
+      w.innerHTML = "⚠️ El uso medio estimado es de <strong>"+fNum(credPerUser)+" créditos/usuario/mes</strong>, por encima del <strong>tope por defecto reportado de 200 créditos</strong> (~2 $). Para sostener este nivel, un administrador tendría que <strong>elevar el límite</strong> por usuario/grupo en Cost Management. <span class=\"badge b-est\">≈ tope no confirmado oficialmente</span>";
+    } else {
+      w.classList.remove("show");
+      w.innerHTML = "";
+    }
+  }
+ 
+  ["users","days","dLight","dMed","dHeavy","cLight","cMed","cHeavy","price","seat","fx"].forEach(function(id){
+    var el = $(id);
+    el.addEventListener("input", recalc);
+    el.addEventListener("change", recalc);
+  });
+ 
+  recalc();
+})();
+</script>
+</body>
+</html>
