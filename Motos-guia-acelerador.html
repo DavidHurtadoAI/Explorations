@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qué pasa cuando das gas · Guía interactiva</title>
+<style>
+  :root{
+    --bg:#0a0c11; --panel:#12161f; --panel2:#171d28; --panel3:#1e2634;
+    --line:#28313f; --line2:#3a4657;
+    --txt:#eef2f8; --mut:#9daabd; --mut2:#6d7c92;
+    --amber:#ffb020; --cyan:#4fd6ff; --green:#5ee6a4; --red:#ff6b6b;
+    --violet:#a78bfa; --blue:#74a7ff;
+    --air:#4fd6ff; --fuel:#ffb020; --elec:#a78bfa; --mech:#ff9d66;
+    --r:10px;
+    --font:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+    --shadow:0 18px 50px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 10% -6%,rgba(255,176,32,.10),transparent 34%),
+      radial-gradient(circle at 92% 2%,rgba(79,214,255,.09),transparent 30%),
+      linear-gradient(180deg,#0a0c11,#0c1017 45%,#090b10);
+    background-attachment:fixed;
+    color:var(--txt);font-family:var(--font);line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--cyan);text-decoration:none}
+  a:hover{text-decoration:underline}
+  button,input,select{font:inherit}
+  button{cursor:pointer}
+
+  /* ---------- layout ---------- */
+  .wrap{max-width:1160px;margin:0 auto;padding:0 22px 90px}
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    background:rgba(10,12,17,.86);backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-in{max-width:1160px;margin:0 auto;padding:11px 22px;display:flex;gap:16px;align-items:center;justify-content:space-between}
+  .logo{display:flex;gap:11px;align-items:center;min-width:0}
+  .logo .mark{
+    width:34px;height:34px;border-radius:50%;flex:none;
+    border:1.5px solid rgba(255,176,32,.6);
+    background:radial-gradient(circle at 35% 30%,#2a2113,#10131a);
+    position:relative;box-shadow:0 0 20px rgba(255,176,32,.18)
+  }
+  .logo .mark:after{content:"";position:absolute;inset:9px;border-radius:50%;border:1.5px solid rgba(79,214,255,.65)}
+  .logo b{font-size:14.5px;letter-spacing:-.01em;display:block;line-height:1.15}
+  .logo span{font-size:10.5px;color:var(--mut2);text-transform:uppercase;letter-spacing:.1em}
+  nav.jump{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+  nav.jump a{
+    color:var(--mut);font-size:12px;font-weight:650;padding:6px 9px;border-radius:7px;
+    border:1px solid transparent;white-space:nowrap
+  }
+  nav.jump a:hover{background:var(--panel2);color:var(--txt);border-color:var(--line);text-decoration:none}
+
+  header.hero{padding:52px 0 30px}
+  .eyebrow{font-size:11px;color:var(--amber);font-weight:850;text-transform:uppercase;letter-spacing:.13em;margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,50px);line-height:1.05;margin:0 0 16px;letter-spacing:-.025em;max-width:19ch}
+  .lead{font-size:17px;color:var(--mut);max-width:66ch;margin:0}
+  .lead strong{color:var(--txt);font-weight:700}
+
+  section{scroll-margin-top:74px;margin:44px 0}
+  h2{font-size:26px;margin:0 0 8px;letter-spacing:-.02em}
+  h3{font-size:18px;margin:0 0 10px;letter-spacing:-.01em}
+  h4{font-size:14px;margin:0 0 6px}
+  .sec-head{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .sec-head p{margin:6px 0 0;color:var(--mut);font-size:14.5px;max-width:74ch}
+  .num{
+    display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;
+    background:rgba(255,176,32,.13);border:1px solid rgba(255,176,32,.35);
+    color:var(--amber);font-size:12px;font-weight:850;margin-right:10px;vertical-align:3px
+  }
+
+  p{margin:0 0 13px}
+  .body p, .body li{color:var(--mut);font-size:14.6px}
+  .body strong{color:var(--txt);font-weight:700}
+  .body em{color:var(--amber);font-style:normal;font-weight:650}
+  ul,ol{margin:0 0 13px;padding-left:21px}
+  li{margin-bottom:6px}
+
+  .panel{background:rgba(18,22,31,.82);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+  .pad{padding:20px}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media(max-width:860px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{border:1px solid var(--line);background:rgba(18,22,31,.8);border-radius:var(--r);padding:17px}
+  .card h4{color:var(--txt);font-size:14.5px}
+  .card p{margin:0;color:var(--mut);font-size:13.6px}
+  .card ul{margin:9px 0 0;padding-left:18px}
+  .card li{font-size:13.4px;color:var(--mut)}
+
+  .tag{display:inline-block;font-size:10.5px;border:1px solid var(--line);border-radius:999px;color:var(--mut);padding:3px 8px;background:rgba(10,14,21,.7);font-weight:700;letter-spacing:.03em}
+  .tag.amber{border-color:rgba(255,176,32,.45);color:var(--amber);background:rgba(255,176,32,.08)}
+  .tag.cyan{border-color:rgba(79,214,255,.45);color:var(--cyan);background:rgba(79,214,255,.08)}
+  .tag.violet{border-color:rgba(167,139,250,.45);color:var(--violet);background:rgba(167,139,250,.08)}
+  .tag.green{border-color:rgba(94,230,164,.45);color:var(--green);background:rgba(94,230,164,.08)}
+  .tag.red{border-color:rgba(255,107,107,.45);color:var(--red);background:rgba(255,107,107,.08)}
+  .tag.mech{border-color:rgba(255,157,102,.45);color:var(--mech);background:rgba(255,157,102,.08)}
+  .tagrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+
+  .note{
+    border-left:3px solid var(--amber);background:rgba(255,176,32,.07);
+    border-radius:0 var(--r) var(--r) 0;padding:13px 16px;margin:16px 0;color:var(--mut);font-size:14px
+  }
+  .note b{color:var(--amber)}
+  .note.cyan{border-left-color:var(--cyan);background:rgba(79,214,255,.07)}
+  .note.cyan b{color:var(--cyan)}
+  .note.red{border-left-color:var(--red);background:rgba(255,107,107,.07)}
+  .note.red b{color:var(--red)}
+
+  code,.k{font-family:var(--mono);font-size:.9em;background:rgba(10,14,21,.8);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--cyan)}
+
+  /* ---------- simulador ---------- */
+  .sim{border:1px solid var(--line2);border-radius:14px;background:linear-gradient(180deg,rgba(23,29,40,.95),rgba(14,18,26,.95));box-shadow:var(--shadow);overflow:hidden}
+  .sim-head{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+  .sim-head h3{margin:0}
+  .sim-head p{margin:3px 0 0;font-size:12.8px;color:var(--mut2)}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .tab{
+    border:1px solid var(--line);background:var(--panel2);color:var(--mut);
+    border-radius:8px;padding:8px 12px;font-size:12.5px;font-weight:750;transition:.14s
+  }
+  .tab:hover{color:var(--txt);border-color:var(--line2)}
+  .tab.active{color:#0a0c11;background:var(--amber);border-color:var(--amber)}
+
+  .sim-body{padding:18px 20px 22px}
+  .stage{background:rgba(8,11,16,.75);border:1px solid var(--line);border-radius:11px;padding:6px;overflow:hidden}
+  .stage svg{display:block;width:100%;height:auto}
+
+  .controls{display:grid;grid-template-columns:1fr 300px;gap:16px;margin-top:16px}
+  @media(max-width:860px){.controls{grid-template-columns:1fr}}
+  .throttle-ctl{border:1px solid var(--line);border-radius:11px;background:var(--panel2);padding:16px 18px}
+  .throttle-ctl .lbl{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:11px}
+  .throttle-ctl .lbl span{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--mut2)}
+  .throttle-ctl .lbl b{font-family:var(--mono);font-size:26px;color:var(--amber);line-height:1}
+
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:32px;background:transparent;outline:none;cursor:grab
+  }
+  input[type=range]:active{cursor:grabbing}
+  input[type=range]::-webkit-slider-runnable-track{
+    height:10px;border-radius:6px;border:1px solid var(--line2);
+    background:linear-gradient(90deg,rgba(94,230,164,.35),rgba(255,176,32,.45) 55%,rgba(255,107,107,.5))
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:26px;height:26px;margin-top:-9px;border-radius:50%;
+    background:radial-gradient(circle at 34% 30%,#fff2d6,var(--amber));
+    border:2px solid #0a0c11;box-shadow:0 0 0 3px rgba(255,176,32,.25),0 4px 12px rgba(0,0,0,.5)
+  }
+  input[type=range]::-moz-range-track{height:10px;border-radius:6px;border:1px solid var(--line2);background:linear-gradient(90deg,rgba(94,230,164,.35),rgba(255,176,32,.45) 55%,rgba(255,107,107,.5))}
+  input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--amber);border:2px solid #0a0c11;box-shadow:0 0 0 3px rgba(255,176,32,.25)}
+
+  .ticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--mut2);margin-top:-2px}
+  .presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:13px}
+  .preset{border:1px solid var(--line);background:var(--panel3);color:var(--mut);border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700}
+  .preset:hover{color:var(--txt);border-color:var(--amber)}
+
+  .readouts{border:1px solid var(--line);border-radius:11px;background:var(--panel2);padding:14px 16px}
+  .ro{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed rgba(58,70,87,.55);font-size:12.6px}
+  .ro:last-child{border-bottom:0}
+  .ro span{color:var(--mut2);font-weight:650}
+  .ro b{font-family:var(--mono);color:var(--txt);font-size:13px}
+  .ro b.air{color:var(--air)} .ro b.fuel{color:var(--fuel)} .ro b.elec{color:var(--elec)} .ro b.mech{color:var(--mech)}
+  .ro b.off{color:var(--mut2)}
+
+  .modes{display:flex;gap:6px;margin-top:13px;flex-wrap:wrap}
+  .mode{border:1px solid var(--line);background:var(--panel3);color:var(--mut);border-radius:7px;padding:7px 11px;font-size:11.8px;font-weight:750}
+  .mode.active{border-color:var(--cyan);color:var(--cyan);background:rgba(79,214,255,.12)}
+  .modes-wrap{margin-top:14px}
+  .modes-wrap .lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--mut2)}
+
+  .explain{
+    margin-top:16px;border:1px solid var(--line);border-radius:11px;background:rgba(8,11,16,.6);padding:15px 17px
+  }
+  .explain .title{font-weight:850;font-size:13.5px;margin-bottom:6px;color:var(--amber)}
+  .explain p{margin:0;color:var(--mut);font-size:13.8px}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11.5px;color:var(--mut2)}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+  /* ---------- svg helpers ---------- */
+  .flow{animation:dash 1s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-24}}
+  .lbl-s{font-family:var(--font);font-size:11px;font-weight:700;fill:#9daabd}
+  .lbl-t{font-family:var(--font);font-size:12.5px;font-weight:800;fill:#eef2f8}
+  .lbl-m{font-family:var(--mono);font-size:10.5px;fill:#6d7c92}
+
+  /* ---------- tabla comparativa ---------- */
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:rgba(18,22,31,.8)}
+  table{border-collapse:collapse;width:100%;min-width:720px;font-size:13.4px}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:rgba(30,38,52,.7);color:var(--txt);font-size:12.5px;font-weight:800;position:sticky;top:0}
+  tbody th{color:var(--mut2);font-weight:700;font-size:12.6px;width:170px;background:rgba(23,29,40,.5)}
+  td{color:var(--mut)}
+  tr:last-child th,tr:last-child td{border-bottom:0}
+  td b{color:var(--txt)}
+
+  /* ---------- acordeón ---------- */
+  details{border:1px solid var(--line);border-radius:var(--r);background:rgba(18,22,31,.8);margin-bottom:9px;overflow:hidden}
+  summary{padding:14px 17px;cursor:pointer;font-weight:750;font-size:14.2px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  summary::-webkit-details-marker{display:none}
+  summary:after{content:"+";color:var(--amber);font-size:19px;font-weight:400;flex:none}
+  details[open] summary:after{content:"−"}
+  details[open] summary{border-bottom:1px solid var(--line)}
+  .det-body{padding:15px 17px;color:var(--mut);font-size:14px}
+  .det-body p:last-child{margin-bottom:0}
+
+  /* ---------- bikes ---------- */
+  .bike{display:grid;grid-template-columns:auto 1fr;gap:15px;align-items:start;border:1px solid var(--line);border-radius:var(--r);background:rgba(18,22,31,.8);padding:16px}
+  .bike .badge{
+    width:52px;height:52px;border-radius:12px;display:grid;place-items:center;flex:none;
+    font-size:10px;font-weight:850;text-align:center;line-height:1.15;letter-spacing:.02em
+  }
+  .b-carb{background:rgba(255,157,102,.14);border:1px solid rgba(255,157,102,.45);color:var(--mech)}
+  .b-efi{background:rgba(79,214,255,.13);border:1px solid rgba(79,214,255,.45);color:var(--cyan)}
+  .b-rbw{background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.45);color:var(--violet)}
+  .bike h4{margin:0 0 3px;font-size:14.6px}
+  .bike p{margin:0;font-size:13.4px;color:var(--mut)}
+  .bike .own{display:inline-block;margin-left:8px;font-size:10px;color:var(--green);border:1px solid rgba(94,230,164,.4);background:rgba(94,230,164,.1);border-radius:999px;padding:2px 7px;font-weight:800;vertical-align:2px}
+
+  footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--mut2);font-size:12.4px}
+  footer a{color:var(--mut)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="logo">
+      <div class="mark"></div>
+      <div>
+        <b>Qué pasa cuando das gas</b>
+        <span>Carburación · Inyección · Ride-by-wire</span>
+      </div>
+    </div>
+    <nav class="jump">
+      <a href="#base">Base</a>
+      <a href="#sim">Simulador</a>
+      <a href="#carb">Carburador</a>
+      <a href="#efi">Inyección</a>
+      <a href="#rbw">Ride-by-wire</a>
+      <a href="#tabla">Comparativa</a>
+      <a href="#motos">Motos</a>
+      <a href="#glosario">Glosario</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Guía interactiva</div>
+  <h1>Qué pasa de verdad cuando abres gas</h1>
+  <p class="lead">Del puño a la explosión, en tres tecnologías distintas. Mueve el puño en el simulador y observa qué se mueve, qué entra y quién decide. Todo en un único fichero: <strong>ábrelo en el navegador y ya está</strong>.</p>
+</header>
+
+<!-- ============ 1. BASE ============ -->
+<section id="base" class="body">
+  <div class="sec-head">
+    <h2><span class="num">1</span>La idea que hay que tener clara antes de nada</h2>
+    <p>Si te quedas con un solo concepto de toda la guía, que sea este.</p>
+  </div>
+
+  <div class="grid g2">
+    <div>
+      <p>Un motor de gasolina es, sobre todo, <strong>una bomba de aire</strong>. Los pistones suben y bajan y aspiran aire por el conducto de admisión. Cuanto más aire consigas meter en el cilindro, más gasolina podrás quemar con él y más empuje sale por el cigüeñal.</p>
+      <p>Por eso <em>el puño de gas no controla la gasolina: controla el aire</em>. Lo que hay al otro lado del cable (o del cable eléctrico) es una compuerta en el tubo de admisión llamada <strong>mariposa</strong>. Cerrada, el motor apenas puede respirar y se queda al ralentí. Abierta, respira todo lo que quiere.</p>
+      <p>La gasolina viene <strong>detrás</strong>, y ahí es donde se diferencian las tres tecnologías: en <em>quién decide cuánta gasolina acompaña a ese aire</em> y <em>con qué precisión lo hace</em>.</p>
+      <div class="note">
+        <b>La proporción mágica.</b> Un motor de gasolina quiere aproximadamente <strong>14,7 gramos de aire por cada gramo de gasolina</strong> (lo que se llama mezcla estequiométrica, o lambda = 1). Con menos aire la mezcla va "rica" (más potencia inmediata, más consumo, más contaminación). Con más aire va "pobre" (menos consumo, más calor, riesgo de detonación). Todo el diseño de un carburador o de una centralita se reduce a acertar con ese número en cada momento.
+      </div>
+    </div>
+    <div class="panel pad">
+      <h3>El recorrido, siempre el mismo</h3>
+      <div id="baseDiagram"></div>
+      <p style="margin-top:12px;font-size:13.4px;color:var(--mut2)">Los cinco pasos son idénticos en cualquier moto. Lo que cambia entre tecnologías son <strong style="color:var(--txt)">los pasos 2 y 3</strong>: cómo viaja tu orden y quién mide la gasolina.</p>
+    </div>
+  </div>
+
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card">
+      <span class="tag mech">Mecánico</span>
+      <h4 style="margin-top:9px">Carburador + cable</h4>
+      <p>Tu mano tira de un cable, el cable abre el paso al aire, y el propio aire al pasar succiona la gasolina. Sin electrónica. La física hace la dosificación.</p>
+      <div class="tagrow"><span class="tag">Hasta ~2005 en calle</span></div>
+    </div>
+    <div class="card">
+      <span class="tag cyan">Híbrido</span>
+      <h4 style="margin-top:9px">Inyección + cable</h4>
+      <p>Tu mano sigue abriendo la mariposa con un cable, pero un sensor mide cuánto has abierto y una centralita calcula la gasolina y la dispara con un inyector.</p>
+      <div class="tagrow"><span class="tag">~2000 a hoy</span></div>
+    </div>
+    <div class="card">
+      <span class="tag violet">Electrónico</span>
+      <h4 style="margin-top:9px">Inyección + ride-by-wire</h4>
+      <p>No hay cable. El puño es un sensor. La centralita lee tu petición, decide cuánta mariposa abre y con qué ritmo, y luego calcula la gasolina.</p>
+      <div class="tagrow"><span class="tag">~2008 a hoy</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. SIMULADOR ============ -->
+<section id="sim">
+  <div class="sec-head body">
+    <h2><span class="num">2</span>Simulador: mueve el puño</h2>
+    <p>Elige una tecnología, arrastra el puño de gas y mira qué se mueve. Los puntos azules son aire, los ámbar gasolina, y las líneas moradas señal eléctrica.</p>
+  </div>
+
+  <div class="sim">
+    <div class="sim-head">
+      <div>
+        <h3 id="simTitle">Carburador con cable</h3>
+        <p id="simSub">Todo mecánico. El aire que pasa arrastra la gasolina.</p>
+      </div>
+      <div class="tabs" id="simTabs">
+        <button class="tab active" data-sys="carb">Carburador + cable</button>
+        <button class="tab" data-sys="efi">Inyección + cable</button>
+        <button class="tab" data-sys="rbw">Inyección + ride-by-wire</button>
+      </div>
+    </div>
+
+    <div class="sim-body">
+      <div class="stage" id="stage"></div>
+
+      <div class="legend">
+        <span><i style="background:var(--air)"></i>Aire</span>
+        <span><i style="background:var(--fuel)"></i>Gasolina</span>
+        <span><i style="background:var(--mech)"></i>Unión mecánica (cable / varilla)</span>
+        <span><i style="background:var(--elec)"></i>Señal eléctrica</span>
+        <span><i style="background:var(--green)"></i>Mezcla lista para quemar</span>
+      </div>
+
+      <div class="controls">
+        <div class="throttle-ctl">
+          <div class="lbl">
+            <span>Puño de gas</span>
+            <b><span id="gripVal">0</span>%</b>
+          </div>
+          <input type="range" id="grip" min="0" max="100" value="0" step="1" aria-label="Puño de gas">
+          <div class="ticks"><span>cerrado</span><span>25</span><span>50</span><span>75</span><span>a tope</span></div>
+          <div class="presets">
+            <button class="preset" data-g="0">Ralentí</button>
+            <button class="preset" data-g="8">Salir de un semáforo</button>
+            <button class="preset" data-g="22">Ciudad</button>
+            <button class="preset" data-g="45">Autovía</button>
+            <button class="preset" data-g="100">Todo abierto</button>
+            <button class="preset" data-anim="1">▶ Barrido</button>
+          </div>
+          <div class="modes-wrap" id="modesWrap" style="display:none">
+            <div class="lbl">Modo de conducción (solo ride-by-wire)</div>
+            <div class="modes" id="modes">
+              <button class="mode" data-mode="rain">Rain</button>
+              <button class="mode active" data-mode="road">Road</button>
+              <button class="mode" data-mode="sport">Sport</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="readouts" id="readouts"></div>
+      </div>
+
+      <div class="explain">
+        <div class="title" id="expTitle">Qué está pasando</div>
+        <p id="expText">Mueve el puño para verlo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. CARBURADOR ============ -->
+<section id="carb" class="body">
+  <div class="sec-head">
+    <h2><span class="num">3</span>Carburador con cable: la física haciendo de centralita</h2>
+    <p>Sin un solo cable eléctrico. Un tubo bien diseñado y un depósito en miniatura.</p>
+  </div>
+
+  <div class="grid g2">
+    <div>
+      <h3>Qué pasa al abrir gas</h3>
+      <p>Cuando giras el puño, tiras de un cable de acero que abre la compuerta del carburador. Entra más aire. Y aquí ocurre lo bonito: el conducto tiene un estrechamiento (el <strong>difusor</strong> o venturi). Cuando un fluido pasa por un estrechamiento se acelera, y al acelerarse <em>baja su presión</em>. Esa presión más baja hace de aspiradora sobre un pequeño surtidor conectado a una cubeta de gasolina que hay debajo, y arrastra combustible hacia la corriente de aire.</p>
+      <p>Es decir: <strong>cuanto más aire pasa, más fuerte succiona, y más gasolina sale</strong>. La dosificación se autorregula sola, sin que nadie mida nada. Es elegante y es la razón de que funcionara durante cien años.</p>
+      <p>La gasolina llega a la cubeta desde el depósito y se mantiene siempre al mismo nivel gracias a un flotador con una aguja, exactamente igual que la cisterna de un váter.</p>
+    </div>
+    <div class="panel pad">
+      <h3>Los circuitos por dentro</h3>
+      <p style="font-size:13.6px;color:var(--mut)">Un carburador no es un único agujero: son varios circuitos que se van relevando según cuánto abras.</p>
+      <div id="carbCircuits"></div>
+    </div>
+  </div>
+
+  <div class="note cyan" style="margin-top:20px">
+    <b>El detalle que casi nadie sabe: el carburador CV.</b> En la mayoría de motos de calle de los 80 en adelante el cable <strong>no</strong> abre directamente la compuerta que regula el aire. El cable abre una mariposa que está <em>después</em>, y hay una segunda compuerta (la campana o guillotina) que sube sola, empujada por el vacío que genera el propio motor. Se llama carburador de <strong>velocidad constante</strong> (CV, constant velocity). ¿Por qué? Porque así, si abres de golpe a bajas vueltas, la campana sube despacio y evita que la mezcla se empobrezca y el motor se ahogue. En cierto modo <em>tu moto de los 90 ya interpretaba tu puño en vez de obedecerlo</em>, solo que con física en lugar de software. En el simulador puedes alternar entre CV y guillotina directa.
+  </div>
+
+  <h3 style="margin-top:26px">Lo que notas al conducir</h3>
+  <div class="grid g3">
+    <div class="card">
+      <h4>Arranque en frío: estárter</h4>
+      <p>La gasolina fría no se evapora bien, así que hace falta una mezcla más rica. El carburador no se entera de la temperatura, por eso <strong>tú</strong> tienes que tirar de la palanca del estárter (o choke) y quitarla cuando el motor coge temperatura. Ese ritual es la firma inconfundible de un carburador.</p>
+    </div>
+    <div class="card">
+      <h4>Altitud y clima</h4>
+      <p>El carburador está ajustado con unos chiclés fijos, calculados para una densidad de aire concreta. Sube a 2.000 m y el aire es menos denso: la mezcla se vuelve rica, la moto pierde fuerza y hace petardeos. Un día muy húmedo o muy caluroso también la desajusta. No se corrige sola.</p>
+    </div>
+    <div class="card">
+      <h4>El corte al cerrar gas</h4>
+      <p>Al soltar el puño de golpe la mariposa cierra pero la gasolina que ya estaba en camino sigue entrando, y parte se quema en el escape: ese <strong>petardeo al retener</strong> tan característico. Encantador o molesto, según a quién preguntes.</p>
+    </div>
+  </div>
+
+  <details style="margin-top:18px">
+    <summary>Mantenimiento: por qué los carburadores se atascan</summary>
+    <div class="det-body">
+      <p>Los pasos internos de un carburador son agujeros calibrados de décimas de milímetro. La gasolina moderna con etanol, cuando la moto pasa meses parada, se evapora y deja un barniz que obstruye esos agujeros. Resultado: ralentí inestable, la moto se cala al cerrar gas, o directamente no arranca.</p>
+      <p>De ahí las dos costumbres clásicas: <strong>cerrar la gasolina y dejar el motor consumiendo hasta que se cala</strong> antes de guardar la moto una temporada, y llevar el carburador a limpieza cada pocos años. También hay que <strong>sincronizar los carburadores</strong> en motos multicilíndricas para que todos abran exactamente igual, algo que en inyección se resuelve solo.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============ 4. INYECCIÓN ============ -->
+<section id="efi" class="body">
+  <div class="sec-head">
+    <h2><span class="num">4</span>Inyección electrónica con cable: tú mandas el aire, la centralita mide la gasolina</h2>
+    <p>El paso intermedio, y todavía el más común en el parque de motos que circula hoy.</p>
+  </div>
+
+  <div class="grid g2">
+    <div>
+      <h3>Qué cambia</h3>
+      <p>El cable sigue estando y sigue haciendo lo mismo: <strong>abrir físicamente la mariposa</strong>. La diferencia es que ya no hay cubeta ni venturi que succione. En su lugar hay un <em>inyector</em>, una electroválvula que apunta al conducto de admisión y que recibe gasolina a presión constante (unos 3 bar, empujada por una bomba dentro del depósito).</p>
+      <p>El inyector solo sabe hacer dos cosas: abrir y cerrar. Toda la dosificación se reduce a <strong>cuántos milisegundos lo mantiene abierto la centralita</strong> en cada ciclo. Al ralentí, alrededor de 1,5 ms. A tope de gas y vueltas, puede pasar de 8 ms. Ese número es la respuesta a "cuánta gasolina entra".</p>
+      <h4 style="margin-top:18px;color:var(--txt)">Cómo lo calcula la centralita</h4>
+      <p>La ECU necesita saber cuánto aire está entrando <em>de verdad</em>, y lo estima combinando varios sensores:</p>
+      <ul>
+        <li><strong>TPS</strong> (posición de mariposa): cuánto has abierto tú y, más importante, <em>a qué velocidad</em>. Un giro rápido dispara un enriquecimiento extra, el equivalente a la bomba de aceleración del carburador.</li>
+        <li><strong>MAP</strong> (presión en el colector) o <strong>caudalímetro</strong>: la carga real del motor.</li>
+        <li><strong>Régimen de giro</strong>: las vueltas por minuto marcan cuántas veces por segundo hay que inyectar.</li>
+        <li><strong>Temperatura de aire y de motor</strong>: densidad del aire y necesidad de enriquecer en frío.</li>
+        <li><strong>Sonda lambda</strong> en el escape: mide el oxígeno sobrante de lo que ya se ha quemado.</li>
+      </ul>
+    </div>
+    <div class="panel pad">
+      <h3>Lazo cerrado: la centralita se corrige a sí misma</h3>
+      <div id="loopDiagram"></div>
+      <p style="margin-top:12px;font-size:13.6px;color:var(--mut)">La sonda lambda cierra el círculo. La ECU inyecta, mide el resultado en el escape y ajusta el siguiente disparo. Corrige sola la altitud, la temperatura, un filtro sucio o un escape distinto.</p>
+      <div class="note cyan" style="margin-top:14px;font-size:13.4px">
+        <b>Ojo:</b> ese lazo cerrado solo actúa en carga parcial y crucero, buscando lambda = 1 por emisiones y consumo. A gas abierto la centralita <strong>ignora la sonda</strong> y va a tabla fija, con mezcla rica a propósito para dar potencia y refrigerar el pistón. Por eso una moto puede ir perfecta en autovía y notarse rara a tope si el mapa no está bien hecho.
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:26px">Lo que notas al conducir</h3>
+  <div class="grid g3">
+    <div class="card">
+      <h4>Arranca y ya está</h4>
+      <p>No hay estárter. La ECU lee la temperatura del motor, enriquece sola y sube el ralentí mediante una válvula de aire auxiliar que puentea la mariposa. Pulsas el botón y funciona igual a -5 °C que a 35 °C.</p>
+    </div>
+    <div class="card">
+      <h4>El tirón al abrir</h4>
+      <p>Con cable, la mariposa se abre exactamente tan brusco como tu mano. Si el mapa es agresivo, salta ese <strong>enganchón</strong> típico al reabrir gas en curva. Es el defecto clásico de las inyecciones de primera generación, y la razón de que se vendieran tantos "domadores de gas".</p>
+    </div>
+    <div class="card">
+      <h4>Consumo y limpieza</h4>
+      <p>Consume bastante menos que un carburador equivalente y contamina mucho menos, que es la razón real de que la carburación desapareciera: las normativas Euro no eran superables con un venturi.</p>
+    </div>
+  </div>
+
+  <details style="margin-top:18px">
+    <summary>¿Y el ralentí, si la mariposa está cerrada del todo?</summary>
+    <div class="det-body">
+      <p>Con la mariposa cerrada el motor no podría respirar y se calaría. La solución en inyección es un <strong>conducto de derivación</strong> con una válvula gobernada por la centralita (motor paso a paso o válvula IAC) que deja pasar justo el aire necesario. Como es electrónica, puede subir el ralentí en frío, mantenerlo estable con el ventilador encendido y bajarlo cuando el motor está caliente. En un carburador ese trabajo lo hace un simple tornillo mecánico que no se adapta a nada.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============ 5. RIDE BY WIRE ============ -->
+<section id="rbw" class="body">
+  <div class="sec-head">
+    <h2><span class="num">5</span>Ride-by-wire: el puño deja de ser una orden y pasa a ser una petición</h2>
+    <p>Se corta el último vínculo mecánico entre tu mano y el motor. Y de ahí sale casi toda la electrónica moderna.</p>
+  </div>
+
+  <div class="grid g2">
+    <div>
+      <h3>Qué hay dentro</h3>
+      <p>No hay cable. En el puño hay un <strong>sensor de posición</strong> (dos, en realidad, por seguridad) que convierte tu giro en un voltaje. Ese voltaje viaja por un cable eléctrico a la centralita. Y en el cuerpo de mariposa hay un <strong>servomotor</strong> que abre y cierra la mariposa siguiendo lo que la ECU le ordena, con su propio sensor de posición para confirmar que ha llegado donde debía.</p>
+      <p>La consecuencia es enorme y muy simple de enunciar: <em>ya no existe una relación fija entre el ángulo de tu puño y el ángulo de la mariposa</em>. La centralita puede abrir menos que tú, más que tú, o más despacio que tú, según lo que crea conveniente.</p>
+      <div class="note red">
+        <b>¿Y si falla?</b> Es la primera pregunta de todo el mundo. Por eso el sistema es redundante: <strong>dos sensores independientes en el puño</strong> con curvas de voltaje distintas, y <strong>dos más en la mariposa</strong>. La ECU compara continuamente. Si no coinciden, entra en modo de emergencia: limita las vueltas y la apertura para que puedas llegar a casa o apartarte, y enciende el testigo de avería. Un muelle de retorno cierra la mariposa por defecto si se corta la corriente. Es un esquema con décadas de uso en aviación y automoción.
+      </div>
+    </div>
+    <div class="panel pad">
+      <h3>Puño contra mariposa, según el modo</h3>
+      <p style="font-size:13.4px;color:var(--mut)">Misma mano, tres respuestas distintas. Esto es exactamente lo que hace un modo de conducción.</p>
+      <div id="mapCurves"></div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:26px">Todo lo que solo es posible con ride-by-wire</h3>
+  <div class="grid g3">
+    <div class="card">
+      <h4>Modos de conducción</h4>
+      <p>Road, Rain, Sport, Off-road. No cambian la potencia máxima: cambian <strong>la curva</strong> entre tu puño y la mariposa. En Rain, un 30% de puño puede abrir solo un 18% de mariposa, y hacerlo más despacio.</p>
+    </div>
+    <div class="card">
+      <h4>Control de tracción de verdad</h4>
+      <p>Si la rueda trasera patina, el sistema puede <strong>cerrar la mariposa él solo</strong> en milésimas, sin tocar el encendido ni cortar la inyección. Es mucho más suave que los antiguos cortes de chispa.</p>
+    </div>
+    <div class="card">
+      <h4>Control de crucero</h4>
+      <p>Imposible con cable sin un mecanismo aparte. Con ride-by-wire es simplemente software: la ECU mantiene la mariposa donde haga falta para sostener la velocidad.</p>
+    </div>
+    <div class="card">
+      <h4>Freno motor ajustable</h4>
+      <p>Al cerrar gas la centralita puede dejar la mariposa entreabierta unos grados para suavizar la retención, evitar que la rueda trasera brinque al bajar marchas y que la moto dé tirones.</p>
+    </div>
+    <div class="card">
+      <h4>Quickshifter y antiwheelie</h4>
+      <p>Cortes de par milimétricos para cambiar sin embrague, y control de caballito que gestiona la apertura en vez de cortar en seco.</p>
+    </div>
+    <div class="card">
+      <h4>Limitador y arranque asistido</h4>
+      <p>Limitador de velocidad configurable, control de salida y hasta modos de bajo consumo. Todo son líneas de código sobre el mismo servomotor.</p>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:20px">
+    <b>El tacto es una decisión de diseño.</b> Con cable, el tacto del acelerador dependía de la mecánica: muelles, poleas, el diámetro del tambor. Con ride-by-wire lo elige el fabricante escribiendo una curva. Por eso dos motos con el mismo motor pueden sentirse completamente distintas, y por eso una actualización de software en el concesionario puede cambiar cómo responde tu moto sin tocar una pieza.
+  </div>
+
+  <details style="margin-top:18px">
+    <summary>¿Se nota que no hay cable? La crítica habitual</summary>
+    <div class="det-body">
+      <p>Los primeros sistemas tenían un pequeño retardo y una sensación algo desconectada, porque el servomotor necesita su tiempo para mover la mariposa. En los sistemas actuales ese retardo está por debajo de lo que el cuerpo humano distingue, y el filtrado que aplica la centralita suele mejorar el tacto en vez de empeorarlo.</p>
+      <p>La objeción que sí se mantiene es la de sensación, no la de latencia: un cable te da una realimentación directa del muelle de la mariposa, mientras que un puño electrónico opone la resistencia de un muelle de imitación que es siempre igual. A mucha gente le parece más aséptico. Es un debate legítimo y sin respuesta técnica: es preferencia.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============ 6. TABLA ============ -->
+<section id="tabla" class="body">
+  <div class="sec-head">
+    <h2><span class="num">6</span>Comparativa directa</h2>
+    <p>Las mismas preguntas contestadas para las tres tecnologías.</p>
+  </div>
+  <div class="tblwrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:170px"></th>
+          <th>Carburador + cable</th>
+          <th>Inyección + cable</th>
+          <th>Inyección + ride-by-wire</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th>Qué mueve tu mano</th><td>Un cable que abre la compuerta del carburador</td><td>Un cable que abre la mariposa</td><td><b>Nada mecánico.</b> Gira un sensor</td></tr>
+        <tr><th>Quién decide la apertura de mariposa</th><td>Tú, directamente</td><td>Tú, directamente</td><td><b>La centralita</b>, interpretando tu petición</td></tr>
+        <tr><th>Cómo entra el aire</th><td>Por el venturi, arrastrando gasolina a su paso</td><td>Por la mariposa, limpio</td><td>Por la mariposa, limpio</td></tr>
+        <tr><th>Cómo entra la gasolina</th><td>Succionada por depresión desde la cubeta</td><td>Disparada por un inyector a presión, en milisegundos calculados</td><td>Igual que en inyección con cable</td></tr>
+        <tr><th>Quién dosifica</th><td>La geometría del carburador y unos chiclés fijos</td><td>La ECU, con sensores y realimentación de lambda</td><td>La ECU, igual, pero además controlando el aire</td></tr>
+        <tr><th>Arranque en frío</th><td>Estárter manual, y paciencia</td><td>Automático</td><td>Automático</td></tr>
+        <tr><th>Se adapta a altitud y temperatura</th><td><b style="color:var(--red)">No</b></td><td><b style="color:var(--green)">Sí</b></td><td><b style="color:var(--green)">Sí</b></td></tr>
+        <tr><th>Control de tracción fino</th><td>No</td><td>Solo cortando chispa o inyección</td><td><b style="color:var(--green)">Sí</b>, cerrando la mariposa</td></tr>
+        <tr><th>Control de crucero</th><td>No</td><td>Rara vez, con un actuador aparte</td><td><b style="color:var(--green)">Sí</b>, por software</td></tr>
+        <tr><th>Modos de conducción</th><td>No</td><td>Muy limitados (cambian el mapa, no la mariposa)</td><td><b style="color:var(--green)">Sí</b>, completos</td></tr>
+        <tr><th>Mantenimiento típico</th><td>Limpieza, sincronización, ajuste de chiclés</td><td>Filtros, bujías, limpieza de inyectores muy de vez en cuando</td><td>Igual, más diagnóstico electrónico</td></tr>
+        <tr><th>Qué se puede tocar</th><td>Piezas: chiclés, agujas, muelles</td><td>Software: reprogramación o módulo intermedio</td><td>Software, y con más matices</td></tr>
+        <tr><th>Punto débil</th><td>Se desajusta con todo y se atasca al estar parada</td><td>Reabrir gas puede ser brusco</td><td>Complejidad y coste de reparación</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 7. MOTOS ============ -->
+<section id="motos" class="body">
+  <div class="sec-head">
+    <h2><span class="num">7</span>Ejemplos para reconocerlo en el mundo real</h2>
+    <p>Y una forma rápida de averiguar qué lleva cualquier moto que tengas delante.</p>
+  </div>
+
+  <div class="grid" style="gap:11px">
+    <div class="bike">
+      <div class="badge b-rbw">RIDE<br>BY<br>WIRE</div>
+      <div>
+        <h4>Triumph Tiger 850 Sport <span class="own">la tuya</span></h4>
+        <p>Tricilíndrico de 888 cc con acelerador ride-by-wire, remapeado respecto a la Tiger 900 para dar más empuje abajo. Dos modos, <strong>Road y Rain</strong>, que cambian a la vez la curva del acelerador y el control de tracción. El control de tracción es desconectable desde el menú de la pantalla TFT. Es el ejemplo de libro: sin ride-by-wire, esos dos modos no existirían.</p>
+        <div class="tagrow"><span class="tag violet">Servomotor en la mariposa</span><span class="tag">2 modos</span><span class="tag">TC desconectable</span></div>
+      </div>
+    </div>
+
+    <div class="bike">
+      <div class="badge b-rbw">RIDE<br>BY<br>WIRE</div>
+      <div>
+        <h4>Husqvarna Svartpilen 401 (2024 en adelante)</h4>
+        <p>Monocilíndrico de 399 cc con cuerpo de mariposa Dell'Orto de 46 mm y ride-by-wire. En el puño lleva <strong>dos sensores de posición redundantes</strong> que hablan directamente con la centralita. Modos Street y Rain, y además un <strong>limitador de velocidad</strong> configurable: aunque abras el puño a tope, la mariposa no pasa de donde tú le has dicho. Ese limitador es imposible con un cable.</p>
+        <div class="tagrow"><span class="tag violet">2 sensores en el puño</span><span class="tag">Street / Rain</span><span class="tag">Limitador</span></div>
+      </div>
+    </div>
+
+    <div class="bike">
+      <div class="badge b-rbw">RIDE<br>BY<br>WIRE</div>
+      <div>
+        <h4>Ducati Scrambler 800, generación 2023</h4>
+        <p>Un caso muy didáctico porque el motor no cambió: sigue siendo el mismo bicilíndrico en L de 803 cc refrigerado por aire. Lo que cambió fue pasar de cable a ride-by-wire. Las Scrambler anteriores tenían fama de <strong>brusquedad al reabrir gas</strong> a poca velocidad, hasta el punto de que mucha gente montaba domadores de gas. Con la nueva generación y el modo Road eso desapareció. Misma mecánica, otro tacto, solo por cómo se gestiona la mariposa.</p>
+        <div class="tagrow"><span class="tag violet">Road / Wet</span><span class="tag">Quickshifter posible</span><span class="tag red">Antes: enganchón al reabrir</span></div>
+      </div>
+    </div>
+
+    <div class="bike">
+      <div class="badge b-efi">INY.<br>CABLE</div>
+      <div>
+        <h4>Ducati Scrambler 800, generación 2015-2022</h4>
+        <p>Inyección electrónica de toda la vida con cable de acelerador. La centralita calculaba la gasolina con precisión, pero la mariposa se abría exactamente tan rápido como tu muñeca. De ahí el tacto algo seco a bajas vueltas. Un ejemplo perfecto de que <strong>inyección y ride-by-wire son dos cosas distintas</strong> que mucha gente confunde.</p>
+        <div class="tagrow"><span class="tag cyan">Cable + inyector</span><span class="tag">Sin modos</span></div>
+      </div>
+    </div>
+
+    <div class="bike">
+      <div class="badge b-efi">INY.<br>CABLE</div>
+      <div>
+        <h4>Honda CB500F / CBR500R, Yamaha MT-07 primeras series, Kawasaki Z650</h4>
+        <p>La categoría media accesible se ha mantenido durante años en inyección con cable: es más barata, más ligera y suficiente cuando no necesitas modos ni control de crucero. Muchas motos que hoy se venden nuevas siguen en este esquema.</p>
+        <div class="tagrow"><span class="tag cyan">El estándar silencioso</span></div>
+      </div>
+    </div>
+
+    <div class="bike">
+      <div class="badge b-carb">CARB.<br>CABLE</div>
+      <div>
+        <h4>Honda CB500 Two Fifty, Suzuki SV650 primera serie, Yamaha XT600, Kawasaki W650</h4>
+        <p>El mundo de antes de 2005 y de las normativas Euro 3. Carburadores CV en casi todos los casos. Si te vas a una clásica o a una moto de campo antigua, esto es lo que te encuentras: estárter, sincronización periódica, y ese carácter algo impredecible que a mucha gente le parece precisamente la gracia.</p>
+        <div class="tagrow"><span class="tag mech">Estárter manual</span><span class="tag">Sin electrónica</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel pad" style="margin-top:22px">
+    <h3>Cómo saber en dos minutos qué lleva una moto</h3>
+    <div class="grid g3" style="margin-top:12px">
+      <div class="card">
+        <h4>1. Mira el puño</h4>
+        <p>Sigue con la vista lo que sale del puño derecho. Si ves <strong>una o dos fundas de cable grises</strong> que bajan hacia el motor, hay cable. Si solo sale un <strong>mazo de cables eléctricos con conector</strong>, es ride-by-wire.</p>
+      </div>
+      <div class="card">
+        <h4>2. Busca el estárter</h4>
+        <p>¿Hay una palanca o tirador de estárter en el manillar o cerca del carburador? Carburador seguro. Si no hay nada y arranca a botón sin ritual, es inyección.</p>
+      </div>
+      <div class="card">
+        <h4>3. Enciende el contacto</h4>
+        <p>En una moto con ride-by-wire suele oírse <strong>un zumbido corto</strong> al dar contacto: es el servomotor haciendo su autocomprobación. Y en la pantalla habrá modos de conducción.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. GLOSARIO ============ -->
+<section id="glosario" class="body">
+  <div class="sec-head">
+    <h2><span class="num">8</span>Glosario</h2>
+    <p>Los términos que te vas a encontrar en cualquier foro o ficha técnica.</p>
+  </div>
+  <div id="glossary"></div>
+</section>
+
+<footer>
+  Guía interactiva generada para David · Julio 2026 · Fichero autocontenido, funciona sin conexión.<br>
+  Datos técnicos de los modelos citados contrastados en <a href="https://www.husqvarna-motorcycles.com/en-us/models/naked/svartpilen/svartpilen-401-2024.html" target="_blank" rel="noopener">Husqvarna</a>,
+  <a href="https://www.triumphmotorcycles.com/motorcycles/adventure/tiger-850-sport/850-sport" target="_blank" rel="noopener">Triumph</a>,
+  <a href="https://www.bennetts.co.uk/bikesocial/reviews/bikes/ducati/scrambler-803-2023-review" target="_blank" rel="noopener">Bennetts BikeSocial</a> y
+  <a href="https://www.cycleworld.com/husqvarna/svartpilen-401/" target="_blank" rel="noopener">Cycle World</a>.
+</footer>
+
+</div>
+
+<script>
+/* =========================================================
+   ESTADO
+   ========================================================= */
+const S = { sys:'carb', grip:0, mode:'road', carbType:'cv', anim:null };
+
+const $ = s => document.querySelector(s);
+const el = (t,a={},...kids)=>{
+  const n=document.createElementNS('http://www.w3.org/2000/svg',t);
+  for(const k in a) n.setAttribute(k,a[k]);
+  kids.forEach(c=>n.appendChild(typeof c==='string'?document.createTextNode(c):c));
+  return n;
+};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* =========================================================
+   MODELO FISICO SIMPLIFICADO
+   ========================================================= */
+const MODE_MAPS = {
+  rain : g => Math.pow(g/100,1.75)*82,
+  road : g => Math.pow(g/100,1.12)*100,
+  sport: g => Math.pow(g/100,0.72)*100
+};
+
+function computeState(){
+  const g = S.grip;
+  let throttle;                       // apertura real de mariposa 0-100
+  if(S.sys==='rbw') throttle = MODE_MAPS[S.mode](g);
+  else              throttle = g;
+
+  // caudal de aire: no lineal. Al 25% de mariposa ya pasa >50% del aire.
+  const airflow = 100*Math.pow(throttle/100,0.55);
+  const idleAir = 4;                                    // derivacion de ralenti
+  const air = Math.max(idleAir, airflow);
+
+  // regimen estimado (solo ilustrativo, en marcha)
+  const rpm = Math.round(1300 + air*88);
+
+  // gasolina
+  const afr = S.sys==='carb'
+        ? (g<6 ? 13.2 : g>85 ? 12.6 : 14.1 + Math.sin(g/17)*0.9)   // errores del carburador
+        : (throttle>78 ? 12.8 : 14.7);                              // lazo cerrado / abierto
+  const fuel = air/afr*14.7;                             // gasolina relativa
+  const pulse = (1.4 + air*0.072).toFixed(2);            // ms de inyeccion
+
+  return {g, throttle, air, rpm, afr, fuel, pulse};
+}
+
+/* =========================================================
+   DIAGRAMAS SVG DEL SIMULADOR
+   ========================================================= */
+const W=900, H=380;
+
+function svgRoot(){
+  const s = el('svg',{viewBox:`0 0 ${W} ${H}`,xmlns:'http://www.w3.org/2000/svg'});
+  const defs = el('defs');
+  // gradientes
+  const gTube=el('linearGradient',{id:'gTube',x1:'0',y1:'0',x2:'0',y2:'1'});
+  gTube.appendChild(el('stop',{offset:'0','stop-color':'#252f3f'}));
+  gTube.appendChild(el('stop',{offset:'1','stop-color':'#141a24'}));
+  defs.appendChild(gTube);
+  const gCyl=el('linearGradient',{id:'gCyl',x1:'0',y1:'0',x2:'0',y2:'1'});
+  gCyl.appendChild(el('stop',{offset:'0','stop-color':'#2b3543'}));
+  gCyl.appendChild(el('stop',{offset:'1','stop-color':'#161c26'}));
+  defs.appendChild(gCyl);
+  const glow=el('filter',{id:'glow',x:'-60%',y:'-60%',width:'220%',height:'220%'});
+  glow.appendChild(el('feGaussianBlur',{stdDeviation:'4',result:'b'}));
+  const m=el('feMerge'); m.appendChild(el('feMergeNode',{in:'b'})); m.appendChild(el('feMergeNode',{in:'SourceGraphic'}));
+  glow.appendChild(m); defs.appendChild(glow);
+  s.appendChild(defs);
+  return s;
+}
+
+/* --- piezas reutilizables --- */
+function drawGrip(s, angleDeg, colorLink){
+  const cx=95, cy=185;
+  const g = el('g');
+  // manillar
+  g.appendChild(el('rect',{x:24,y:cy-7,width:150,height:14,rx:7,fill:'#1c2430',stroke:'#3a4657'}));
+  // puño
+  const grip = el('g',{transform:`rotate(${-angleDeg} ${cx} ${cy})`});
+  grip.appendChild(el('rect',{x:cx-46,y:cy-19,width:92,height:38,rx:19,fill:'#232c3a',stroke:'#4a5768','stroke-width':1.6}));
+  for(let i=0;i<6;i++)
+    grip.appendChild(el('line',{x1:cx-34+i*13,y1:cy-15,x2:cx-34+i*13,y2:cy+15,stroke:'#3d4a5c','stroke-width':2}));
+  // marca de referencia
+  grip.appendChild(el('circle',{cx:cx+30,cy:cy-12,r:4.5,fill:colorLink}));
+  g.appendChild(grip);
+  g.appendChild(el('text',{x:cx,y:cy+42,'text-anchor':'middle',class:'lbl-t'},'Puño de gas'));
+  s.appendChild(g);
+  return {cx,cy};
+}
+
+function tubeShape(s){
+  // conducto de admision horizontal en el centro
+  const g=el('g');
+  g.appendChild(el('rect',{x:330,y:130,width:300,height:110,rx:8,fill:'url(#gTube)',stroke:'#3a4657','stroke-width':1.6}));
+  s.appendChild(g);
+}
+
+function drawCylinder(s, fillPct, mixColor){
+  const g=el('g');
+  const x=705,y=118,w=130,h=150;
+  g.appendChild(el('rect',{x,y,width:w,height:h,rx:9,fill:'url(#gCyl)',stroke:'#3a4657','stroke-width':1.6}));
+  // aletas
+  for(let i=0;i<5;i++) g.appendChild(el('line',{x1:x+8,y1:y+18+i*26,x2:x+w-8,y2:y+18+i*26,stroke:'#212a37','stroke-width':3}));
+  // carga de mezcla
+  const ch = clamp(fillPct,0,100)/100*(h-46);
+  g.appendChild(el('rect',{x:x+12,y:y+h-24-ch,width:w-24,height:ch,rx:5,fill:mixColor,opacity:.35}));
+  // piston
+  g.appendChild(el('rect',{x:x+12,y:y+h-24,width:w-24,height:16,rx:4,fill:'#48566a',stroke:'#63748c'}));
+  g.appendChild(el('text',{x:x+w/2,y:y-12,'text-anchor':'middle',class:'lbl-t'},'Cilindro'));
+  s.appendChild(g);
+}
+
+function flowLine(s,d,color,width,speed,opacity=1){
+  const p=el('path',{d,fill:'none',stroke:color,'stroke-width':width,'stroke-linecap':'round',
+    'stroke-dasharray':'6 18','opacity':opacity});
+  p.classList.add('flow');
+  p.style.animationDuration = (speed<=0? '0s' : (1.5/speed)+'s');
+  if(speed<=0){p.style.animationPlayState='paused'; p.setAttribute('opacity', opacity*0.18);}
+  s.appendChild(p);
+  return p;
+}
+
+function staticLine(s,d,color,width,dash){
+  const a={d,fill:'none',stroke:color,'stroke-width':width,'stroke-linecap':'round'};
+  if(dash) a['stroke-dasharray']=dash;
+  s.appendChild(el('path',a));
+}
+
+function box(s,x,y,w,h,label,sub,color){
+  const g=el('g');
+  g.appendChild(el('rect',{x,y,width:w,height:h,rx:8,fill:'rgba(20,26,36,.95)',stroke:color,'stroke-width':1.6}));
+  g.appendChild(el('text',{x:x+w/2,y:y+(sub?20:h/2+4),'text-anchor':'middle',class:'lbl-t',fill:color},label));
+  if(sub) g.appendChild(el('text',{x:x+w/2,y:y+38,'text-anchor':'middle',class:'lbl-m'},sub));
+  s.appendChild(g);
+  return g;
+}
+
+/* --- 1. CARBURADOR --- */
+function renderCarb(st){
+  const s=svgRoot();
+  const gripAngle = st.g*0.65;
+  drawGrip(s,gripAngle,'#ff9d66');
+
+  // cable
+  const pull = st.g/100*26;
+  staticLine(s,`M 132 168 C 210 150, 250 90, 300 90 L 400 90`, '#ff9d66', 3.4);
+  s.appendChild(el('text',{x:250,y:78,'text-anchor':'middle',class:'lbl-s',fill:'#ff9d66'},'Cable de acero'));
+
+  // cuerpo del carburador (vertical)
+  s.appendChild(el('rect',{x:352,y:96,width:150,height:196,rx:10,fill:'url(#gTube)',stroke:'#3a4657','stroke-width':1.6}));
+  s.appendChild(el('text',{x:427,y:60,'text-anchor':'middle',class:'lbl-t'},'Carburador'));
+
+  // venturi: paredes que se estrechan
+  s.appendChild(el('path',{d:'M 352 142 C 392 142, 400 172, 400 190 C 400 208, 392 238, 352 238 Z',fill:'#101720',stroke:'#3a4657'}));
+  s.appendChild(el('path',{d:'M 502 142 C 462 142, 454 172, 454 190 C 454 208, 462 238, 502 238 Z',fill:'#101720',stroke:'#3a4657'}));
+  s.appendChild(el('line',{x1:427,y1:250,x2:427,y2:274,stroke:'#3a4657','stroke-width':1,'stroke-dasharray':'3 3'}));
+  s.appendChild(el('text',{x:427,y:288,'text-anchor':'middle',class:'lbl-s'},'estrechamiento (venturi)'));
+
+  // guillotina / campana: baja tapando el paso de aire
+  const openFrac = S.carbType==='cv'
+      ? Math.pow(st.air/100,0.85)     // sube por depresion del motor
+      : st.g/100;                     // sube directamente con el cable
+  const sBottom = 150 + (1-openFrac)*82;
+  s.appendChild(el('rect',{x:404,y:104,width:46,height:Math.max(8,sBottom-104),rx:3,
+    fill:'#3c485a',stroke:'#5b6b81','stroke-width':1.4}));
+  s.appendChild(el('line',{x1:427,y1:88,x2:427,y2:102,stroke:'#5b6b81','stroke-width':1,'stroke-dasharray':'3 3'}));
+  s.appendChild(el('text',{x:427,y:82,'text-anchor':'middle',class:'lbl-m',fill:'#8ea0b8'},
+    S.carbType==='cv'?'campana (sube sola, por vacío)':'guillotina (sube con el cable)'));
+
+  // aire entrando (izquierda del carburador)
+  const airSpeed = st.air/100;
+  flowLine(s,'M 196 190 L 350 190',  '#4fd6ff', 5, airSpeed*2.2);
+  flowLine(s,'M 196 216 L 350 216',  '#4fd6ff', 4, airSpeed*2.0, .7);
+  flowLine(s,'M 196 164 L 350 164',  '#4fd6ff', 4, airSpeed*2.0, .7);
+  s.appendChild(el('text',{x:198,y:146,class:'lbl-s',fill:'#4fd6ff'},'Aire (filtro)'));
+
+  // aire pasando por el estrechamiento: mas rapido y mas junto
+  flowLine(s,'M 352 178 C 396 178, 400 186, 452 186 L 502 178', '#4fd6ff', 3.5, airSpeed*4.2, .95);
+  flowLine(s,'M 352 202 C 396 202, 400 194, 452 194 L 502 202', '#4fd6ff', 3.5, airSpeed*4.2, .95);
+  s.appendChild(el('text',{x:427,y:130,'text-anchor':'middle',class:'lbl-m',fill:'#4fd6ff'},'el aire se acelera → baja la presión'));
+
+  // cubeta de gasolina
+  s.appendChild(el('rect',{x:378,y:304,width:100,height:50,rx:6,fill:'#1a212c',stroke:'#3a4657'}));
+  s.appendChild(el('rect',{x:384,y:324,width:88,height:24,rx:4,fill:'#ffb020',opacity:.3}));
+  s.appendChild(el('circle',{cx:452,cy:324,r:8,fill:'#2b3543',stroke:'#5b6b81'}));
+  s.appendChild(el('text',{x:428,y:372,'text-anchor':'middle',class:'lbl-s'},'Cubeta + flotador'));
+
+  // surtidor: gasolina subiendo por depresion
+  const fuelSpeed = Math.pow(st.air/100,1.25);
+  flowLine(s,'M 427 322 L 427 196', '#ffb020', 4.5, fuelSpeed*2.2);
+  s.appendChild(el('text',{x:440,y:256,class:'lbl-s',fill:'#ffb020'},'succión'));
+
+  // mezcla hacia el cilindro
+  flowLine(s,'M 502 190 L 700 190', '#5ee6a4', 6, airSpeed*2.6);
+  s.appendChild(el('text',{x:604,y:172,'text-anchor':'middle',class:'lbl-s',fill:'#5ee6a4'},'mezcla aire + gasolina'));
+
+  drawCylinder(s, st.air, '#5ee6a4');
+
+  // marca de "sin electronica"
+  s.appendChild(el('text',{x:700,y:340,'text-anchor':'middle',class:'lbl-s',fill:'#6d7c92'},'Sin sensores. Sin centralita.'));
+  return s;
+}
+
+/* --- 2. INYECCION CON CABLE --- */
+function renderEfi(st){
+  const s=svgRoot();
+  drawGrip(s,st.g*0.65,'#ff9d66');
+
+  staticLine(s,'M 132 168 C 210 152, 250 104, 320 104 L 402 104','#ff9d66',3.4);
+  s.appendChild(el('text',{x:250,y:92,'text-anchor':'middle',class:'lbl-s',fill:'#ff9d66'},'Cable de acero'));
+  s.appendChild(el('circle',{cx:420,cy:116,r:13,fill:'#242c3a',stroke:'#ff9d66','stroke-width':1.6}));
+  staticLine(s,'M 420 129 L 420 136','#ff9d66',2.4);
+
+  tubeShape(s);
+  s.appendChild(el('text',{x:238,y:66,class:'lbl-t'},'Cuerpo de mariposa'));
+  staticLine(s,'M 368 62 L 396 62 L 396 130','#3a4657',1.4,'3 3');
+
+  // mariposa (rota con el puno)
+  const ang = -st.g*0.9;   // 0% = vertical (cerrada) · 100% = horizontal (abierta)
+  const mg=el('g',{transform:`rotate(${ang} 420 185)`});
+  mg.appendChild(el('rect',{x:415,y:137,width:10,height:96,rx:4,fill:'#4c5b70',stroke:'#6d7f97','stroke-width':1.4}));
+  s.appendChild(mg);
+  s.appendChild(el('circle',{cx:420,cy:185,r:5,fill:'#8ea0b8'}));
+  s.appendChild(el('text',{x:334,y:270,class:'lbl-s'},'mariposa'));
+  staticLine(s,'M 412 206 L 384 258','#3a4657',1.4,'3 3');
+
+  // aire
+  const airSpeed=st.air/100;
+  flowLine(s,'M 218 160 L 330 160','#4fd6ff',4,airSpeed*2.2,.75);
+  flowLine(s,'M 218 185 L 330 185','#4fd6ff',5,airSpeed*2.4);
+  flowLine(s,'M 218 210 L 330 210','#4fd6ff',4,airSpeed*2.2,.75);
+  s.appendChild(el('text',{x:220,y:144,class:'lbl-s',fill:'#4fd6ff'},'Aire'));
+  flowLine(s,'M 432 185 L 545 185','#4fd6ff',5,airSpeed*2.4);
+
+  // TPS: va en el eje de la mariposa
+  s.appendChild(el('rect',{x:396,y:250,width:56,height:26,rx:5,fill:'rgba(167,139,250,.14)',stroke:'#a78bfa'}));
+  s.appendChild(el('text',{x:424,y:267,'text-anchor':'middle',class:'lbl-m',fill:'#a78bfa'},'TPS'));
+  staticLine(s,'M 424 240 L 424 250','#a78bfa',1.6,'3 3');
+
+  // ECU
+  box(s,300,300,150,54,'ECU','centralita','#a78bfa');
+  staticLine(s,'M 424 276 L 424 300','#a78bfa',2,'5 5');
+
+  // inyector
+  s.appendChild(el('path',{d:'M 566 128 L 590 128 L 590 168 L 578 182 L 566 168 Z',fill:'#2a3242',stroke:'#ffb020','stroke-width':1.6}));
+  s.appendChild(el('rect',{x:562,y:96,width:32,height:34,rx:5,fill:'#242c3a',stroke:'#ffb020','stroke-width':1.4}));
+  s.appendChild(el('text',{x:614,y:112,class:'lbl-s',fill:'#ffb020'},'Inyector'));
+  staticLine(s,'M 450 322 L 578 322 L 578 200','#a78bfa',2,'5 5');
+  s.appendChild(el('text',{x:512,y:340,'text-anchor':'middle',class:'lbl-m',fill:'#a78bfa'},'pulso de '+st.pulse+' ms'));
+
+  // spray de gasolina
+  const fs = st.air/100;
+  flowLine(s,'M 578 182 L 600 200','#ffb020',4,fs*2.6);
+  flowLine(s,'M 578 182 L 596 208','#ffb020',3,fs*2.4,.7);
+  flowLine(s,'M 578 182 L 606 192','#ffb020',3,fs*2.4,.7);
+
+  // bomba de gasolina
+  s.appendChild(el('rect',{x:640,y:58,width:96,height:34,rx:6,fill:'rgba(255,176,32,.1)',stroke:'#ffb020'}));
+  s.appendChild(el('text',{x:688,y:80,'text-anchor':'middle',class:'lbl-m',fill:'#ffb020'},'bomba · 3 bar'));
+  staticLine(s,'M 640 75 L 578 75 L 578 96','#ffb020',2.4);
+
+  // mezcla al cilindro
+  flowLine(s,'M 610 200 L 700 205','#5ee6a4',6,airSpeed*2.6);
+  drawCylinder(s, st.air, '#5ee6a4');
+
+  // sonda lambda
+  s.appendChild(el('rect',{x:770,y:288,width:106,height:30,rx:6,fill:'rgba(94,230,164,.1)',stroke:'#5ee6a4'}));
+  s.appendChild(el('text',{x:823,y:308,'text-anchor':'middle',class:'lbl-m',fill:'#5ee6a4'},'sonda lambda'));
+  staticLine(s,'M 790 268 L 790 288','#5ee6a4',2);
+  staticLine(s,'M 770 303 L 460 303','#5ee6a4',2,'5 5');
+  s.appendChild(el('text',{x:614,y:296,'text-anchor':'middle',class:'lbl-m',fill:'#5ee6a4'},'corrección de mezcla'));
+
+  return s;
+}
+
+/* --- 3. RIDE BY WIRE --- */
+function renderRbw(st){
+  const s=svgRoot();
+  drawGrip(s,st.g*0.65,'#a78bfa');
+
+  // sensores en el puno
+  s.appendChild(el('rect',{x:24,y:250,width:152,height:28,rx:6,fill:'rgba(167,139,250,.12)',stroke:'#a78bfa'}));
+  s.appendChild(el('text',{x:100,y:269,'text-anchor':'middle',class:'lbl-m',fill:'#a78bfa'},'2 sensores (redundancia)'));
+
+  // sin cable: senal electrica
+  staticLine(s,'M 176 268 C 236 268, 250 322, 300 324','#a78bfa',2.4,'6 5');
+  s.appendChild(el('text',{x:236,y:306,'text-anchor':'middle',class:'lbl-s',fill:'#a78bfa'},'señal, no cable'));
+
+  // ECU grande
+  box(s,300,300,190,58,'ECU','decide la apertura','#a78bfa');
+
+  tubeShape(s);
+  s.appendChild(el('text',{x:238,y:66,class:'lbl-t'},'Cuerpo de mariposa'));
+  staticLine(s,'M 368 62 L 396 62 L 396 130','#3a4657',1.4,'3 3');
+
+  // servomotor
+  s.appendChild(el('circle',{cx:352,cy:266,r:23,fill:'rgba(167,139,250,.14)',stroke:'#a78bfa','stroke-width':1.6}));
+  s.appendChild(el('text',{x:352,y:270,'text-anchor':'middle',class:'lbl-m',fill:'#a78bfa'},'servo'));
+  staticLine(s,'M 350 306 L 352 289','#a78bfa',2,'4 4');
+  staticLine(s,'M 372 254 L 412 208','#a78bfa',2.6);
+
+  // mariposa: sigue a la ECU, no al puno
+  const ang = -st.throttle*0.9;   // 0% = vertical (cerrada) · 100% = horizontal (abierta)
+  const mg=el('g',{transform:`rotate(${ang} 420 185)`});
+  mg.appendChild(el('rect',{x:415,y:137,width:10,height:96,rx:4,fill:'#4c5b70',stroke:'#a78bfa','stroke-width':1.6}));
+  s.appendChild(mg);
+  s.appendChild(el('circle',{cx:420,cy:185,r:5,fill:'#a78bfa'}));
+
+  // aire
+  const airSpeed=st.air/100;
+  flowLine(s,'M 218 160 L 330 160','#4fd6ff',4,airSpeed*2.2,.75);
+  flowLine(s,'M 218 185 L 330 185','#4fd6ff',5,airSpeed*2.4);
+  flowLine(s,'M 218 210 L 330 210','#4fd6ff',4,airSpeed*2.2,.75);
+  s.appendChild(el('text',{x:220,y:144,class:'lbl-s',fill:'#4fd6ff'},'Aire'));
+  flowLine(s,'M 432 185 L 545 185','#4fd6ff',5,airSpeed*2.4);
+
+  // sensor de posicion de la mariposa (realimentacion)
+  s.appendChild(el('rect',{x:452,y:250,width:62,height:26,rx:5,fill:'rgba(167,139,250,.14)',stroke:'#a78bfa'}));
+  s.appendChild(el('text',{x:483,y:267,'text-anchor':'middle',class:'lbl-m',fill:'#a78bfa'},'2× TPS'));
+  staticLine(s,'M 440 240 L 470 250','#a78bfa',1.6,'3 3');
+  staticLine(s,'M 470 276 L 470 316','#a78bfa',2,'4 4');
+  s.appendChild(el('text',{x:522,y:270,class:'lbl-m',fill:'#a78bfa'},'confirma posición'));
+
+  // inyector
+  s.appendChild(el('path',{d:'M 566 128 L 590 128 L 590 168 L 578 182 L 566 168 Z',fill:'#2a3242',stroke:'#ffb020','stroke-width':1.6}));
+  s.appendChild(el('rect',{x:562,y:96,width:32,height:34,rx:5,fill:'#242c3a',stroke:'#ffb020','stroke-width':1.4}));
+  s.appendChild(el('text',{x:614,y:84,class:'lbl-s',fill:'#ffb020'},'Inyector'));
+  s.appendChild(el('text',{x:614,y:100,class:'lbl-m',fill:'#ffb020'},st.pulse+' ms'));
+  const fs=st.air/100;
+  flowLine(s,'M 578 182 L 600 200','#ffb020',4,fs*2.6);
+  flowLine(s,'M 578 182 L 596 208','#ffb020',3,fs*2.4,.7);
+  flowLine(s,'M 578 182 L 606 192','#ffb020',3,fs*2.4,.7);
+
+  flowLine(s,'M 610 200 L 700 205','#5ee6a4',6,airSpeed*2.6);
+  drawCylinder(s, st.air, '#5ee6a4');
+
+  // comparador puno vs mariposa
+  const diff = Math.round(st.throttle - st.g);
+  const n = Math.abs(diff), pl = n===1?'punto':'puntos';
+  const dtxt = diff===0 ? 'puño = mariposa'
+             : diff<0 ? `la ECU abre ${n} ${pl} MENOS que tu mano`
+                      : `la ECU abre ${n} ${pl} MÁS que tu mano`;
+  s.appendChild(el('text',{x:690,y:340,'text-anchor':'middle',class:'lbl-s',
+    fill: diff===0?'#6d7c92':(diff<0?'#4fd6ff':'#ffb020')}, dtxt));
+
+  return s;
+}
+
+/* =========================================================
+   READOUTS Y EXPLICACION
+   ========================================================= */
+function ro(label,val,cls){
+  return `<div class="ro"><span>${label}</span><b class="${cls||''}">${val}</b></div>`;
+}
+
+function renderReadouts(st){
+  const box=$('#readouts');
+  let h='';
+  if(S.sys==='carb'){
+    h += ro('Puño', st.g+' %','mech');
+    h += ro(S.carbType==='cv'?'Mariposa (por cable)':'Guillotina (por cable)', Math.round(st.g)+' %','mech');
+    if(S.carbType==='cv') h += ro('Campana (por vacío)', Math.round(100-(1-Math.pow(st.air/100,0.85))*100)+' %','mech');
+    h += ro('Caudal de aire', Math.round(st.air)+' %','air');
+    h += ro('Gasolina succionada', Math.round(st.fuel)+' %','fuel');
+    h += ro('Mezcla estimada (AFR)', st.afr.toFixed(1)+':1', st.afr<13.4?'fuel':'');
+    h += ro('Sensores en juego','ninguno','off');
+    h += ro('Se adapta a altitud','no','off');
+  } else if(S.sys==='efi'){
+    h += ro('Puño', st.g+' %','mech');
+    h += ro('Mariposa (por cable)', Math.round(st.throttle)+' %','mech');
+    h += ro('Caudal de aire', Math.round(st.air)+' %','air');
+    h += ro('Señal TPS', (0.6+st.g/100*3.8).toFixed(2)+' V','elec');
+    h += ro('Pulso de inyección', st.pulse+' ms','fuel');
+    h += ro('Objetivo de mezcla', st.afr.toFixed(1)+':1', st.afr<13.4?'fuel':'');
+    h += ro('Lazo lambda', st.throttle>78?'abierto (tabla fija)':'cerrado (corrige)', st.throttle>78?'off':'elec');
+    h += ro('Régimen estimado', st.rpm.toLocaleString('es-ES')+' rpm','');
+  } else {
+    h += ro('Puño (petición)', st.g+' %','elec');
+    h += ro('Modo', {rain:'Rain',road:'Road',sport:'Sport'}[S.mode],'elec');
+    h += ro('Mariposa (decide la ECU)', Math.round(st.throttle)+' %','mech');
+    h += ro('Caudal de aire', Math.round(st.air)+' %','air');
+    h += ro('Pulso de inyección', st.pulse+' ms','fuel');
+    h += ro('Objetivo de mezcla', st.afr.toFixed(1)+':1', st.afr<13.4?'fuel':'');
+    h += ro('Régimen estimado', st.rpm.toLocaleString('es-ES')+' rpm','');
+    h += ro('Sensores redundantes','2 puño + 2 mariposa','elec');
+  }
+  box.innerHTML=h;
+}
+
+function renderExplain(st){
+  const g=st.g; let t='',title='';
+  if(S.sys==='carb'){
+    title = S.carbType==='cv' ? 'Carburador CV: dos compuertas' : 'Carburador de guillotina directa';
+    if(g===0) t='Puño cerrado. La compuerta está casi del todo bajada y solo pasa el hilo de aire que deja el tornillo de ralentí. La gasolina sale por un orificio secundario, el circuito de ralentí, porque en el surtidor principal no hay succión suficiente. El motor se mantiene vivo, nada más.';
+    else if(g<15) t='Estás en el circuito de ralentí y el de progresión. Este tramo es el más delicado de ajustar en un carburador y el culpable de que muchas motos antiguas se caleen al salir de un semáforo o den tirones a poca velocidad.';
+    else if(g<50) t='Ahora manda la aguja cónica: al subir la compuerta, la aguja sale del surtidor y deja pasar más gasolina de forma progresiva. Es el tramo donde más tiempo vas a circular. '+(S.carbType==='cv'?'Fíjate en que la campana sube más despacio que tu mano: eso es lo que impide que el motor se ahogue.':'La compuerta sigue tu mano sin filtro, y por eso este tipo se ahoga si abres de golpe a bajas vueltas.');
+    else if(g<85) t='La aguja ya está prácticamente fuera y quien limita la gasolina pasa a ser el chiclé principal, un agujero calibrado fijo. A partir de aquí la mezcla la decide un taladro de décimas de milímetro que alguien eligió en fábrica para una altitud y una temperatura concretas.';
+    else t='Todo abierto. El chiclé principal manda solo. La mezcla se va deliberadamente rica (por debajo de 13:1) para dar potencia y refrigerar el pistón. Nadie está midiendo nada: solo la física del venturi y el tamaño de un agujero.';
+  } else if(S.sys==='efi'){
+    title='Inyección con cable: tú abres el aire, la ECU pone la gasolina';
+    if(g===0) t='Mariposa cerrada. El aire de ralentí pasa por un conducto de derivación con una válvula que gobierna la centralita, y por eso el ralentí es estable en frío, en caliente y con el ventilador puesto. El inyector dispara pulsos cortos, del orden de 1,5 ms.';
+    else if(g<15) t='Has abierto poco pero el TPS ya lo ha detectado, y sobre todo ha detectado la velocidad a la que has girado. Si abres rápido, la ECU añade un chorro extra de gasolina, el equivalente electrónico de la bomba de aceleración del carburador. Sin ese extra, la moto daría un vacío.';
+    else if(g<78) t='Zona de crucero. La sonda lambda está trabajando en lazo cerrado: la centralita inyecta, mide el oxígeno sobrante en el escape y corrige el siguiente disparo para clavar 14,7:1. Así se adapta sola a la altitud, al filtro sucio o a un día de calor.';
+    else t='A plena carga la centralita deja de hacer caso a la sonda lambda y pasa a tabla fija, con mezcla rica alrededor de 12,8:1 para dar potencia y bajar la temperatura del pistón. El pulso del inyector se alarga hasta varios milisegundos. Y ojo: la mariposa se ha abierto exactamente igual de rápido que tu muñeca, sin filtro ninguno.';
+  } else {
+    title='Ride-by-wire: la centralita interpreta tu petición';
+    const diff=Math.round(st.throttle-st.g);
+    if(g===0) t='Puño en reposo. Los dos sensores del puño mandan el mismo valor y la ECU lo da por bueno. La mariposa está donde la centralita quiere que esté para sostener el ralentí, no donde la deja tu mano: aquí no hay mano.';
+    else if(S.mode==='rain') t=`Modo Rain. Pides un ${g}% y la centralita abre un ${Math.round(st.throttle)}%, es decir ${Math.abs(diff)} puntos menos, y además lo hace con un retardo deliberado. No estás perdiendo potencia máxima: estás cambiando la forma de llegar a ella. Con poco agarre eso es la diferencia entre tracción y derrape.`;
+    else if(S.mode==='sport') t=`Modo Sport. La curva se adelanta: pides un ${g}% y la mariposa se va a un ${Math.round(st.throttle)}%. La moto se siente mucho más nerviosa aunque el motor sea exactamente el mismo. Solo ha cambiado una tabla dentro de la centralita.`;
+    else t=`Modo Road, la curva neutra. Pides un ${g}% y la mariposa va a un ${Math.round(st.throttle)}%, con un pequeño suavizado en los primeros grados para que reabrir gas en curva no sea brusco. Ese suavizado es justo lo que no se puede hacer con un cable.`;
+  }
+  $('#expTitle').textContent=title;
+  $('#expText').textContent=t;
+}
+
+/* =========================================================
+   RENDER PRINCIPAL
+   ========================================================= */
+const TITLES={
+  carb:['Carburador con cable','Todo mecánico. El aire que pasa arrastra la gasolina.'],
+  efi:['Inyección electrónica con cable','Tú abres la mariposa. La centralita calcula la gasolina.'],
+  rbw:['Inyección con ride-by-wire','No hay cable. La centralita decide cuánta mariposa abre.']
+};
+
+function render(){
+  const st=computeState();
+  $('#gripVal').textContent=Math.round(st.g);
+  $('#simTitle').textContent=TITLES[S.sys][0];
+  $('#simSub').textContent=TITLES[S.sys][1];
+  $('#modesWrap').style.display = S.sys==='rbw' ? 'block':'none';
+
+  const stage=$('#stage');
+  stage.innerHTML='';
+  let svg;
+  if(S.sys==='carb') svg=renderCarb(st);
+  else if(S.sys==='efi') svg=renderEfi(st);
+  else svg=renderRbw(st);
+  stage.appendChild(svg);
+
+  // selector de tipo de carburador
+  const prev=document.getElementById('carbBar'); if(prev) prev.remove();
+  if(S.sys==='carb'){
+    const bar=document.createElement('div');
+    bar.id='carbBar';
+    bar.className='modes';
+    bar.style.marginTop='10px';
+    bar.innerHTML=`<button class="mode ${S.carbType==='cv'?'active':''}" data-carb="cv">Carburador CV (el habitual en calle)</button>
+                   <button class="mode ${S.carbType==='slide'?'active':''}" data-carb="slide">Guillotina directa (clásicas y campo)</button>`;
+    stage.parentElement.insertBefore(bar, stage.nextSibling);
+    bar.querySelectorAll('[data-carb]').forEach(b=>b.onclick=()=>{S.carbType=b.dataset.carb;render();});
+  }
+
+  renderReadouts(st);
+  renderExplain(st);
+}
+
+/* =========================================================
+   EVENTOS
+   ========================================================= */
+$('#grip').addEventListener('input',e=>{ stopAnim(); S.grip=+e.target.value; render(); });
+
+document.querySelectorAll('#simTabs .tab').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#simTabs .tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    S.sys=b.dataset.sys;
+    render();
+  };
+});
+
+document.querySelectorAll('#modes .mode').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#modes .mode').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); S.mode=b.dataset.mode; render(); drawCurves();
+  };
+});
+
+document.querySelectorAll('.preset').forEach(b=>{
+  b.onclick=()=>{
+    if(b.dataset.anim){ toggleAnim(b); return; }
+    stopAnim();
+    S.grip=+b.dataset.g; $('#grip').value=S.grip; render();
+  };
+});
+
+function stopAnim(){
+  if(S.anim){ cancelAnimationFrame(S.anim); S.anim=null; }
+  const b=document.querySelector('[data-anim]'); if(b) b.textContent='▶ Barrido';
+}
+function toggleAnim(btn){
+  if(S.anim){ stopAnim(); return; }
+  btn.textContent='■ Parar';
+  let t=0;
+  const step=()=>{
+    t+=0.014;
+    S.grip=Math.round((Math.sin(t-Math.PI/2)+1)/2*100);
+    $('#grip').value=S.grip;
+    render();
+    S.anim=requestAnimationFrame(step);
+  };
+  S.anim=requestAnimationFrame(step);
+}
+
+/* =========================================================
+   DIAGRAMA BASE (5 pasos)
+   ========================================================= */
+(function baseDiagram(){
+  const steps=[
+    ['1','Tu mano','giras el puño','#ff9d66'],
+    ['2','El enlace','cable de acero o señal eléctrica','#a78bfa'],
+    ['3','El aire','se abre la mariposa y el motor respira','#4fd6ff'],
+    ['4','La gasolina','se añade en la proporción correcta','#ffb020'],
+    ['5','La explosión','la bujía enciende la mezcla','#5ee6a4']
+  ];
+  const w=470,h=steps.length*62+14;
+  const s=el('svg',{viewBox:`0 0 ${w} ${h}`});
+  steps.forEach((st,i)=>{
+    const y=8+i*62;
+    s.appendChild(el('rect',{x:0,y,width:w,height:50,rx:8,fill:'rgba(23,29,40,.8)',stroke:'#28313f'}));
+    s.appendChild(el('circle',{cx:28,cy:y+25,r:14,fill:'rgba(0,0,0,.35)',stroke:st[3],'stroke-width':1.6}));
+    s.appendChild(el('text',{x:28,y:y+30,'text-anchor':'middle',class:'lbl-t',fill:st[3]},st[0]));
+    s.appendChild(el('text',{x:54,y:y+21,class:'lbl-t'},st[1]));
+    s.appendChild(el('text',{x:54,y:y+38,class:'lbl-s'},st[2]));
+    if(i<steps.length-1){
+      const p=el('path',{d:`M 28 ${y+50} L 28 ${y+62}`,stroke:'#3a4657','stroke-width':2,'stroke-dasharray':'3 4'});
+      s.appendChild(p);
+    }
+    if(i===1||i===3){
+      s.appendChild(el('text',{x:w-10,y:y+30,'text-anchor':'end',class:'lbl-m',fill:'#6d7c92'},'← aquí está la diferencia'));
+    }
+  });
+  $('#baseDiagram').appendChild(s);
+})();
+
+/* =========================================================
+   CIRCUITOS DEL CARBURADOR
+   ========================================================= */
+(function carbCircuits(){
+  const rows=[
+    ['Ralentí','0 · 10%','Un orificio pequeño con su propio tornillo de mezcla. Manda con el puño cerrado.','#5ee6a4'],
+    ['Progresión','5 · 20%','Unos agujeros extra que van quedando descubiertos según abre la mariposa. Rellenan el hueco.','#4fd6ff'],
+    ['Aguja cónica','15 · 75%','Una aguja que sale del surtidor conforme sube la campana. La zona de uso diario.','#ffb020'],
+    ['Chiclé principal','60 · 100%','Un agujero calibrado fijo. A tope de gas es él quien decide toda la gasolina.','#ff9d66'],
+    ['Bomba de aceleración','al abrir de golpe','Un chorro extra puntual para tapar el vacío del acelerón brusco. No todos la llevan.','#ff6b6b']
+  ];
+  const w=470, rh=64, h=rows.length*rh+30;
+  const s=el('svg',{viewBox:`0 0 ${w} ${h}`});
+  // eje
+  s.appendChild(el('text',{x:0,y:12,class:'lbl-m'},'circuito'));
+  s.appendChild(el('text',{x:150,y:12,class:'lbl-m'},'tramo de puño'));
+  rows.forEach((r,i)=>{
+    const y=24+i*rh;
+    s.appendChild(el('rect',{x:0,y,width:w,height:rh-8,rx:7,fill:'rgba(23,29,40,.75)',stroke:'#28313f'}));
+    s.appendChild(el('rect',{x:0,y,width:4,height:rh-8,rx:2,fill:r[3]}));
+    s.appendChild(el('text',{x:14,y:y+19,class:'lbl-t',fill:r[3]},r[0]));
+    s.appendChild(el('text',{x:14,y:y+35,class:'lbl-m'},r[1]));
+    // texto envuelto manualmente
+    const words=r[2].split(' ');let line='',ln=0;
+    words.forEach(wd=>{
+      if((line+wd).length>44){ s.appendChild(el('text',{x:150,y:y+19+ln*15,class:'lbl-s'},line.trim())); line=''; ln++; }
+      line+=wd+' ';
+    });
+    s.appendChild(el('text',{x:150,y:y+19+ln*15,class:'lbl-s'},line.trim()));
+  });
+  $('#carbCircuits').appendChild(s);
+})();
+
+/* =========================================================
+   LAZO CERRADO
+   ========================================================= */
+(function loopDiagram(){
+  const w=460,h=250;
+  const s=el('svg',{viewBox:`0 0 ${w} ${h}`});
+  const nodes=[
+    [30,20,150,44,'Sensores','TPS · MAP · rpm · Tª','#4fd6ff'],
+    [30,96,150,44,'ECU','calcula los ms','#a78bfa'],
+    [30,172,150,44,'Inyector','dispara gasolina','#ffb020'],
+    [270,96,160,44,'Combustión','en el cilindro','#5ee6a4'],
+    [270,172,160,44,'Sonda lambda','mide el O₂ sobrante','#5ee6a4']
+  ];
+  nodes.forEach(n=>{
+    const [x,y,w2,h2,label,sub,col]=n;
+    s.appendChild(el('rect',{x,y,width:w2,height:h2,rx:8,fill:'rgba(20,26,36,.9)',stroke:col,'stroke-width':1.5}));
+    s.appendChild(el('text',{x:x+w2/2,y:y+20,'text-anchor':'middle',class:'lbl-t',fill:col},label));
+    s.appendChild(el('text',{x:x+w2/2,y:y+35,'text-anchor':'middle',class:'lbl-m'},sub));
+  });
+  const arrow=(d,c)=>{
+    s.appendChild(el('path',{d,fill:'none',stroke:c,'stroke-width':2,'stroke-linecap':'round','marker-end':'url(#ah)'}));
+  };
+  const defs=el('defs');
+  const mk=el('marker',{id:'ah',viewBox:'0 0 10 10',refX:'8',refY:'5',markerWidth:'6',markerHeight:'6',orient:'auto'});
+  mk.appendChild(el('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#6d7c92'}));
+  defs.appendChild(mk); s.appendChild(defs);
+  arrow('M 105 64 L 105 92','#6d7c92');
+  arrow('M 105 140 L 105 168','#6d7c92');
+  arrow('M 180 194 L 268 130','#6d7c92');
+  arrow('M 350 140 L 350 168','#6d7c92');
+  arrow('M 268 194 L 184 194','#5ee6a4');
+  s.appendChild(el('text',{x:226,y:236,'text-anchor':'middle',class:'lbl-s',fill:'#5ee6a4'},'realimentación: corrige el siguiente disparo'));
+  $('#loopDiagram').appendChild(s);
+})();
+
+/* =========================================================
+   CURVAS DE MODO
+   ========================================================= */
+let curveSvg=null;
+function drawCurves(){
+  const host=$('#mapCurves');
+  host.innerHTML='';
+  const w=440,h=300,pad=44;
+  const s=el('svg',{viewBox:`0 0 ${w} ${h}`});
+  const X=g=>pad+g/100*(w-pad-16);
+  const Y=t=>h-pad-t/100*(h-pad-22);
+  // rejilla
+  for(let i=0;i<=4;i++){
+    s.appendChild(el('line',{x1:pad,y1:Y(i*25),x2:w-16,y2:Y(i*25),stroke:'#232c39','stroke-width':1}));
+    s.appendChild(el('line',{x1:X(i*25),y1:Y(0),x2:X(i*25),y2:22,stroke:'#232c39','stroke-width':1}));
+    s.appendChild(el('text',{x:pad-8,y:Y(i*25)+4,'text-anchor':'end',class:'lbl-m'},i*25+''));
+    s.appendChild(el('text',{x:X(i*25),y:h-pad+16,'text-anchor':'middle',class:'lbl-m'},i*25+''));
+  }
+  s.appendChild(el('text',{x:X(50),y:h-10,'text-anchor':'middle',class:'lbl-s'},'puño de gas (%)'));
+  s.appendChild(el('text',{x:14,y:Y(50),'text-anchor':'middle',class:'lbl-s',transform:`rotate(-90 14 ${Y(50)})`},'mariposa (%)'));
+  // diagonal 1:1
+  s.appendChild(el('line',{x1:X(0),y1:Y(0),x2:X(100),y2:Y(100),stroke:'#3a4657','stroke-width':1.4,'stroke-dasharray':'4 5'}));
+  s.appendChild(el('text',{x:X(78),y:Y(88),class:'lbl-m',fill:'#6d7c92'},'1:1 (cable)'));
+
+  const cols={rain:'#4fd6ff',road:'#ffb020',sport:'#ff6b6b'};
+  const names={rain:'Rain',road:'Road',sport:'Sport'};
+  ['rain','road','sport'].forEach(m=>{
+    let d='';
+    for(let g=0;g<=100;g+=2){ d+=(g===0?'M ':'L ')+X(g)+' '+Y(MODE_MAPS[m](g))+' '; }
+    const active = m===S.mode;
+    s.appendChild(el('path',{d,fill:'none',stroke:cols[m],'stroke-width':active?3.4:1.8,opacity:active?1:.4,'stroke-linecap':'round'}));
+  });
+  // leyenda
+  ['rain','road','sport'].forEach((m,i)=>{
+    const x=pad+i*90, y=20;
+    s.appendChild(el('rect',{x,y:y-9,width:11,height:11,rx:3,fill:cols[m],opacity:m===S.mode?1:.4}));
+    s.appendChild(el('text',{x:x+17,y,class:'lbl-s',fill:m===S.mode?cols[m]:'#6d7c92'},names[m]));
+  });
+  // punto actual
+  const gg=S.grip, tt=MODE_MAPS[S.mode](gg);
+  s.appendChild(el('circle',{cx:X(gg),cy:Y(tt),r:6,fill:cols[S.mode],filter:'url(#none)'}));
+  s.appendChild(el('circle',{cx:X(gg),cy:Y(tt),r:11,fill:'none',stroke:cols[S.mode],opacity:.4}));
+  s.appendChild(el('text',{x:X(gg),y:Y(tt)-18,'text-anchor':'middle',class:'lbl-m',fill:cols[S.mode]},
+    Math.round(gg)+'% → '+Math.round(tt)+'%'));
+  host.appendChild(s);
+  const p=document.createElement('p');
+  p.style.cssText='margin:11px 0 0;font-size:13.2px;color:var(--mut2)';
+  p.textContent='La línea de puntos es lo que hace un cable: la mariposa copia exactamente al puño. Con ride-by-wire cada modo es una curva distinta sobre el mismo motor. Cambia el modo en el simulador para ver cómo se mueve el punto.';
+  host.appendChild(p);
+}
+
+/* =========================================================
+   GLOSARIO
+   ========================================================= */
+(function glossary(){
+  const terms=[
+    ['Mariposa','La compuerta circular que hay dentro del conducto de admisión y que regula cuánto aire entra al motor. Es lo que realmente controla el acelerador. En inglés, <i>throttle</i>.'],
+    ['Cuerpo de mariposa','La pieza completa que aloja la mariposa, y en inyección también el inyector y los sensores. El equivalente moderno del carburador. Su diámetro (46 mm en la Svartpilen 401, por ejemplo) es un dato de ficha técnica.'],
+    ['Venturi o difusor','El estrechamiento del conducto en un carburador. Al pasar por él, el aire se acelera y baja de presión, y esa depresión es la que succiona la gasolina.'],
+    ['Cubeta y flotador','El pequeño depósito del carburador. Un flotador con aguja mantiene el nivel constante, como la cisterna de un váter.'],
+    ['Chiclé','Un tapón con un agujero calibrado con precisión que limita cuánta gasolina puede pasar. Cambiarlo por otro de distinto número es la forma clásica de reajustar un carburador.'],
+    ['Estárter o choke','El mando que enriquece la mezcla para arrancar en frío en un carburador. Puede cerrar el paso de aire o abrir un circuito extra de gasolina. En inyección no existe.'],
+    ['Carburador CV','Carburador de velocidad constante. El cable abre una mariposa, y una segunda compuerta (la campana) sube por sí sola empujada por el vacío del motor. Suaviza la respuesta y evita que el motor se ahogue.'],
+    ['ECU o centralita','El ordenador que gestiona el motor. Lee sensores, calcula cuánta gasolina inyectar y cuándo saltar la chispa, y en ride-by-wire también decide cuánto abrir la mariposa.'],
+    ['Inyector','Electroválvula que pulveriza gasolina a presión dentro del conducto de admisión (o directamente en el cilindro, en inyección directa). Solo abre y cierra: la cantidad se controla con el tiempo que permanece abierto.'],
+    ['Pulso de inyección','Los milisegundos que el inyector está abierto en cada ciclo. Entre ~1,5 ms al ralentí y más de 8 ms a plena carga. Es la respuesta a "cuánta gasolina".'],
+    ['TPS','<i>Throttle Position Sensor</i>. Un potenciómetro que mide el ángulo de la mariposa y lo convierte en voltaje. La ECU lo usa tanto para saber la posición como la velocidad de apertura.'],
+    ['MAP','<i>Manifold Absolute Pressure</i>. Sensor de presión en el colector de admisión. Junto con las vueltas permite estimar cuánto aire está entrando de verdad.'],
+    ['Sonda lambda','Sensor en el escape que mide el oxígeno sobrante tras la combustión. Permite a la ECU corregirse a sí misma. Lambda = 1 significa mezcla exacta.'],
+    ['AFR','<i>Air Fuel Ratio</i>, la proporción aire/gasolina en peso. 14,7:1 es el punto exacto. Por debajo la mezcla es rica, por encima es pobre.'],
+    ['Lazo cerrado / abierto','Cerrado: la ECU usa la sonda lambda para corregirse continuamente. Abierto: ignora la sonda y aplica una tabla fija, algo que hace a plena carga y en frío.'],
+    ['Ride-by-wire','También <i>throttle-by-wire</i> o acelerador electrónico. No hay unión mecánica entre puño y mariposa: el puño es un sensor y la mariposa la mueve un servomotor gobernado por la ECU.'],
+    ['Mapa o curva de acelerador','La tabla que relaciona el ángulo de tu puño con el de la mariposa. Cambiar de mapa es exactamente lo que hace un modo de conducción.'],
+    ['Modo de conducción','Road, Rain, Sport, Off-road. No suelen limitar la potencia máxima: cambian la curva del acelerador y los umbrales del control de tracción.'],
+    ['Redundancia','Duplicar los sensores críticos para que el sistema pueda detectar si uno falla. En ride-by-wire hay dos sensores en el puño y dos en la mariposa.'],
+    ['Válvula de ralentí (IAC)','Conducto de derivación gobernado por la ECU que deja pasar el aire necesario para el ralentí con la mariposa cerrada. Permite subir el ralentí en frío automáticamente.'],
+    ['Domador de gas','Módulo o leva que se instala en motos con cable para suavizar la primera parte del recorrido del puño. Muy usado en inyecciones bruscas antiguas. Con ride-by-wire deja de tener sentido: se resuelve por software.']
+  ];
+  const host=$('#glossary');
+  terms.forEach(t=>{
+    const d=document.createElement('details');
+    d.innerHTML=`<summary>${t[0]}</summary><div class="det-body"><p>${t[1]}</p></div>`;
+    host.appendChild(d);
+  });
+})();
+
+/* =========================================================
+   INIT
+   ========================================================= */
+render();
+drawCurves();
+</script>
+</body>
+</html>
