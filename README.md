@@ -4,7 +4,7 @@ Explorations on AI, nothing too techie.
 
 Colección de páginas HTML autocontenidas —guías, simuladores, mapas visuales y experimentos— publicadas con GitHub Pages. Cada archivo funciona por sí solo: se abre en el navegador o se embebe donde haga falta.
 
-**Índice:** 27 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
+**Índice:** 28 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
 
 ## Cómo usarlas
 
@@ -94,6 +94,7 @@ Cosas complicadas explicadas moviendo cosas por la pantalla.
 | [Outlook Calendar Tetris](https://davidhurtadoai.github.io/Explorations/outlook-tetris.html) | Tu calendario, pero jugable |
 | [Bomb Jack · clon](https://davidhurtadoai.github.io/Explorations/BombJack_clone.html) | Clon del arcade, «por David & Máquina» |
 | [3D City Builder](https://davidhurtadoai.github.io/Explorations/CityBuilder.html) | Constructor de ciudades en 3D, pensado para móvil |
+| [Red Dead Redemption 2 · ruta de caza](https://davidhurtadoai.github.io/Explorations/rdr2-ruta-de-caza-pieles-perfectas.html) | Mapa navegable con la ruta para reunir las 21 pieles perfectas del zurrón Leyenda del Este, «by David Hurtado & Máquina» |
 
 ---
 
