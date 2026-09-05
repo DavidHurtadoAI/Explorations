@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Ruta de caza · Red Dead Redemption 2</title>
+<meta name="description" content="Guía interactiva de caza de Red Dead Redemption 2: ruta desde Horseshoe Overlook para conseguir las 21 pieles perfectas del zurrón Leyenda del Este.">
+<style>
+:root{
+  --bg:#100d09;
+  --bg2:#171209;
+  --panel:#1d1710;
+  --panel2:#252017;
+  --panel3:#2f2819;
+  --line:#3d3325;
+  --line2:#544631;
+  --paper:#e6dcc0;
+  --ink:#efe6cf;
+  --muted:#a1937a;
+  --muted2:#7d7059;
+  --gold:#d9b56c;
+  --gold2:#f0d495;
+  --red:#b34a33;
+  --green:#7f9a6b;
+
+  --s1:#c96a3c;
+  --s2:#d0a63a;
+  --s3:#6f9c86;
+  --s4:#5b8fb9;
+  --s5:#9d6bb3;
+  --s6:#a08157;
+
+  --shadow:0 18px 45px rgba(0,0,0,.55);
+  --font-d:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --font-b:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--font-b);font-size:14px;line-height:1.5;
+  overflow:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(217,181,108,.10), transparent 60%),
+    radial-gradient(90% 70% at 10% 110%, rgba(179,74,51,.10), transparent 60%);
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--panel)}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;border:2px solid var(--panel)}
+::-webkit-scrollbar-thumb:hover{background:var(--line2)}
+
+/* ---------- LAYOUT ---------- */
+.app{position:relative;z-index:1;display:grid;grid-template-rows:auto 1fr;height:100%}
+
+header.topbar{
+  display:flex;align-items:center;gap:18px;
+  padding:10px 16px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  box-shadow:0 6px 18px rgba(0,0,0,.4);z-index:30;
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand .seal{
+  width:40px;height:40px;flex:none;border-radius:50%;
+  border:1.5px solid var(--gold);color:var(--gold);
+  display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#3a2f1d,#191309);
+  box-shadow:inset 0 0 0 3px rgba(217,181,108,.14);
+}
+.brand h1{
+  margin:0;font-family:var(--font-d);font-size:17px;letter-spacing:.10em;
+  text-transform:uppercase;color:var(--gold2);white-space:nowrap;
+}
+.brand p{margin:1px 0 0;font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+
+.topbar .spacer{flex:1}
+.progress-wrap{display:flex;align-items:center;gap:12px}
+.ring{position:relative;width:46px;height:46px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .val{
+  position:absolute;inset:0;display:grid;place-items:center;
+  font-family:var(--font-d);font-size:13px;color:var(--gold2);letter-spacing:.02em;
+}
+.progress-meta{font-size:11.5px;color:var(--muted);line-height:1.35;white-space:nowrap}
+.progress-meta b{display:block;font-family:var(--font-d);font-size:13px;color:var(--ink);letter-spacing:.05em}
+
+.iconbtn{
+  width:34px;height:34px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--muted);display:grid;place-items:center;transition:.15s;
+}
+.iconbtn:hover{color:var(--gold2);border-color:var(--line2);background:var(--panel3)}
+
+main{display:grid;grid-template-columns:376px 1fr;min-height:0}
+
+/* ---------- SIDEBAR ---------- */
+aside{
+  border-right:1px solid var(--line);background:var(--panel);
+  display:grid;grid-template-rows:auto 1fr;min-height:0;position:relative;z-index:20;
+}
+.tabs{display:flex;border-bottom:1px solid var(--line);background:var(--panel2)}
+.tabs button{
+  flex:1;padding:11px 4px 9px;font-size:11px;letter-spacing:.10em;text-transform:uppercase;
+  color:var(--muted2);border-bottom:2px solid transparent;font-family:var(--font-d);transition:.15s;
+}
+.tabs button:hover{color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--gold2);border-bottom-color:var(--gold);background:var(--panel)}
+.panes{overflow:auto;padding:16px 16px 60px}
+.pane{display:none;animation:fade .25s ease}
+.pane.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.sect-title{
+  font-family:var(--font-d);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted2);margin:22px 0 10px;display:flex;align-items:center;gap:10px;
+}
+.sect-title:first-child{margin-top:0}
+.sect-title::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+/* stage cards */
+.stage-card{
+  border:1px solid var(--line);border-radius:10px;background:var(--panel2);
+  margin-bottom:10px;overflow:hidden;transition:.18s;
+}
+.stage-card:hover{border-color:var(--line2)}
+.stage-card.active{border-color:var(--c);box-shadow:0 0 0 1px var(--c) inset,0 8px 24px rgba(0,0,0,.35)}
+.stage-head{display:flex;gap:12px;align-items:flex-start;padding:12px 13px;width:100%;text-align:left}
+.stage-num{
+  width:28px;height:28px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--font-d);font-size:14px;color:#140f08;background:var(--c);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 22%,transparent);
+}
+.stage-head h3{margin:0;font-family:var(--font-d);font-size:14.5px;letter-spacing:.02em;color:var(--ink);font-weight:600}
+.stage-head .sub{font-size:11.5px;color:var(--muted2);margin-top:2px}
+.stage-body{padding:0 13px 13px 53px;display:none}
+.stage-card.active .stage-body{display:block}
+.stage-body p{margin:0 0 10px;font-size:12.8px;color:var(--muted)}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 9px 4px 6px;border-radius:999px;
+  border:1px solid var(--line2);background:var(--panel3);font-size:11.5px;color:var(--ink);
+  cursor:pointer;transition:.15s;
+}
+.chip:hover{border-color:var(--gold);color:var(--gold2)}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--c)}
+.chip.done{opacity:.45;text-decoration:line-through}
+
+/* animal list */
+.a-item{
+  display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;
+  padding:9px 10px;border:1px solid transparent;border-radius:9px;cursor:pointer;transition:.15s;
+}
+.a-item:hover{background:var(--panel2);border-color:var(--line)}
+.a-item.complete .a-name{color:var(--muted2);text-decoration:line-through}
+.a-medal{
+  width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;
+  border:1px solid var(--line2);background:radial-gradient(circle at 35% 30%,#39301f,#161108);color:var(--gold);
+}
+.a-name{display:block;font-family:var(--font-d);font-size:14.5px;letter-spacing:.01em}
+.a-meta{display:block;font-size:11px;color:var(--muted2);margin-top:2px;line-height:1.35}
+.a-count{
+  font-family:var(--font-d);font-size:12px;color:var(--muted);
+  border:1px solid var(--line);border-radius:7px;padding:3px 8px;background:var(--panel2);white-space:nowrap;
+}
+.a-count.full{color:#a7c48f;border-color:#4d5c3f;background:rgba(127,154,107,.12)}
+
+/* checkboxes */
+.pips{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px}
+.pip{
+  width:22px;height:22px;border-radius:6px;border:1px solid var(--line2);background:var(--panel3);
+  display:grid;place-items:center;transition:.15s;color:transparent;
+}
+.pip:hover{border-color:var(--gold)}
+.pip.on{background:linear-gradient(180deg,#7f9a6b,#5e7550);border-color:#8fae78;color:#12180d}
+
+/* satchels */
+.satchel{border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:12px 13px;margin-bottom:10px}
+.satchel.done{border-color:#4d5c3f;background:rgba(127,154,107,.08)}
+.satchel h4{margin:0 0 3px;font-family:var(--font-d);font-size:14px;letter-spacing:.03em;display:flex;align-items:center;gap:8px}
+.satchel .unlock{font-size:11px;color:var(--muted2);margin-bottom:9px}
+.satchel .unlock b{color:var(--muted);font-weight:600}
+.recipe{display:flex;flex-wrap:wrap;gap:5px}
+.rq{
+  font-size:11.5px;padding:3px 8px;border-radius:6px;border:1px solid var(--line2);
+  background:var(--panel3);color:var(--muted);cursor:pointer;
+}
+.rq.ok{color:#b3ce9b;border-color:#4d5c3f;background:rgba(127,154,107,.14)}
+.rq:hover{border-color:var(--gold);color:var(--gold2)}
+.legend-satchel{border-color:var(--gold);background:linear-gradient(180deg,rgba(217,181,108,.10),rgba(217,181,108,.03))}
+.legend-satchel h4{color:var(--gold2)}
+
+/* prose */
+.prose p{margin:0 0 11px;font-size:13px;color:var(--muted)}
+.prose strong{color:var(--ink);font-weight:600}
+.prose ul{margin:0 0 14px;padding-left:18px}
+.prose li{font-size:13px;color:var(--muted);margin-bottom:7px}
+.prose li::marker{color:var(--gold)}
+.callout{
+  border-left:2px solid var(--gold);background:linear-gradient(90deg,rgba(217,181,108,.09),transparent);
+  padding:11px 13px;border-radius:0 8px 8px 0;margin:0 0 14px;
+}
+.callout p{margin:0;font-size:12.8px;color:var(--ink)}
+.callout .lab{
+  font-family:var(--font-d);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);display:block;margin-bottom:4px;
+}
+.kit{display:grid;gap:8px}
+.kit-item{display:flex;gap:10px;align-items:flex-start;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel2)}
+.kit-item svg{flex:none;color:var(--gold);margin-top:1px}
+.kit-item b{display:block;font-family:var(--font-d);font-size:13.5px;color:var(--ink);font-weight:600}
+.kit-item span{font-size:12px;color:var(--muted2)}
+
+/* ---------- MAP ---------- */
+.mapwrap{position:relative;overflow:hidden;background:
+  radial-gradient(80% 80% at 50% 40%, #191308, #0d0a06 75%);}
+#viewport{position:absolute;inset:0;cursor:grab;touch-action:none}
+#viewport.grabbing{cursor:grabbing}
+#canvas{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+#canvas img{display:block;width:100%;height:100%;user-select:none;-webkit-user-drag:none;
+  filter:sepia(.12) saturate(.92) contrast(1.04) brightness(.98);}
+#routes{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+#markers{position:absolute;inset:0}
+
+.mk{position:absolute;transform:translate(-50%,-50%);pointer-events:none}
+.mk .inner{transform:scale(var(--inv,1));transform-origin:center;pointer-events:auto;
+  display:flex;flex-direction:column;align-items:center;gap:3px;transition:opacity .25s}
+.mk.dim .inner{opacity:.18}
+.mk.hidden{display:none}
+
+.pin{
+  width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  background:radial-gradient(circle at 34% 28%,#2c2416,#0f0b06);
+  border:1.5px solid var(--c,#d9b56c);color:var(--c,#d9b56c);
+  box-shadow:0 4px 12px rgba(0,0,0,.6),0 0 0 3px color-mix(in srgb,var(--c,#d9b56c) 16%,transparent);
+  transition:transform .16s cubic-bezier(.34,1.56,.64,1),box-shadow .16s;
+}
+.pin:hover{transform:scale(1.18)}
+.mk.sel .pin{transform:scale(1.25);box-shadow:0 6px 18px rgba(0,0,0,.7),0 0 0 5px color-mix(in srgb,var(--c,#d9b56c) 34%,transparent)}
+.pin.way{
+  width:26px;height:26px;font-family:var(--font-d);font-size:13px;
+  background:var(--c);color:#150f07;border-color:#0f0b06;
+}
+.pin.done{border-color:#7f9a6b;color:#a7c48f}
+.pin.done::after{
+  content:"";position:absolute;width:12px;height:12px;border-radius:50%;
+  background:#7f9a6b;border:1.5px solid #0f0b06;transform:translate(11px,-11px);
+}
+.tag{
+  font-family:var(--font-d);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 7px;border-radius:5px;white-space:nowrap;cursor:pointer;
+  background:rgba(14,10,6,.86);border:1px solid var(--line2);color:var(--ink);
+  box-shadow:0 3px 8px rgba(0,0,0,.5);
+}
+.mk.way-mk .tag{color:var(--c);border-color:color-mix(in srgb,var(--c) 45%,var(--line2))}
+body.nolabels .tag{display:none}
+#markers.hide-way .mk.way-mk .tag{display:none}
+#markers.hide-animal .mk.animal-mk .tag{display:none}
+#markers .mk.sel .tag,
+#markers .mk.stage-on .tag,
+#markers .inner:hover .tag{display:block !important}
+body.nolabels #markers .tag{display:none !important}
+.mk .inner:hover{z-index:5}
+
+/* map ui */
+.map-ui{position:absolute;z-index:12;display:flex;gap:8px}
+.map-ui.tl{top:14px;left:14px;flex-wrap:wrap;max-width:calc(100% - 28px)}
+.map-ui.br{bottom:14px;right:14px;flex-direction:column}
+.map-ui.bl{bottom:14px;left:14px;flex-direction:column;gap:10px;align-items:flex-start}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;
+  border:1px solid var(--line);background:rgba(20,16,10,.86);backdrop-filter:blur(8px);
+  font-size:11.5px;letter-spacing:.04em;color:var(--muted);transition:.15s;
+}
+.pill:hover{border-color:var(--line2);color:var(--ink)}
+.pill.on{border-color:var(--c,var(--gold));color:var(--gold2);background:rgba(36,27,14,.94);box-shadow:0 0 0 1px color-mix(in srgb,var(--c,var(--gold)) 28%,transparent) inset}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:var(--c,var(--gold))}
+.zoombtn{
+  width:36px;height:36px;border-radius:9px;border:1px solid var(--line);
+  background:rgba(20,16,10,.86);backdrop-filter:blur(8px);color:var(--muted);
+  display:grid;place-items:center;transition:.15s;
+}
+.zoombtn:hover{color:var(--gold2);border-color:var(--line2)}
+
+.legend{
+  border:1px solid var(--line);background:rgba(16,12,8,.88);backdrop-filter:blur(8px);
+  border-radius:10px;padding:10px 12px;font-size:11px;color:var(--muted2);max-width:210px;
+}
+.legend .t{font-family:var(--font-d);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:7px}
+.legend .row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.legend .row:last-child{margin-bottom:0}
+.legend .sign{margin-top:9px;padding-top:8px;border-top:1px solid var(--line);
+  font-family:var(--font-d);font-size:10px;letter-spacing:.10em;color:var(--muted2);font-style:italic}
+.legend .sign b{color:var(--gold);font-weight:400;font-style:normal;letter-spacing:.14em}
+.legend i{width:16px;height:2px;border-radius:2px;background:var(--c);display:block;flex:none}
+
+/* step navigator */
+.stepnav{
+  position:absolute;left:50%;transform:translateX(-50%);bottom:14px;z-index:12;
+  display:flex;align-items:center;gap:2px;padding:5px;border-radius:999px;
+  border:1px solid var(--line);background:rgba(16,12,8,.9);backdrop-filter:blur(10px);
+  box-shadow:var(--shadow);
+}
+.stepnav button.nav{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.stepnav button.nav:hover{color:var(--gold2);background:var(--panel3)}
+.stepnav .steps{display:flex;gap:3px;padding:0 5px}
+.stepnav .steps b{
+  width:26px;height:26px;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  font-family:var(--font-d);font-size:12px;font-weight:500;color:var(--muted2);
+  border:1px solid transparent;transition:.15s;
+}
+.stepnav .steps b:hover{color:var(--ink)}
+.stepnav .steps b.on{background:var(--c);color:#140f07;border-color:#0f0b06}
+
+/* detail drawer */
+.drawer{
+  position:absolute;top:14px;right:14px;width:320px;max-height:calc(100% - 28px);z-index:25;
+  border:1px solid var(--line2);border-radius:12px;overflow:hidden;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));box-shadow:var(--shadow);
+  display:none;flex-direction:column;
+}
+.drawer.on{display:flex;animation:slidein .22s cubic-bezier(.2,.8,.3,1)}
+@keyframes slidein{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+.drawer-head{padding:14px 15px 12px;border-bottom:1px solid var(--line);position:relative;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c,#d9b56c) 16%,transparent),transparent)}
+.drawer-head .eyebrow{font-family:var(--font-d);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--c,var(--gold))}
+.drawer-head h3{margin:3px 0 0;font-family:var(--font-d);font-size:20px;letter-spacing:.02em}
+.drawer-close{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:7px;color:var(--muted2)}
+.drawer-close:hover{color:var(--ink);background:var(--panel3)}
+.drawer-body{padding:13px 15px 16px;overflow:auto}
+.kv{display:grid;grid-template-columns:78px 1fr;gap:6px 10px;margin-bottom:12px}
+.kv dt{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);padding-top:2px}
+.kv dd{margin:0;font-size:12.8px;color:var(--ink)}
+.drawer-body p{margin:0 0 10px;font-size:12.8px;color:var(--muted)}
+.badge{
+  display:inline-block;font-size:10.5px;letter-spacing:.06em;padding:2px 7px;border-radius:5px;
+  border:1px solid var(--line2);background:var(--panel3);color:var(--muted);margin:0 4px 4px 0;
+}
+.badge.g{color:#b3ce9b;border-color:#4d5c3f}
+.badge.r{color:#e0a08e;border-color:#6b3d31}
+
+/* toast */
+.toast{
+  position:absolute;left:50%;top:16px;transform:translate(-50%,-16px);z-index:40;
+  padding:9px 16px;border-radius:999px;border:1px solid var(--gold);
+  background:rgba(24,18,10,.94);color:var(--gold2);font-size:12.5px;letter-spacing:.03em;
+  opacity:0;pointer-events:none;transition:.3s;box-shadow:var(--shadow);
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+.hint{position:absolute;bottom:14px;right:64px;z-index:11;font-size:10.5px;color:var(--muted2);letter-spacing:.05em}
+
+/* mobile */
+.mobtabs{display:none}
+@media (max-width:900px){
+  main{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  .map-ui.tl{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;
+    width:calc(100% - 28px);padding-bottom:4px;scrollbar-width:none}
+  .map-ui.tl::-webkit-scrollbar{display:none}
+  .map-ui.tl .pill{flex:none}
+  .map-ui.br{bottom:auto;top:100px;right:12px;flex-direction:column}
+  .zoombtn{width:34px;height:34px}
+  aside{
+    border-right:0;border-top:1px solid var(--line);
+    position:absolute;left:0;right:0;bottom:0;height:56%;z-index:40;
+    transform:translateY(calc(100% - 42px));transition:transform .3s cubic-bezier(.2,.8,.3,1);
+    border-radius:14px 14px 0 0;box-shadow:0 -18px 40px rgba(0,0,0,.6);
+  }
+  body.sheet-open aside{transform:translateY(0)}
+  .sheet-handle{display:flex !important}
+  .mapwrap{grid-row:1/-1;grid-column:1}
+  .drawer{width:auto;left:12px;right:12px;top:auto;bottom:100px;max-height:54%}
+  .stepnav{bottom:54px;left:50%;transform:translateX(-50%)}
+  .map-ui.bl{display:none}
+  .hint{display:none}
+  .brand p{display:none}
+  .brand h1{font-size:14px}
+  .panes{padding-bottom:80px}
+}
+@media (max-width:520px){
+  .ring{display:none}
+  .progress-meta{white-space:nowrap;font-size:10.5px}
+  .progress-meta b{font-size:12px}
+  header.topbar{padding:8px 12px;gap:10px}
+  .brand .seal{width:34px;height:34px}
+}
+.sheet-handle{
+  display:none;align-items:center;justify-content:center;gap:8px;height:42px;
+  border-bottom:1px solid var(--line);background:var(--panel2);
+  font-family:var(--font-d);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="seal">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21c-2.1 0-3.8-1.6-3.8-3.7 0-1.4.7-2.4.7-3.5 0-1-.5-1.6-.5-2.6C8.4 9.4 10 8 12 8s3.6 1.4 3.6 3.2c0 1-.5 1.6-.5 2.6 0 1.1.7 2.1.7 3.5 0 2.1-1.7 3.7-3.8 3.7z"/>
+          <path d="M9.4 8.4C8.6 6.7 7.1 5.5 5.3 5.2M9.4 8.4 6.9 7.3M14.6 8.4c.8-1.7 2.3-2.9 4.1-3.2M14.6 8.4l2.5-1.1"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Ruta de caza · RDR2</h1>
+        <p>21 pieles perfectas · del campamento al zurrón Leyenda del Este</p>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="progress-wrap">
+      <div class="ring">
+        <svg width="46" height="46">
+          <circle cx="23" cy="23" r="19" fill="none" stroke="#3d3325" stroke-width="4"></circle>
+          <circle id="ringFill" cx="23" cy="23" r="19" fill="none" stroke="#d9b56c" stroke-width="4"
+                  stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4"
+                  style="transition:stroke-dashoffset .5s cubic-bezier(.2,.8,.3,1)"></circle>
+        </svg>
+        <div class="val" id="ringVal">0%</div>
+      </div>
+      <div class="progress-meta">
+        <b id="pcount">0 / 20</b>
+        pieles perfectas
+      </div>
+      <button class="iconbtn" id="btnReset" title="Reiniciar progreso">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <div class="sheet-handle" id="sheetHandle">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 15 6-6 6 6"/></svg>
+        Guía
+      </div>
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="ruta">Ruta</button>
+        <button role="tab" aria-selected="false" data-tab="animales">Animales</button>
+        <button role="tab" aria-selected="false" data-tab="zurrones">Zurrones</button>
+        <button role="tab" aria-selected="false" data-tab="consejos">Consejos</button>
+      </div>
+      <div class="panes">
+        <section class="pane on" id="pane-ruta"></section>
+        <section class="pane" id="pane-animales"></section>
+        <section class="pane" id="pane-zurrones"></section>
+        <section class="pane" id="pane-consejos"></section>
+      </div>
+    </aside>
+
+    <div class="mapwrap">
+      <div id="viewport">
+        <div id="canvas">
+          <img id="mapimg" src="red-dead-redemption-2-map.webp" alt="Mapa de Red Dead Redemption 2">
+          <svg id="routes" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+          <div id="markers"></div>
+        </div>
+      </div>
+
+      <div class="map-ui tl" id="filters"></div>
+
+      <div class="map-ui br">
+        <button class="zoombtn" id="zIn" title="Acercar (+)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button class="zoombtn" id="zOut" title="Alejar (-)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14"/></svg>
+        </button>
+        <button class="zoombtn" id="zFit" title="Ver todo (0)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        </button>
+        <button class="zoombtn" id="zLbl" title="Etiquetas (L)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h13l5 5-5 5H3z"/><circle cx="7.5" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg>
+        </button>
+      </div>
+
+      <div class="map-ui bl">
+        <div class="legend" id="legend"></div>
+      </div>
+
+      <div class="stepnav">
+        <button class="nav" id="stepPrev" title="Etapa anterior">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="steps" id="stepDots"></div>
+        <button class="nav" id="stepNext" title="Etapa siguiente">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <div class="hint">Arrastra para mover · rueda para hacer zoom</div>
+
+      <div class="drawer" id="drawer">
+        <div class="drawer-head" id="drawerHead">
+          <div class="eyebrow" id="drEyebrow"></div>
+          <h3 id="drTitle"></h3>
+          <button class="drawer-close" id="drClose">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="drawer-body" id="drBody"></div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+"use strict";
+
+/* ======================================================================
+   ICONOS
+   ====================================================================== */
+const SW = 'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"';
+const ICONS = {
+  ciervo:`<g ${SW}><path d="M12 20.4c-2 0-3.6-1.5-3.6-3.5 0-1.3.7-2.3.7-3.4 0-.9-.5-1.5-.5-2.4 0-1.7 1.5-3 3.4-3s3.4 1.3 3.4 3c0 .9-.5 1.5-.5 2.4 0 1.1.7 2.1.7 3.4 0 2-1.6 3.5-3.6 3.5z"/><path d="M8.7 9.6C7.6 8.7 6.1 8.6 5 9.2M15.3 9.6c1.1-.9 2.6-1 3.7-.4"/></g>`,
+  ciervoMacho:`<g ${SW}><path d="M12 20.6c-1.9 0-3.4-1.4-3.4-3.3 0-1.2.6-2.1.6-3.2 0-.8-.4-1.4-.4-2.2 0-1.6 1.4-2.8 3.2-2.8s3.2 1.2 3.2 2.8c0 .8-.4 1.4-.4 2.2 0 1.1.6 2 .6 3.2 0 1.9-1.5 3.3-3.4 3.3z"/><path d="M9.2 10.2C8.4 8.2 6.8 6.8 4.8 6.4M9.2 10.2 6.4 8.6M14.8 10.2c.8-2 2.4-3.4 4.4-3.8M14.8 10.2l2.8-1.6"/><path d="M5.6 4.2c-.3 1 .1 1.9.7 2.3M18.4 4.2c.3 1-.1 1.9-.7 2.3"/></g>`,
+  alce:`<g ${SW}><path d="M12 20.8c-1.8 0-3.2-1.3-3.2-3.1 0-1.2.6-2 .6-3 0-.8-.4-1.3-.4-2.1 0-1.5 1.3-2.7 3-2.7s3 1.2 3 2.7c0 .8-.4 1.3-.4 2.1 0 1 .6 1.8.6 3 0 1.8-1.4 3.1-3.2 3.1z"/><path d="M9.1 10.4C7 9.7 5.2 7.9 4.4 5.6M9.1 10.4 4.6 9.4M9.1 10.4 5.6 7.6M14.9 10.4c2.1-.7 3.9-2.5 4.7-4.8M14.9 10.4l4.5-1M14.9 10.4l3.5-2.8"/></g>`,
+  bisonte:`<g ${SW}><path d="M3.4 17.6c-.6-2.6.5-4.6 2.5-5.6.4-2.6 2.4-4.2 5.3-4.2 3 0 5.1 1.5 5.9 3.7 1.7.5 2.8 1.8 3 3.5"/><path d="M6.1 17.8 5.7 21M9.4 18.6 9.2 21M14.8 18.4 15 21M18.4 17.6 18.8 21"/><path d="M16.8 11.4c1.5-.7 2.8-.2 3.4.9M20.1 15.2c.9.2 1.4.9 1.3 1.8"/></g>`,
+  jabali:`<g ${SW}><path d="M4 15.6c0-2.6 1.9-4.6 4.8-4.6h4.4c1.5-1.6 3.4-2.2 5.3-1.7-.5 1-.5 2 .1 2.9 1 .5 1.6 1.4 1.6 2.6 0 2.4-1.9 4.2-4.4 4.2H8.4C5.9 19 4 17.6 4 15.6z"/><path d="M6.4 19v2M10 19.4v1.8M14.8 19.4v1.8M18 18.6V21"/><path d="M18.6 13.4c-.7.4-1.5.3-2-.3M17.2 15.8c-.6.5-1.4.5-2-.1"/></g>`,
+  lobo:`<g ${SW}><path d="M12 20.4c-2.5 0-4.4-1.7-4.4-4 0-1.5.7-2.6.7-3.9 0-1-.5-1.7-.5-2.7l1.9 1.2h4.6l1.9-1.2c0 1-.5 1.7-.5 2.7 0 1.3.7 2.4.7 3.9 0 2.3-1.9 4-4.4 4z"/><path d="M9.7 11 7.4 6.2l2.4 1.6M14.3 11l2.3-4.8-2.4 1.6"/><path d="M10.4 15.2h.01M13.6 15.2h.01"/><path d="M12 17.4v1.4"/></g>`,
+  puma:`<g ${SW}><path d="M12 20.2c-2.7 0-4.8-1.9-4.8-4.4 0-1.6.7-2.7.7-4 0-1-.4-1.7-.4-2.7l2 1.3h5l2-1.3c0 1-.4 1.7-.4 2.7 0 1.3.7 2.4.7 4 0 2.5-2.1 4.4-4.8 4.4z"/><path d="M9.5 10.4 7.5 6.6l2.1 1.5M14.5 10.4l2-3.8-2.1 1.5"/><path d="M10.2 14.6h.01M13.8 14.6h.01"/><path d="M12 16.6v1M12 17.6c-.9.7-2 .7-2.9.1M12 17.6c.9.7 2 .7 2.9.1"/></g>`,
+  pantera:`<g ${SW}><path d="M12 20.4c-3 0-5.2-2-5.2-4.7 0-1.7.8-2.9.8-4.3 0-1.1-.5-1.8-.5-2.9l2.2 1.4h5.4l2.2-1.4c0 1.1-.5 1.8-.5 2.9 0 1.4.8 2.6.8 4.3 0 2.7-2.2 4.7-5.2 4.7z"/><path d="M9.3 10 7.1 5.8l2.3 1.6M14.7 10l2.2-4.2-2.3 1.6"/><path d="M9.9 14.4h.01M14.1 14.4h.01"/><path d="M12 16.6v1.1M12 17.7c-1 .8-2.2.8-3.2.1M12 17.7c1 .8 2.2.8 3.2.1"/></g>`,
+  conejo:`<g ${SW}><path d="M12 20.6c-2.2 0-3.9-1.6-3.9-3.7 0-1.9 1.7-3.4 3.9-3.4s3.9 1.5 3.9 3.4c0 2.1-1.7 3.7-3.9 3.7z"/><path d="M9.9 13.8C9 11.2 8.3 8.2 8.9 5.4c.2-1 1.3-1 1.6 0 .7 2.6.9 5.5.7 8.1M14.1 13.8c.9-2.6 1.6-5.6 1-8.4-.2-1-1.3-1-1.6 0-.7 2.6-.9 5.5-.7 8.1"/><path d="M10.6 17.2h.01M13.4 17.2h.01"/></g>`,
+  ardilla:`<g ${SW}><path d="M13.2 20.6H8.6c-1.6 0-2.7-1.2-2.7-2.7 0-2.9 2-5.1 4.7-5.1 2 0 3.4 1.3 3.4 3.2 0 1.4-.9 2.3-2 2.3"/><path d="M10.6 12.8c-.8-.9-.8-2.3.1-3.2.9-.9 2.3-.9 3.1 0"/><path d="M14.2 9.8c2.6-.3 4.4 1.4 4.6 4 .2 2.6-1.3 4.7-3.6 5.4"/><path d="M9.2 10.4h.01"/><path d="M6.2 20.6h6"/></g>`,
+  mapache:`<g ${SW}><path d="M12 20.4c-3 0-5.1-2-5.1-4.8 0-1.7.7-2.8.7-4.1 0-1-.5-1.7-.5-2.7l2.1 1.3h5.6l2.1-1.3c0 1-.5 1.7-.5 2.7 0 1.3.7 2.4.7 4.1 0 2.8-2.1 4.8-5.1 4.8z"/><path d="M6.6 13.6c1.4-.9 2.9-.9 4.1 0M17.4 13.6c-1.4-.9-2.9-.9-4.1 0"/><path d="M9.1 14h.01M14.9 14h.01"/><path d="M12 16.6v1.2"/></g>`,
+  tejon:`<g ${SW}><path d="M12 20.6c-3.2 0-5.5-2-5.5-4.9 0-2 .9-3.3.9-4.6 0-1-.5-1.7-.5-2.6l2.2 1.3h5.8l2.2-1.3c0 .9-.5 1.6-.5 2.6 0 1.3.9 2.6.9 4.6 0 2.9-2.3 4.9-5.5 4.9z"/><path d="M12 9.6V19"/><path d="M9.2 13.6h.01M14.8 13.6h.01"/></g>`,
+  castor:`<g ${SW}><path d="M13.6 19.4H9.4c-2.4 0-4.1-1.7-4.1-4s1.9-4.2 4.4-4.2h3.4c2.4 0 4.1 1.7 4.1 3.9"/><path d="M7.6 11.4c-.5-1.1-.1-2.3.9-2.9 1-.6 2.3-.4 3 .5"/><path d="M17.2 15.1c1.8 0 3.3 1.2 3.3 2.9 0 1.6-1.4 2.8-3.2 2.8-1.6 0-2.8-.9-3.1-2.2"/><path d="M8.4 13.6h.01"/><path d="M7.4 19.4v1.6M11 19.4V21"/></g>`,
+  iguana:`<g ${SW}><path d="M4.8 14.6c0-1.9 1.6-3.2 3.7-3.2h4.2c2 0 3.4 1.1 3.6 2.8"/><path d="M16.3 14.2c1.9-.3 3.4.6 3.9 2.2.5 1.7-.4 3.2-2 3.7"/><path d="M8.5 11.4c-.6-1-.3-2.2.6-2.8.9-.6 2.2-.4 2.9.5"/><path d="M6.4 14.8V17M9.6 14.8V17M12.8 14.6v2.2"/><path d="M9.4 9.4h.01"/><path d="M5.2 12.6c-.9-.5-1.4-1.4-1.3-2.3"/></g>`,
+  camp:`<g ${SW}><path d="M3.5 20.5h17"/><path d="M12 4.5 4.8 20.5M12 4.5l7.2 16"/><path d="M7.6 14.2h8.8"/></g>`,
+  town:`<g ${SW}><path d="M3.5 20.5h17"/><path d="M5.5 20.5V11l4-3 4 3v9.5"/><path d="M13.5 20.5v-6h5v6"/><path d="M8.5 20.5v-4h2v4"/></g>`,
+  water:`<g ${SW}><path d="M12 3.5s6 6.4 6 10.3A6 6 0 0 1 6 13.8C6 9.9 12 3.5 12 3.5z"/><path d="M9.4 14.6c.4 1.6 1.6 2.6 3.1 2.7"/></g>`,
+  peak:`<g ${SW}><path d="M2.5 19.5h19L14.6 6.2l-3.3 5.8-1.9-2.7z"/><path d="M11.4 9.4 14.6 6.2l2.4 4.4"/></g>`,
+  forest:`<g ${SW}><path d="M12 3.5 7 11h3l-3.6 5.5h11.2L14 11h3z"/><path d="M12 16.5v4"/></g>`,
+  island:`<g ${SW}><path d="M3 18.5c1.6-1 3.2-1 4.8 0 1.6 1 3.2 1 4.8 0 1.6-1 3.2-1 4.8 0 .9.6 1.8.8 2.6.6"/><path d="M7.5 15.5c1.2-2.6 4-4.2 7-3.9"/><path d="M12.5 11.6c.4-2.4 2.4-4.2 4.9-4.3"/></g>`
+};
+
+/* ======================================================================
+   DATOS
+   ====================================================================== */
+
+/* Coordenadas en % sobre la imagen del mapa (x = izquierda, y = arriba) */
+const STAGES = [
+  {
+    id:1, color:"var(--s1)", hex:"#c96a3c",
+    title:"Horseshoe Overlook → The Heartlands",
+    sub:"Ciervos, conejo y bisonte",
+    text:"Sales del campamento y bajas hacia Flatneck Station. Desde ahí, todas las llanuras de The Heartlands, al este y al sureste de Valentine. Es la zona con más ciervos del mapa y donde pastan las manadas de bisontes.",
+    way:[
+      {n:"Horseshoe Overlook", x:53.4, y:44.5, icon:"camp", note:"El campamento. Aquí acabará la ruta y aquí entregas todas las pieles a Pearson."},
+      {n:"Flatneck Station", x:55.6, y:50.0, icon:"town", note:"Punto de paso hacia las llanuras. Buenos ciervos por el meandro del Dakota."},
+      {n:"The Heartlands", x:61.0, y:46.3, icon:"forest", note:"Llanura abierta al este de Valentine. Manadas de bisonte y ciervos por todas partes."}
+    ],
+    animals:["ciervo","conejo","bisonte","ciervoMacho"]
+  },
+  {
+    id:2, color:"var(--s2)", hex:"#d0a63a",
+    title:"Valentine → Cumberland Forest",
+    sub:"Ardilla, mapache, tejón y lobo",
+    text:"Subes de Valentine hacia el bosque. Cumberland Forest es el mejor sitio del mapa para los animales pequeños y medianos de la lista. El mapache y el tejón salen de noche, así que llega al atardecer.",
+    way:[
+      {n:"Valentine", x:54.1, y:38.8, icon:"town", note:"Reponer munición y flechas en el gunsmith antes de subir al bosque."},
+      {n:"Cumberland Forest", x:60.4, y:32.9, icon:"forest", note:"Ardillas en los árboles, mapaches y tejones de noche, lobos en manada por la carretera."}
+    ],
+    animals:["ardilla","mapache","tejon","lobo"]
+  },
+  {
+    id:3, color:"var(--s3)", hex:"#6f9c86",
+    title:"Subida a Grizzlies / Cattail Pond",
+    sub:"Los dos alces",
+    text:"El tramo frío. Los alces se ven en los claros nevados y alrededor de los lagos. Necesitas dos pieles perfectas, así que no bajes hasta tenerlas. Si te falta el lobo, aquí abundan.",
+    way:[
+      {n:"Cattail Pond", x:49.4, y:37.4, icon:"water", note:"Entrada natural a las montañas desde Valentine. Alces y lobos en la subida."},
+      {n:"Cotorra Springs", x:59.2, y:25.6, icon:"peak", note:"Claros de Grizzlies East. Alce y lobo con mucha frecuencia."},
+      {n:"Cairn Lake", x:49.9, y:21.2, icon:"water", note:"Zona alta de Ambarino. Alces en las orillas al amanecer."}
+    ],
+    animals:["alce","lobo"]
+  },
+  {
+    id:4, color:"var(--s4)", hex:"#5b8fb9",
+    title:"Bajada a Strawberry → Owanjila",
+    sub:"Castor, puma y los ciervos que falten",
+    text:"La zona más rentable de toda la ruta. El castor vive en las orillas del embalse de Owanjila. El puma aparece siguiendo la carretera hacia el norte, camino del trampero de Big Valley: es uno de los mejores puntos de aparición del juego.",
+    way:[
+      {n:"Puma · norte de Owanjila", x:38.6, y:47.3, icon:"puma", note:"Carretera que sube hacia el trampero de Big Valley. Ve despacio a caballo y usa Ojo de Halcón."},
+      {n:"Owanjila", x:38.1, y:50.6, icon:"water", note:"Embalse. Castores en las orillas, sobre todo al anochecer y de noche."},
+      {n:"Strawberry", x:43.9, y:50.6, icon:"town", note:"Pueblo base de West Elizabeth. Buenos ciervos y ciervos macho por Big Valley."}
+    ],
+    animals:["castor","puma","ciervo","ciervoMacho"]
+  },
+  {
+    id:5, color:"var(--s5)", hex:"#9d6bb3",
+    title:"Cruce a Lemoyne / Rhodes",
+    sub:"Jabalí, iguana y pantera",
+    text:"El tramo difícil. El jabalí es fácil por todo Lemoyne. La iguana está en la isla grande de Flat Iron Lake, al oeste de Rhodes: puedes llegar nadando con el caballo. La pantera es la caza más puñetera de la lista, en el bosque al sureste de Braithwaite Manor.",
+    way:[
+      {n:"Isla de Flat Iron Lake", x:61.7, y:60.6, icon:"island", note:"La isla grande del lago. Iguanas al sol durante el día. Se llega nadando desde Clemens Point."},
+      {n:"Rhodes", x:68.2, y:60.7, icon:"town", note:"Base de Lemoyne. Jabalíes por Scarlett Meadows y por la marisma."},
+      {n:"Braithwaite Manor", x:66.6, y:66.1, icon:"town", note:"Referencia para bajar al bosque de la pantera."},
+      {n:"Pantera · bosque de la costa", x:69.6, y:68.3, icon:"pantera", note:"Bosque al sureste de la mansión, pegado a la costa. De noche, con cebo de depredador."}
+    ],
+    animals:["jabali","iguana","pantera"]
+  },
+  {
+    id:6, color:"var(--s6)", hex:"#a08157",
+    title:"Vuelta al campamento",
+    sub:"Entregar todo a Pearson",
+    text:"Las pieles se le dan a Pearson para elaboración, no se venden al carnicero ni al trampero. Cuando tengas fabricados los seis zurrones, se desbloquea el Leyenda del Este, que sube a 99 la capacidad de casi todo.",
+    way:[
+      {n:"Pearson · Horseshoe Overlook", x:54.6, y:43.3, icon:"camp", note:"Habla con Pearson en la mesa de despiece del campamento y fabrica los zurrones."}
+    ],
+    animals:[]
+  }
+];
+
+const ANIMALS = {
+  ciervo:{
+    nombre:"Ciervo", plural:"Ciervos", need:7, size:"Grande", icon:"ciervo",
+    arma:"Arco con flechas mejoradas, o rifle de un solo tiro (Springfield / Rolling Block)",
+    momento:"Amanecer y atardecer",
+    donde:"The Heartlands, Big Valley, Cumberland Forest. Está por todo el mapa norte.",
+    zurrones:["Tónicos","Ingredientes","Kit","Provisiones","Materiales","Objetos de valor","Leyenda del Este"],
+    tip:"Es la piel que más veces necesitas: siete. Ve cazando ciervos ★★★ durante toda la ruta y no te preocupes por reunirlos de golpe. El caballo solo lleva una piel grande a la vez, así que tendrás que hacer varios viajes al campamento.",
+    spots:[{x:59.5,y:44.6,l:"Heartlands",st:1},{x:46.5,y:47.5,l:"Big Valley",st:4},{x:57.6,y:34.5,l:"Cumberland",st:2}]
+  },
+  ciervoMacho:{
+    nombre:"Ciervo macho", plural:"Ciervos macho", need:1, size:"Grande", icon:"ciervoMacho",
+    arma:"Arco con flechas mejoradas, o rifle de un solo tiro",
+    momento:"Amanecer y atardecer",
+    donde:"Mismas zonas que el ciervo. Es el macho con cuernos, cuenta como animal distinto.",
+    zurrones:["Tónicos"],
+    tip:"Ojo: el juego distingue ciervo y ciervo macho. Estudia el animal con los prismáticos antes de disparar para asegurarte de cuál es y de que tiene tres estrellas.",
+    spots:[{x:63.2,y:44.0,l:"Heartlands este",st:1},{x:45.2,y:44.8,l:"Big Valley",st:4}]
+  },
+  alce:{
+    nombre:"Alce", plural:"Alces", need:2, size:"Grande", icon:"alce",
+    arma:"Arco con flechas mejoradas, o rifle de un solo tiro",
+    momento:"Amanecer",
+    donde:"Ambarino y Grizzlies: Cattail Pond, Cotorra Springs, Cairn Lake, Lake Isabella.",
+    zurrones:["Tónicos","Kit"],
+    tip:"Necesitas dos pieles perfectas y el alce es esquivo. Sube por Cattail Pond al amanecer y recorre los claros nevados con Ojo de Halcón activado.",
+    spots:[{x:52.0,y:26.5,l:"Grizzlies",st:3},{x:56.0,y:22.0,l:"Ambarino",st:3}]
+  },
+  bisonte:{
+    nombre:"Bisonte", plural:"Bisontes", need:1, size:"Grande", icon:"bisonte",
+    arma:"Rifle potente a la cabeza (Springfield / Rolling Block / cerrojo)",
+    momento:"Cualquier hora",
+    donde:"The Heartlands, al este y al sureste de Valentine. Van en manada.",
+    zurrones:["Provisiones"],
+    tip:"Con el arco se te queda vivo y te embiste. Rifle, a la cabeza, desde lejos y a caballo por si carga. Busca la manada y estudia uno por uno hasta encontrar el de tres estrellas.",
+    spots:[{x:63.8,y:47.2,l:"Manada del este",st:1},{x:58.8,y:48.5,l:"Sureste de Valentine",st:1}]
+  },
+  pantera:{
+    nombre:"Pantera", plural:"Panteras", need:1, size:"Grande", icon:"pantera",
+    arma:"Arco con flecha mejorada o rifle, a la cabeza",
+    momento:"Noche",
+    donde:"Bosque al sureste de Braithwaite Manor, pegado a la costa de Lemoyne. También por Bolger Glade.",
+    zurrones:["Kit"],
+    tip:"La caza más difícil de la lista. Guarda partida antes de entrar en la zona: si la que aparece no tiene tres estrellas, recargas y vuelves a intentarlo. Usa cebo de depredador y quédate a caballo hasta verla, porque ataca de golpe.",
+    spots:[{x:70.9,y:69.4,l:"Costa sureste",st:5},{x:71.4,y:64.8,l:"Bolger Glade",st:5}]
+  },
+  puma:{
+    nombre:"Puma", plural:"Pumas", need:1, size:"Grande", icon:"puma",
+    arma:"Arco con flecha mejorada o rifle, a la cabeza",
+    momento:"Cualquier hora, mejor de noche",
+    donde:"Carretera al norte de Owanjila, camino del trampero de Big Valley.",
+    zurrones:["Leyenda del Este"],
+    tip:"Es uno de los mejores puntos de aparición del juego. Recorre la carretera despacio, en los dos sentidos, hasta que salte el aviso. Igual que con la pantera, guarda antes por si sale de dos estrellas.",
+    spots:[{x:37.2,y:46.2,l:"Norte de Owanjila",st:4},{x:35.4,y:43.4,l:"Big Valley oeste",st:4}]
+  },
+  lobo:{
+    nombre:"Lobo", plural:"Lobos", need:1, size:"Mediano", icon:"lobo",
+    arma:"Arco con flechas normales o mejoradas, a la cabeza",
+    momento:"Noche",
+    donde:"Cumberland Forest y toda la subida a Grizzlies.",
+    zurrones:["Leyenda del Este"],
+    tip:"Van en manada y atacan al caballo. Ponte en alto o sobre una roca, deja que se acerquen y tira al que tenga tres estrellas. Si disparas con repetidora estropeas la piel.",
+    spots:[{x:57.0,y:31.0,l:"Cumberland",st:2},{x:52.5,y:29.0,l:"Subida a Grizzlies",st:3}]
+  },
+  jabali:{
+    nombre:"Jabalí", plural:"Jabalíes", need:1, size:"Mediano", icon:"jabali",
+    arma:"Arco con flechas normales o mejoradas",
+    momento:"Cualquier hora",
+    donde:"Todo Lemoyne: Scarlett Meadows, Bluewater Marsh y los alrededores de Rhodes.",
+    zurrones:["Materiales"],
+    tip:"Muy frecuente, no es problema. Cuidado porque carga: dispárale desde el caballo o desde un sitio alto.",
+    spots:[{x:70.6,y:63.4,l:"Scarlett Meadows",st:5},{x:74.8,y:52.0,l:"Bluewater Marsh",st:5}]
+  },
+  castor:{
+    nombre:"Castor", plural:"Castores", need:1, size:"Mediano", icon:"castor",
+    arma:"Arco con flechas normales",
+    momento:"Anochecer y noche",
+    donde:"Orillas del embalse de Owanjila. También por el río Kamassa y Elysian Pool.",
+    zurrones:["Objetos de valor"],
+    tip:"Bordea el agua a pie y en silencio, con la loción anti-olor puesta. Si te acercas a caballo salen corriendo antes de que los veas.",
+    spots:[{x:39.4,y:51.7,l:"Orilla este de Owanjila",st:4},{x:36.0,y:52.3,l:"Presa",st:4}]
+  },
+  mapache:{
+    nombre:"Mapache", plural:"Mapaches", need:1, size:"Mediano", icon:"mapache",
+    arma:"Arco con flechas normales, o rifle Varmint a la cabeza",
+    momento:"Anochecer y noche",
+    donde:"Cumberland Forest, y en general los bosques del norte de New Hanover.",
+    zurrones:["Provisiones"],
+    tip:"Nocturno. Da una vuelta por el bosque después de que se ponga el sol con Ojo de Halcón para verlos entre los matorrales.",
+    spots:[{x:59.0,y:33.8,l:"Cumberland Forest",st:2}]
+  },
+  tejon:{
+    nombre:"Tejón", plural:"Tejones", need:1, size:"Mediano", icon:"tejon",
+    arma:"Arco con flechas normales, o rifle Varmint a la cabeza",
+    momento:"Noche",
+    donde:"Cumberland Forest y los bordes de The Heartlands. Sale de madrigueras.",
+    zurrones:["Ingredientes"],
+    tip:"Es de los más escurridizos de la lista, más por lo raro que es encontrarlo que por matarlo. Si no aparece, haz un viaje aparte solo para él, de noche, con Ojo de Halcón.",
+    spots:[{x:61.5,y:35.6,l:"Cumberland sur",st:2},{x:58.0,y:42.0,l:"Borde de Heartlands",st:2}]
+  },
+  ardilla:{
+    nombre:"Ardilla", plural:"Ardillas", need:1, size:"Pequeño", icon:"ardilla",
+    arma:"Flecha para animales pequeños, o rifle Varmint",
+    momento:"Día",
+    donde:"Cumberland Forest, en los árboles y en el suelo entre las raíces.",
+    zurrones:["Ingredientes"],
+    tip:"Con cualquier otra arma revientas la piel. Flecha para animales pequeños o Varmint, siempre a la cabeza.",
+    spots:[{x:62.0,y:31.6,l:"Cumberland Forest",st:2}]
+  },
+  conejo:{
+    nombre:"Conejo", plural:"Conejos", need:1, size:"Pequeño", icon:"conejo",
+    arma:"Flecha para animales pequeños, o rifle Varmint",
+    momento:"Amanecer",
+    donde:"The Heartlands y las praderas alrededor de Valentine. Salen por todas partes.",
+    zurrones:["Objetos de valor"],
+    tip:"El más fácil de la lista. Lo único: usa el arma correcta, porque con la escopeta o la repetidora no queda piel que valga.",
+    spots:[{x:57.0,y:47.5,l:"Heartlands",st:1},{x:52.0,y:42.0,l:"Praderas de Valentine",st:1}]
+  },
+  iguana:{
+    nombre:"Iguana", plural:"Iguanas", need:1, size:"Pequeño", icon:"iguana",
+    arma:"Flecha para animales pequeños, o rifle Varmint",
+    momento:"Día, al sol",
+    donde:"Isla grande de Flat Iron Lake, al oeste de Rhodes y de Clemens Point. En el epílogo, también por Rio Bravo y Tumbleweed.",
+    zurrones:["Materiales"],
+    tip:"Vas nadando con el caballo desde Clemens Point. Están tomando el sol sobre las rocas: acércate a pie y tira a la cabeza. Es la piel que más gente se deja para el final sin necesidad.",
+    spots:[{x:62.9,y:61.4,l:"Isla de Flat Iron Lake",st:5},{x:20.0,y:81.5,l:"New Austin (epílogo)",st:5}]
+  }
+};
+
+const SATCHELS = [
+  {n:"Tónicos", unlock:"Mejorar el carro de medicinas dos veces", req:[["ciervo",1],["ciervoMacho",1],["alce",1]], efecto:"Duplica la capacidad de tónicos"},
+  {n:"Ingredientes", unlock:"Donar 5 cadáveres de animales al campamento", req:[["ciervo",1],["tejon",1],["ardilla",1]], efecto:"Duplica la capacidad de ingredientes"},
+  {n:"Kit", unlock:"Donar 3 objetos de valor", req:[["ciervo",1],["alce",1],["pantera",1]], efecto:"Duplica la capacidad del kit"},
+  {n:"Provisiones", unlock:"Mejorar el carro de provisiones dos veces", req:[["ciervo",1],["bisonte",1],["mapache",1]], efecto:"Duplica la capacidad de provisiones"},
+  {n:"Materiales", unlock:"Elaborar 3 recetas en una hoguera de explorador", req:[["ciervo",1],["jabali",1],["iguana",1]], efecto:"Duplica la capacidad de materiales"},
+  {n:"Objetos de valor", unlock:"Donar 50 $ al campamento", req:[["ciervo",1],["castor",1],["conejo",1]], efecto:"Duplica la capacidad de objetos de valor"},
+  {n:"Leyenda del Este", unlock:"Haber fabricado los otros seis zurrones", req:[["ciervo",1],["puma",1],["lobo",1]], efecto:"Sube a 99 la capacidad de casi todos los objetos", legend:true}
+];
+
+const ORDER = ["ciervo","ciervoMacho","alce","bisonte","pantera","puma","lobo","jabali","castor","mapache","tejon","ardilla","conejo","iguana"];
+const TOTAL = ORDER.reduce((s,k)=>s+ANIMALS[k].need,0);
+
+/* ======================================================================
+   ESTADO
+   ====================================================================== */
+const KEY = "rdr2-ruta-caza-v1";
+let got = {};
+try{ got = JSON.parse(localStorage.getItem(KEY)||"{}") || {}; }catch(e){ got = {}; }
+ORDER.forEach(k=>{ if(typeof got[k]!=="number") got[k]=0; });
+
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(got)); }catch(e){} }
+function total(){ return ORDER.reduce((s,k)=>s+Math.min(got[k],ANIMALS[k].need),0); }
+function isDone(k){ return got[k] >= ANIMALS[k].need; }
+
+let activeStage = 0;      // 0 = todas
+let selected = null;      // {type:'animal'|'way', key}
+let onlyPending = false;
+
+/* ======================================================================
+   MAPA: zoom / pan
+   ====================================================================== */
+const AR = 12000/8670;
+const BASE_W = 2000, BASE_H = BASE_W/AR;
+const viewport = document.getElementById("viewport");
+const canvas   = document.getElementById("canvas");
+const markersEl= document.getElementById("markers");
+const routesEl = document.getElementById("routes");
+
+canvas.style.width  = BASE_W+"px";
+canvas.style.height = BASE_H+"px";
+
+let view = {x:0, y:0, k:1};
+let MINK = .2, MAXK = 5;
+
+function clampView(){
+  const r = viewport.getBoundingClientRect();
+  const w = BASE_W*view.k, h = BASE_H*view.k;
+  const padX = Math.min(r.width*0.5, w*0.5);
+  const padY = Math.min(r.height*0.5, h*0.5);
+  view.x = Math.min(r.width - padX, Math.max(padX - w, view.x));
+  view.y = Math.min(r.height - padY, Math.max(padY - h, view.y));
+}
+function apply(){
+  clampView();
+  canvas.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.k})`;
+  markersEl.style.setProperty("--inv", 1/view.k);
+  markersEl.classList.toggle("hide-way",    view.k < fitK*1.10);
+  markersEl.classList.toggle("hide-animal", view.k < fitK*1.70);
+}
+const LAND_FULL   = {x0:1.5,  y0:5.5, x1:90.5, y1:96.5};
+const LAND_NARROW = {x0:33.0, y0:6.0, x1:91.0, y1:97.0};
+let fitK = 1;
+function fit(animate){
+  const r = viewport.getBoundingClientRect();
+  const LAND = r.width < 780 ? LAND_NARROW : LAND_FULL;
+  const w = BASE_W*(LAND.x1-LAND.x0)/100, h = BASE_H*(LAND.y1-LAND.y0)/100;
+  const k = Math.min(r.width/w, r.height/h)*0.98;
+  fitK = k; MINK = k*0.7;
+  const cx = (LAND.x0+LAND.x1)/2/100*BASE_W, cy = (LAND.y0+LAND.y1)/2/100*BASE_H;
+  animateTo({k, x:r.width/2-cx*k, y:r.height/2-cy*k}, animate!==false);
+}
+function flyTo(xPct, yPct, k, animate){
+  const r = viewport.getBoundingClientRect();
+  const target = Math.max(MINK, Math.min(MAXK, k||view.k));
+  animateTo({
+    k:target,
+    x:r.width/2  - (xPct/100)*BASE_W*target,
+    y:r.height/2 - (yPct/100)*BASE_H*target
+  }, animate!==false);
+}
+let animId = null;
+function animateTo(to, animate){
+  if(animId) cancelAnimationFrame(animId);
+  if(!animate){ view = {...to}; apply(); return; }
+  const from = {...view}, t0 = performance.now(), dur = 620;
+  const ease = t => 1 - Math.pow(1-t, 3);
+  (function step(now){
+    const t = Math.min(1,(now-t0)/dur), e = ease(t);
+    view.k = from.k + (to.k-from.k)*e;
+    view.x = from.x + (to.x-from.x)*e;
+    view.y = from.y + (to.y-from.y)*e;
+    apply();
+    if(t<1) animId = requestAnimationFrame(step);
+  })(t0);
+}
+
+/* pan */
+let drag = null;
+viewport.addEventListener("pointerdown", e=>{
+  if(e.target.closest(".pin, .tag")) return;
+  drag = {id:e.pointerId, x:e.clientX, y:e.clientY, vx:view.x, vy:view.y, moved:0};
+  viewport.setPointerCapture(e.pointerId);
+  viewport.classList.add("grabbing");
+  if(animId) cancelAnimationFrame(animId);
+});
+viewport.addEventListener("pointermove", e=>{
+  if(!drag || e.pointerId!==drag.id) return;
+  const dx = e.clientX-drag.x, dy = e.clientY-drag.y;
+  drag.moved = Math.max(drag.moved, Math.abs(dx)+Math.abs(dy));
+  view.x = drag.vx+dx; view.y = drag.vy+dy; apply();
+});
+["pointerup","pointercancel"].forEach(ev=>viewport.addEventListener(ev, e=>{
+  if(drag && e.pointerId===drag.id){ drag=null; viewport.classList.remove("grabbing"); }
+}));
+
+/* pellizco */
+let pinch = null;
+viewport.addEventListener("touchstart", e=>{
+  if(e.touches.length===2){
+    drag=null;
+    const [a,b]=e.touches;
+    pinch = {d:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY), k:view.k,
+             cx:(a.clientX+b.clientX)/2, cy:(a.clientY+b.clientY)/2, x:view.x, y:view.y};
+  }
+},{passive:true});
+viewport.addEventListener("touchmove", e=>{
+  if(pinch && e.touches.length===2){
+    e.preventDefault();
+    const [a,b]=e.touches;
+    const d = Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+    const nk = Math.max(MINK, Math.min(MAXK, pinch.k*(d/pinch.d)));
+    const r = viewport.getBoundingClientRect();
+    const px = pinch.cx-r.left, py = pinch.cy-r.top;
+    view.x = px - (px-pinch.x)*(nk/pinch.k);
+    view.y = py - (py-pinch.y)*(nk/pinch.k);
+    view.k = nk; apply();
+  }
+},{passive:false});
+viewport.addEventListener("touchend", ()=>{ pinch=null; });
+
+/* rueda */
+viewport.addEventListener("wheel", e=>{
+  e.preventDefault();
+  if(animId) cancelAnimationFrame(animId);
+  const r = viewport.getBoundingClientRect();
+  const px = e.clientX-r.left, py = e.clientY-r.top;
+  const factor = Math.exp(-e.deltaY*0.0016);
+  const nk = Math.max(MINK, Math.min(MAXK, view.k*factor));
+  view.x = px-(px-view.x)*(nk/view.k);
+  view.y = py-(py-view.y)*(nk/view.k);
+  view.k = nk; apply();
+},{passive:false});
+
+viewport.addEventListener("dblclick", e=>{
+  const r = viewport.getBoundingClientRect();
+  const px = e.clientX-r.left, py = e.clientY-r.top;
+  const nk = Math.min(MAXK, view.k*1.9);
+  animateTo({k:nk, x:px-(px-view.x)*(nk/view.k), y:py-(py-view.y)*(nk/view.k)}, true);
+});
+
+document.getElementById("zIn").onclick  = ()=>zoomBy(1.5);
+document.getElementById("zOut").onclick = ()=>zoomBy(1/1.5);
+document.getElementById("zFit").onclick = ()=>{ setStage(0); fit(); };
+document.getElementById("zLbl").onclick = e=>{
+  document.body.classList.toggle("nolabels");
+  e.currentTarget.style.color = document.body.classList.contains("nolabels") ? "" : "var(--gold2)";
+};
+function zoomBy(f){
+  const r = viewport.getBoundingClientRect();
+  const px = r.width/2, py = r.height/2;
+  const nk = Math.max(MINK, Math.min(MAXK, view.k*f));
+  animateTo({k:nk, x:px-(px-view.x)*(nk/view.k), y:py-(py-view.y)*(nk/view.k)}, true);
+}
+let rzT=null;
+window.addEventListener("resize", ()=>{
+  apply();
+  clearTimeout(rzT);
+  rzT = setTimeout(()=>{ if(activeStage===0) fit(false); }, 180);
+});
+
+/* ======================================================================
+   RUTA (SVG)
+   ====================================================================== */
+function catmull(points, tension){
+  if(points.length<2) return "";
+  const t = tension==null?0.5:tension;
+  let d = `M ${points[0][0]} ${points[0][1]}`;
+  for(let i=0;i<points.length-1;i++){
+    const p0 = points[i-1]||points[i], p1 = points[i], p2 = points[i+1], p3 = points[i+2]||points[i+1];
+    const c1x = p1[0]+(p2[0]-p0[0])/6*t, c1y = p1[1]+(p2[1]-p0[1])/6*t;
+    const c2x = p2[0]-(p3[0]-p1[0])/6*t, c2y = p2[1]-(p3[1]-p1[1])/6*t;
+    d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2[0]} ${p2[1]}`;
+  }
+  return d;
+}
+function buildRoutes(){
+  const NS = "http://www.w3.org/2000/svg";
+  routesEl.innerHTML = "";
+  const defs = document.createElementNS(NS,"defs");
+  defs.innerHTML = `<filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="0.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+  routesEl.appendChild(defs);
+
+  /* enlace entre etapas: línea tenue continua */
+  const all = [];
+  STAGES.forEach(s=>s.way.forEach(w=>all.push([w.x,w.y])));
+  const linkPath = document.createElementNS(NS,"path");
+  linkPath.setAttribute("d", catmull(all));
+  linkPath.setAttribute("fill","none");
+  linkPath.setAttribute("stroke","rgba(230,220,192,.28)");
+  linkPath.setAttribute("stroke-width","1.6");
+  linkPath.setAttribute("stroke-dasharray","0.5 3.5");
+  linkPath.setAttribute("stroke-linecap","round");
+  linkPath.setAttribute("vector-effect","non-scaling-stroke");
+  linkPath.dataset.role = "link";
+  routesEl.appendChild(linkPath);
+
+  STAGES.forEach((s,i)=>{
+    const pts = s.way.map(w=>[w.x,w.y]);
+    if(i<STAGES.length-1 && STAGES[i+1].way.length) pts.push([STAGES[i+1].way[0].x, STAGES[i+1].way[0].y]);
+    if(pts.length<2) return;
+    const d = catmull(pts);
+
+    const halo = document.createElementNS(NS,"path");
+    halo.setAttribute("d",d); halo.setAttribute("fill","none");
+    halo.setAttribute("stroke",s.hex); halo.setAttribute("stroke-opacity",".22");
+    halo.setAttribute("stroke-width","11"); halo.setAttribute("stroke-linecap","round");
+    halo.setAttribute("vector-effect","non-scaling-stroke");
+    halo.dataset.stage = s.id; halo.dataset.role="halo";
+    routesEl.appendChild(halo);
+
+    const p = document.createElementNS(NS,"path");
+    p.setAttribute("d",d); p.setAttribute("fill","none");
+    p.setAttribute("stroke",s.hex); p.setAttribute("stroke-width","3.1");
+    p.setAttribute("stroke-linecap","round"); p.setAttribute("stroke-dasharray","7 5");
+    p.setAttribute("vector-effect","non-scaling-stroke");
+    p.setAttribute("filter","url(#glow)");
+    p.dataset.stage = s.id; p.dataset.role="line";
+    p.style.animation = "none";
+    routesEl.appendChild(p);
+  });
+
+  const style = document.createElementNS(NS,"style");
+  style.textContent = `@keyframes march{to{stroke-dashoffset:-24}}
+    #routes path[data-role="line"]{animation:march 1.6s linear infinite}`;
+  routesEl.appendChild(style);
+}
+
+/* ======================================================================
+   MARCADORES
+   ====================================================================== */
+function medal(iconKey, size){
+  return `<svg width="${size||18}" height="${size||18}" viewBox="0 0 24 24">${ICONS[iconKey]||ICONS.forest}</svg>`;
+}
+function buildMarkers(){
+  markersEl.innerHTML = "";
+
+  STAGES.forEach(s=>{
+    s.way.forEach((w,idx)=>{
+      const el = document.createElement("div");
+      el.className = "mk way-mk";
+      el.style.left = w.x+"%"; el.style.top = w.y+"%";
+      el.style.setProperty("--c", s.hex);
+      el.dataset.stage = s.id;
+      el.dataset.type = "way";
+      el.dataset.key = s.id+"-"+idx;
+      el.innerHTML = `<div class="inner">
+          <div class="pin way" title="${w.n}">${idx===0?s.id:medal(w.icon,15)}</div>
+          <div class="tag">${w.n}</div>
+        </div>`;
+      el.querySelector(".inner").addEventListener("click", ev=>{
+        ev.stopPropagation(); openWay(s, w);
+      });
+      markersEl.appendChild(el);
+    });
+  });
+
+  ORDER.forEach(key=>{
+    const a = ANIMALS[key];
+    (a.spots||[]).forEach((sp,i)=>{
+      const st = STAGES.find(s=>s.id===sp.st) || STAGES.find(s=>s.animals.includes(key));
+      const hex = st ? st.hex : "#d9b56c";
+      const el = document.createElement("div");
+      el.className = "mk animal-mk";
+      el.style.left = sp.x+"%"; el.style.top = sp.y+"%";
+      el.style.setProperty("--c", hex);
+      el.dataset.stage = st ? st.id : 0;
+      el.dataset.type = "animal";
+      el.dataset.key = key;
+      el.innerHTML = `<div class="inner">
+          <div class="pin" title="${a.nombre} · ${sp.l}">${medal(a.icon,17)}</div>
+          <div class="tag">${a.nombre}${a.need>1?" ×"+a.need:""}</div>
+        </div>`;
+      el.querySelector(".inner").addEventListener("click", ev=>{
+        ev.stopPropagation(); openAnimal(key);
+      });
+      markersEl.appendChild(el);
+    });
+  });
+  refreshMarkers();
+}
+
+function refreshMarkers(){
+  markersEl.querySelectorAll(".mk").forEach(el=>{
+    const st = +el.dataset.stage;
+    const dim = activeStage!==0 && st!==activeStage;
+    el.classList.toggle("dim", dim);
+    el.classList.toggle("stage-on", activeStage!==0 && st===activeStage);
+
+    let hide = false;
+    if(el.dataset.type==="animal"){
+      const k = el.dataset.key;
+      el.querySelector(".pin").classList.toggle("done", isDone(k));
+      if(onlyPending && isDone(k)) hide = true;
+      el.classList.toggle("sel", selected && selected.type==="animal" && selected.key===k);
+    }else{
+      el.classList.toggle("sel", selected && selected.type==="way" && selected.key===el.dataset.key);
+    }
+    el.classList.toggle("hidden", hide);
+  });
+  routesEl.querySelectorAll("path[data-stage]").forEach(p=>{
+    const on = activeStage===0 || +p.dataset.stage===activeStage;
+    p.style.opacity = on ? 1 : .12;
+  });
+  const link = routesEl.querySelector('path[data-role="link"]');
+  if(link) link.style.opacity = activeStage===0 ? 1 : .1;
+}
+
+/* ======================================================================
+   PANEL DE DETALLE
+   ====================================================================== */
+const drawer = document.getElementById("drawer");
+document.getElementById("drClose").onclick = closeDrawer;
+function closeDrawer(){ drawer.classList.remove("on"); selected=null; refreshMarkers(); }
+
+function openAnimal(key, fly){
+  const a = ANIMALS[key];
+  const st = STAGES.find(s=>s.animals.includes(key));
+  selected = {type:"animal", key};
+  drawer.classList.add("on");
+  drawer.style.setProperty("--c", st?st.hex:"#d9b56c");
+  document.getElementById("drawerHead").style.setProperty("--c", st?st.hex:"#d9b56c");
+  document.getElementById("drEyebrow").textContent = st ? "Etapa "+st.id+" · "+st.sub : "Objetivo";
+  document.getElementById("drTitle").textContent = a.nombre + (a.need>1 ? "  ×"+a.need : "");
+
+  const pips = Array.from({length:a.need},(_,i)=>
+    `<button class="pip ${i<got[key]?"on":""}" data-k="${key}" data-i="${i}" title="Piel ${i+1}">
+       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4.5 4.5L19 7"/></svg>
+     </button>`).join("");
+
+  document.getElementById("drBody").innerHTML = `
+    <div style="margin-bottom:12px">
+      <span class="badge">${a.size}</span>
+      <span class="badge">${a.momento}</span>
+      <span class="badge ${isDone(key)?"g":"r"}">${Math.min(got[key],a.need)} / ${a.need} ${a.need>1?"conseguidas":"conseguida"}</span>
+    </div>
+    <dl class="kv">
+      <dt>Arma</dt><dd>${a.arma}</dd>
+      <dt>Dónde</dt><dd>${a.donde}</dd>
+      <dt>Zurrón</dt><dd>${a.zurrones.join(" · ")}</dd>
+    </dl>
+    <p>${a.tip}</p>
+    <div class="sect-title">Pieles perfectas</div>
+    <div class="pips">${pips}</div>
+    ${(a.spots&&a.spots.length>1)?`<div class="sect-title">Puntos en el mapa</div>
+      <div class="chip-row">${a.spots.map(s=>`<button class="chip" data-fx="${s.x}" data-fy="${s.y}"><span class="dot" style="background:${st?st.hex:'#d9b56c'}"></span>${s.l}</button>`).join("")}</div>`:""}
+  `;
+  wirePips();
+  document.getElementById("drBody").querySelectorAll("[data-fx]").forEach(b=>{
+    b.onclick = ()=>flyTo(+b.dataset.fx, +b.dataset.fy, Math.max(view.k,1.5));
+  });
+
+  if(fly!==false && a.spots && a.spots.length) flyTo(a.spots[0].x, a.spots[0].y, Math.max(view.k, 1.35));
+  refreshMarkers();
+}
+
+function openWay(s, w){
+  selected = {type:"way", key:s.id+"-"+s.way.indexOf(w)};
+  drawer.classList.add("on");
+  document.getElementById("drawerHead").style.setProperty("--c", s.hex);
+  document.getElementById("drEyebrow").textContent = "Etapa "+s.id;
+  document.getElementById("drTitle").textContent = w.n;
+  document.getElementById("drBody").innerHTML = `
+    <p>${w.note}</p>
+    <div class="sect-title">Objetivos de la etapa</div>
+    <div class="chip-row">${s.animals.map(k=>{
+      const a = ANIMALS[k];
+      return `<button class="chip ${isDone(k)?"done":""}" data-a="${k}"><span class="dot" style="background:${s.hex}"></span>${a.nombre}${a.need>1?" ×"+a.need:""}</button>`;
+    }).join("") || '<span style="font-size:12px;color:var(--muted2)">Sin caza. Aquí se entregan las pieles.</span>'}</div>
+    <div class="sect-title">La etapa</div>
+    <p>${s.text}</p>`;
+  document.getElementById("drBody").querySelectorAll("[data-a]").forEach(b=>{
+    b.onclick = ()=>openAnimal(b.dataset.a);
+  });
+  refreshMarkers();
+}
+
+function wirePips(){
+  document.querySelectorAll(".pip").forEach(p=>{
+    p.onclick = ()=>{
+      const k = p.dataset.k, i = +p.dataset.i;
+      got[k] = (got[k] === i+1) ? i : i+1;
+      save(); renderAll();
+      if(selected && selected.type==="animal" && selected.key===k) openAnimal(k, false);
+      if(isDone(k)) toast(ANIMALS[k].nombre+": piel perfecta conseguida");
+      if(total()===TOTAL) toast("Las 21 pieles. Ve a por el Leyenda del Este.");
+    };
+  });
+}
+
+/* ======================================================================
+   BARRA LATERAL
+   ====================================================================== */
+function renderRuta(){
+  const el = document.getElementById("pane-ruta");
+  el.innerHTML = `
+    <div class="callout">
+      <span class="lab">Antes de salir</span>
+      <p>Arco con flechas mejoradas y flechas para animales pequeños, rifle Varmint y un rifle potente de un solo tiro. Loción anti-olor, cebo de herbívoro y cebo de depredador. Caza solo animales de tres estrellas.</p>
+    </div>
+    <div class="sect-title">Las seis etapas</div>
+    ${STAGES.map(s=>`
+      <div class="stage-card ${s.id===activeStage?"active":""}" style="--c:${s.hex}" data-stage="${s.id}">
+        <button class="stage-head">
+          <span class="stage-num">${s.id}</span>
+          <span>
+            <h3>${s.title}</h3>
+            <span class="sub">${s.sub}</span>
+          </span>
+        </button>
+        <div class="stage-body">
+          <p>${s.text}</p>
+          <div class="chip-row">
+            ${s.way.map((w,i)=>`<button class="chip" data-w="${s.id}-${i}"><span class="dot"></span>${w.n}</button>`).join("")}
+          </div>
+          ${s.animals.length?`<div style="height:8px"></div><div class="chip-row">
+            ${s.animals.map(k=>`<button class="chip ${isDone(k)?"done":""}" data-a="${k}">${ANIMALS[k].nombre}${ANIMALS[k].need>1?" ×"+ANIMALS[k].need:""}</button>`).join("")}
+          </div>`:""}
+        </div>
+      </div>`).join("")}
+    <div class="sect-title">Y luego</div>
+    <div class="prose">
+      <p>Entrega las pieles a <strong>Pearson</strong> en el campamento, no las vendas. Cada zurrón necesita además su propia condición de desbloqueo, que tienes en la pestaña Zurrones.</p>
+    </div>`;
+
+  el.querySelectorAll(".stage-head").forEach(b=>{
+    b.onclick = ()=>{
+      const id = +b.closest(".stage-card").dataset.stage;
+      setStage(activeStage===id?0:id);
+    };
+  });
+  el.querySelectorAll("[data-a]").forEach(b=>b.onclick=e=>{e.stopPropagation();openAnimal(b.dataset.a);});
+  el.querySelectorAll("[data-w]").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    const [sid,i] = b.dataset.w.split("-").map(Number);
+    const s = STAGES.find(x=>x.id===sid);
+    flyTo(s.way[i].x, s.way[i].y, Math.max(view.k,1.6));
+    openWay(s, s.way[i]);
+  });
+}
+
+function renderAnimales(){
+  const el = document.getElementById("pane-animales");
+  const groups = [["Grandes","Grande"],["Medianos","Mediano"],["Pequeños","Pequeño"]];
+  el.innerHTML = `
+    <div class="callout">
+      <span class="lab">Regla de oro</span>
+      <p>Piel perfecta = animal de tres estrellas + muerte limpia con el arma adecuada. Estudia siempre con los prismáticos antes de disparar.</p>
+    </div>
+    ${groups.map(([label,size])=>`
+      <div class="sect-title">${label}</div>
+      ${ORDER.filter(k=>ANIMALS[k].size===size).map(k=>{
+        const a = ANIMALS[k], n = Math.min(got[k],a.need);
+        return `<div class="a-item ${isDone(k)?"complete":""}" data-a="${k}">
+          <span class="a-medal">${medal(a.icon,19)}</span>
+          <span>
+            <span class="a-name">${a.nombre}</span>
+            <span class="a-meta">${a.arma.split(",")[0]} · ${a.momento.toLowerCase()}</span>
+          </span>
+          <span class="a-count ${isDone(k)?"full":""}">${n}/${a.need}</span>
+        </div>`;
+      }).join("")}
+    `).join("")}`;
+  el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>openAnimal(b.dataset.a));
+}
+
+function renderZurrones(){
+  const el = document.getElementById("pane-zurrones");
+  el.innerHTML = `
+    <div class="callout">
+      <span class="lab">Cómo funciona</span>
+      <p>Los zurrones los fabrica Pearson en el campamento, y hace falta haberle comprado antes las herramientas de marroquinería. Cada uno pide tres pieles perfectas y una condición de campamento. Los seis primeros abren el séptimo.</p>
+    </div>
+    <div class="sect-title">Los siete zurrones</div>
+    ${SATCHELS.map(s=>{
+      const done = s.req.every(([k])=>isDone(k));
+      return `<div class="satchel ${done?"done":""} ${s.legend?"legend-satchel":""}">
+        <h4>${s.legend?'<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>':""}${s.n}</h4>
+        <div class="unlock">Desbloqueo: <b>${s.unlock}</b></div>
+        <div class="recipe">${s.req.map(([k,n])=>
+          `<button class="rq ${isDone(k)?"ok":""}" data-a="${k}">Piel de ${ANIMALS[k].nombre.toLowerCase()} ★★★${n>1?" ×"+n:""}</button>`).join("")}</div>
+      </div>`;
+    }).join("")}
+    <div class="sect-title">Cuentas</div>
+    <div class="prose">
+      <ul>
+        <li>El ciervo entra en <strong>los siete</strong> zurrones: hacen falta 7 pieles perfectas de ciervo.</li>
+        <li>El alce entra en dos: <strong>2 pieles de alce</strong>.</li>
+        <li>Todo lo demás, una piel de cada. <strong>21 pieles perfectas</strong> en total: 7 zurrones × 3 pieles.</li>
+      </ul>
+    </div>`;
+  el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>openAnimal(b.dataset.a));
+}
+
+function renderConsejos(){
+  document.getElementById("pane-consejos").innerHTML = `
+    <div class="callout">
+      <span class="lab">El consejo importante</span>
+      <p>No intentes hacerlo literalmente en una sola ruta. Ve guardando cualquier piel de tres estrellas que coincida con la lista mientras juegas, y haz viajes expresos solo para el puma, la pantera, la iguana y quizá el tejón. Es bastante más rápido.</p>
+    </div>
+
+    <div class="sect-title">Qué llevar encima</div>
+    <div class="kit">
+      <div class="kit-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 3v18M4 6c5-3 9 3 14 0v8c-5 3-9-3-14 0"/></svg>
+        <span><b>Arco + flechas mejoradas</b><span>El arma más versátil para pieles perfectas. Las flechas mejoradas se elaboran con plumas de ave y salvia.</span></span>
+      </div>
+      <div class="kit-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 12h13l5-2v4l-5-2M3 12v3M8 12v2"/></svg>
+        <span><b>Flechas para animales pequeños</b><span>Obligatorias para conejo, ardilla e iguana. Con cualquier otra cosa revientas la piel.</span></span>
+      </div>
+      <div class="kit-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 14h9l4-3h7M6 14v3M15 11V8"/></svg>
+        <span><b>Rifle Varmint</b><span>Alternativa cómoda para los pequeños y para mapache y tejón, siempre a la cabeza.</span></span>
+      </div>
+      <div class="kit-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 15h12l6-4M9 15v3M15 11V9M18 12.6l2.5-1.6"/></svg>
+        <span><b>Rifle de un solo tiro</b><span>Springfield o Rolling Block para bisonte, alce y ciervo a distancia.</span></span>
+      </div>
+      <div class="kit-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l-1 4H9zM9 7c-2 2-3 4-3 7 0 4 2.5 7 6 7s6-3 6-7c0-3-1-5-3-7"/></svg>
+        <span><b>Loción anti-olor y cebos</b><span>Cebo de herbívoro para ciervo y alce, cebo de depredador para pantera y puma. Cambian la partida.</span></span>
+      </div>
+    </div>
+
+    <div class="sect-title">Nueve cosas que te ahorran horas</div>
+    <div class="prose">
+      <ul>
+        <li><strong>Estudia antes de disparar.</strong> Prismáticos o Ojo de Halcón. Si no tiene tres estrellas, no gastes la flecha.</li>
+        <li><strong>Guarda partida antes del puma y de la pantera.</strong> Si aparece de dos estrellas, recargas y vuelve a generarse.</li>
+        <li><strong>A la cabeza y de un tiro.</strong> Un segundo disparo estropea la piel aunque el animal fuera perfecto.</li>
+        <li><strong>El caballo lleva una piel grande cada vez.</strong> Siete ciervos son siete viajes. Asume que habrá idas y venidas al campamento.</li>
+        <li><strong>Despelleja siempre.</strong> Si dejas el cadáver, pierdes la piel. Y si te matan cargando una, la pierdes también.</li>
+        <li><strong>Pearson, no el carnicero.</strong> Las pieles perfectas para zurrones se le dan a Pearson. El trampero es para atuendos, es otra cosa.</li>
+        <li><strong>De noche salen otros animales.</strong> Mapache, tejón, castor, lobo y pantera son mucho más frecuentes con el sol puesto.</li>
+        <li><strong>Acampa para pasar el tiempo.</strong> Si necesitas que sea de noche o de día, monta el campamento y duerme en vez de dar vueltas.</li>
+        <li><strong>Ciervo y ciervo macho son distintos.</strong> El macho tiene cuernos y solo hace falta uno, para el zurrón de tónicos.</li>
+      </ul>
+    </div>
+
+    <div class="sect-title">Sobre esta guía</div>
+    <div class="prose">
+      <p>Ruta pensada para salir desde Horseshoe Overlook, el campamento del capítulo 2, acumulando casi todo sin desvíos largos. Las recetas de los zurrones están tomadas de la <strong>Red Dead Wiki</strong>.</p>
+      <p style="font-size:11.5px;color:var(--muted2)">El progreso se guarda en tu navegador. Si borras los datos del sitio, se pierde.</p>
+      <p style="margin-top:18px;font-family:var(--font-d);font-size:11px;letter-spacing:.10em;color:var(--muted2);font-style:italic">
+        Hecha a cuatro manos <span style="color:var(--gold);font-style:normal;letter-spacing:.14em">by David Hurtado &amp; Máquina</span></p>
+    </div>`;
+}
+
+function renderProgress(){
+  const t = total(), pct = Math.round(t/TOTAL*100);
+  document.getElementById("pcount").textContent = t+" / "+TOTAL;
+  document.getElementById("ringVal").textContent = pct+"%";
+  const C = 2*Math.PI*19;
+  document.getElementById("ringFill").style.strokeDashoffset = C*(1-t/TOTAL);
+}
+
+function renderFilters(){
+  const el = document.getElementById("filters");
+  el.innerHTML = `
+    <button class="pill ${activeStage===0?"on":""}" data-s="0" style="--c:var(--gold)">Ruta completa</button>
+    ${STAGES.map(s=>`<button class="pill ${activeStage===s.id?"on":""}" data-s="${s.id}" style="--c:${s.hex}"><span class="dot"></span>${s.id}</button>`).join("")}
+    <button class="pill ${onlyPending?"on":""}" id="pendBtn" style="--c:var(--green)">Solo lo que falta</button>`;
+  el.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>setStage(+b.dataset.s));
+  document.getElementById("pendBtn").onclick = ()=>{ onlyPending=!onlyPending; renderFilters(); refreshMarkers(); };
+}
+
+function renderLegend(){
+  document.getElementById("legend").innerHTML = `
+    <div class="t">Etapas</div>
+    ${STAGES.map(s=>`<div class="row" style="--c:${s.hex}"><i></i>${s.id}. ${s.sub}</div>`).join("")}
+    <div class="sign">by <b>David Hurtado &amp; Máquina</b></div>`;
+}
+
+function renderSteps(){
+  document.getElementById("stepDots").innerHTML =
+    STAGES.map(s=>`<b class="${activeStage===s.id?"on":""}" style="--c:${s.hex}" data-s="${s.id}">${s.id}</b>`).join("");
+  document.getElementById("stepDots").querySelectorAll("b").forEach(b=>{
+    b.onclick = ()=>setStage(+b.dataset.s);
+  });
+}
+
+function renderAll(){
+  renderRuta(); renderAnimales(); renderZurrones(); renderProgress();
+  renderFilters(); renderSteps(); refreshMarkers();
+}
+
+/* ======================================================================
+   ETAPAS
+   ====================================================================== */
+function setStage(id){
+  activeStage = id;
+  renderRuta(); renderFilters(); renderSteps(); refreshMarkers();
+  if(id===0){ fit(); return; }
+  const s = STAGES.find(x=>x.id===id);
+  const xs = s.way.map(w=>w.x), ys = s.way.map(w=>w.y);
+  const cx = (Math.min(...xs)+Math.max(...xs))/2, cy=(Math.min(...ys)+Math.max(...ys))/2;
+  const spanX = Math.max(8, Math.max(...xs)-Math.min(...xs)+16);
+  const spanY = Math.max(8, Math.max(...ys)-Math.min(...ys)+16);
+  const r = viewport.getBoundingClientRect();
+  const k = Math.min(r.width/(BASE_W*spanX/100), r.height/(BASE_H*spanY/100));
+  flyTo(cx, cy, Math.max(MINK, Math.min(MAXK, k)));
+  const card = document.querySelector(`.stage-card[data-stage="${id}"]`);
+  if(card) card.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+document.getElementById("stepPrev").onclick = ()=>setStage(activeStage<=1 ? STAGES.length : activeStage-1);
+document.getElementById("stepNext").onclick = ()=>setStage(activeStage>=STAGES.length ? 1 : activeStage+1);
+
+/* ======================================================================
+   PESTAÑAS, TOAST, ATAJOS
+   ====================================================================== */
+document.querySelectorAll(".tabs button").forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected", x===b));
+    document.querySelectorAll(".pane").forEach(p=>p.classList.toggle("on", p.id==="pane-"+b.dataset.tab));
+    document.body.classList.add("sheet-open");
+  };
+});
+document.getElementById("sheetHandle").onclick = ()=>document.body.classList.toggle("sheet-open");
+
+let toastT = null;
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove("on"), 2400);
+}
+
+document.getElementById("btnReset").onclick = ()=>{
+  if(!confirm("¿Reiniciar el progreso de las 21 pieles?")) return;
+  ORDER.forEach(k=>got[k]=0); save(); renderAll(); closeDrawer(); toast("Progreso reiniciado");
+};
+
+document.addEventListener("keydown", e=>{
+  if(e.target.matches("input,textarea")) return;
+  if(e.key==="Escape") closeDrawer();
+  else if(e.key>="1" && e.key<="6") setStage(+e.key);
+  else if(e.key==="0") { setStage(0); }
+  else if(e.key==="+"||e.key==="=") zoomBy(1.4);
+  else if(e.key==="-") zoomBy(1/1.4);
+  else if(e.key.toLowerCase()==="l") document.getElementById("zLbl").click();
+  else if(e.key==="ArrowRight") document.getElementById("stepNext").click();
+  else if(e.key==="ArrowLeft") document.getElementById("stepPrev").click();
+});
+
+viewport.addEventListener("click", e=>{
+  if(!e.target.closest(".pin,.tag") && drag===null) { /* click en vacío: no cierra, es cómodo */ }
+});
+
+/* ======================================================================
+   ARRANQUE
+   ====================================================================== */
+buildRoutes();
+buildMarkers();
+renderConsejos();
+renderLegend();
+renderAll();
+
+const img = document.getElementById("mapimg");
+function boot(){ fit(false); apply(); }
+if(img.complete) boot(); else img.addEventListener("load", boot);
+window.addEventListener("load", ()=>{ if(view.k===1) boot(); });
+</script>
+</body>
+</html>
