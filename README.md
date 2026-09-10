@@ -4,7 +4,7 @@ Explorations on AI, nothing too techie.
 
 Colección de páginas HTML autocontenidas —guías, simuladores, mapas visuales y experimentos— publicadas con GitHub Pages. Cada archivo funciona por sí solo: se abre en el navegador o se embebe donde haga falta.
 
-**Índice:** 28 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
+**Índice:** 29 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
 
 ## Cómo usarlas
 
@@ -77,6 +77,7 @@ Cosas complicadas explicadas moviendo cosas por la pantalla.
 
 | Página | De qué va |
 |---|---|
+| [Fórmula 1 · Telemetría de Spa 2026](https://davidhurtadoai.github.io/Explorations/Formula1-Spa2026.html) | Dashboard interactivo de Antonelli vs Verstappen en clasificación: velocidad, acelerador, freno, DRS y diferencia de tiempo |
 | [Simulador de hipoteca · segunda vivienda 2026](https://davidhurtadoai.github.io/Explorations/simulador-hipoteca.html) | Cuotas, intereses y escenarios para una segunda vivienda |
 | [CRM · Consulta de clientes](https://davidhurtadoai.github.io/Explorations/crm-consulta.html) | Interfaz de consulta de una base de clientes |
 
