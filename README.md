@@ -4,7 +4,7 @@ Explorations on AI, nothing too techie.
 
 Colección de páginas HTML autocontenidas —guías, simuladores, mapas visuales y experimentos— publicadas con GitHub Pages. Cada archivo funciona por sí solo: se abre en el navegador o se embebe donde haga falta.
 
-**Índice:** 29 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
+**Índice:** 33 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
 
 ## Cómo usarlas
 
@@ -34,6 +34,13 @@ Marco de trabajo sobre cómo una organización piensa, mide y decide con IA.
 | [El equipo de detección frontera](https://davidhurtadoai.github.io/Explorations/equipo-deteccion-frontera.html) | El equipo que vigila qué es posible hoy y qué acaba de volverse posible |
 | [SaaS vs Era Agéntica](https://davidhurtadoai.github.io/Explorations/saas-vs-agentic.html) | Comparativa visual entre el software tradicional y el modelo agéntico |
 | [Ejercicio práctico · Módulo 1](https://davidhurtadoai.github.io/Explorations/ejercicio_modulo1.html) | Visualización interactiva de los 8 entregables del módulo |
+
+## Guías de IA y gobierno de la información
+
+| Página | De qué va |
+|---|---|
+| [Gobierno de la Información en la Era de la IA](https://davidhurtadoai.github.io/Explorations/Guia-Gobierno-de-la-Informacion.html) | Guía interactiva en 26 volúmenes sobre gobierno de la información, Microsoft Purview y Copilot |
+| [Convertirse en usuario experto de IA](https://davidhurtadoai.github.io/Explorations/Gu%C3%ADa-convertirse-en-usuario-experto-de-IA.html) | Plan de aprendizaje por semanas, con recursos, certificaciones y prompts prácticos |
 
 ## Guías de producto: Copilot y Microsoft
 
@@ -78,6 +85,8 @@ Cosas complicadas explicadas moviendo cosas por la pantalla.
 | Página | De qué va |
 |---|---|
 | [Fórmula 1 · Telemetría de Spa 2026](https://davidhurtadoai.github.io/Explorations/Formula1-Spa2026.html) | Dashboard interactivo de Antonelli vs Verstappen en clasificación: velocidad, acelerador, freno, DRS y diferencia de tiempo |
+| [Fórmula 1 · MADRING 2026 · Clasificación Top 5](https://davidhurtadoai.github.io/Explorations/dashboard_madring_2026.html) | Dashboard interactivo con vista 3D, telemetría y comparación de los cinco primeros pilotos en clasificación |
+| [Fórmula 1 · La Monumental · MADRING 2026](https://davidhurtadoai.github.io/Explorations/monumental_santander_2026.html) | Visualización 3D de la curva T12, con controles de peralte y una demo de publicidad simulada de Santander |
 | [Simulador de hipoteca · segunda vivienda 2026](https://davidhurtadoai.github.io/Explorations/simulador-hipoteca.html) | Cuotas, intereses y escenarios para una segunda vivienda |
 | [CRM · Consulta de clientes](https://davidhurtadoai.github.io/Explorations/crm-consulta.html) | Interfaz de consulta de una base de clientes |
 
