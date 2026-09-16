@@ -39,7 +39,7 @@ Marco de trabajo sobre cómo una organización piensa, mide y decide con IA.
 
 | Página | De qué va |
 |---|---|
-| [Gobierno de la Información en la Era de la IA](https://davidhurtadoai.github.io/Explorations/Guia-Gobierno-de-la-Informacion.html) | Guía interactiva en 26 volúmenes sobre gobierno de la información, Microsoft Purview y Copilot |
+| [Gobierno de la Información en la Era de la IA](https://davidhurtadoai.github.io/Explorations/Guia-Gobierno-de-la-Informacion.html) | Guía interactiva en 26 volúmenes y anexos sobre gobierno de la información, Microsoft Purview y Copilot, con el branding de DavidHurtado.ai |
 | [Convertirse en usuario experto de IA](https://davidhurtadoai.github.io/Explorations/Gu%C3%ADa-convertirse-en-usuario-experto-de-IA.html) | Plan de aprendizaje por semanas, con recursos, certificaciones y prompts prácticos |
 
 ## Guías de producto: Copilot y Microsoft
