@@ -4,7 +4,7 @@ Explorations on AI, nothing too techie.
 
 Colección de páginas HTML autocontenidas —guías, simuladores, mapas visuales y experimentos— publicadas con GitHub Pages. Cada archivo funciona por sí solo: se abre en el navegador o se embebe donde haga falta.
 
-**Índice:** 33 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
+**Índice:** 34 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
 
 ## Cómo usarlas
 
@@ -84,6 +84,7 @@ Cosas complicadas explicadas moviendo cosas por la pantalla.
 
 | Página | De qué va |
 |---|---|
+| [Dashboard de riesgo regulatorio](https://davidhurtadoai.github.io/Explorations/dashboard_riesgo_regulatorio.html) | Panel de riesgo regulatorio |
 | [Fórmula 1 · Telemetría de Spa 2026](https://davidhurtadoai.github.io/Explorations/Formula1-Spa2026.html) | Dashboard interactivo de Antonelli vs Verstappen en clasificación: velocidad, acelerador, freno, DRS y diferencia de tiempo |
 | [Fórmula 1 · MADRING 2026 · Clasificación Top 5](https://davidhurtadoai.github.io/Explorations/dashboard_madring_2026.html) | Dashboard interactivo con vista 3D, telemetría y comparación de los cinco primeros pilotos en clasificación |
 | [Fórmula 1 · La Monumental · MADRING 2026](https://davidhurtadoai.github.io/Explorations/monumental_santander_2026.html) | Visualización 3D de la curva T12, con controles de peralte y una demo de publicidad simulada de Santander |
