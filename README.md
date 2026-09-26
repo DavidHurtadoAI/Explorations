@@ -4,7 +4,7 @@ Explorations on AI, nothing too techie.
 
 Colección de páginas HTML autocontenidas —guías, simuladores, mapas visuales y experimentos— publicadas con GitHub Pages. Cada archivo funciona por sí solo: se abre en el navegador o se embebe donde haga falta.
 
-**Índice:** 36 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
+**Índice:** 38 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
 
 ## Cómo usarlas
 
@@ -92,6 +92,8 @@ Cosas complicadas explicadas moviendo cosas por la pantalla.
 | [Fórmula 1 · La Monumental · MADRING 2026](https://davidhurtadoai.github.io/Explorations/monumental_santander_2026.html) | Visualización 3D de la curva T12, con controles de peralte y una demo de publicidad simulada de Santander |
 | [Simulador de hipoteca · segunda vivienda 2026](https://davidhurtadoai.github.io/Explorations/simulador-hipoteca.html) | Cuotas, intereses y escenarios para una segunda vivienda |
 | [CRM · Consulta de clientes](https://davidhurtadoai.github.io/Explorations/crm-consulta.html) | Interfaz de consulta de una base de clientes |
+| [Comparador de motos · Antes de comprarme una moto](https://davidhurtadoai.github.io/Explorations/comparador-motos-16-9.html) | Comparador interactivo para elegir la próxima moto, con fichas, costes de cambio y simulación de financiación |
+| [Triumph Tiger 850 Sport vs. Trident 660 Triple Tribute](https://davidhurtadoai.github.io/Explorations/Triumph-Tiger-850-vs-Trident-660.html) | Comparativa interactiva de par, potencia y desarrollos para entender las diferencias de respuesta entre ambas motos |
 
 ## Rutas y escapadas
 
