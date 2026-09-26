@@ -4,7 +4,7 @@ Explorations on AI, nothing too techie.
 
 Colección de páginas HTML autocontenidas —guías, simuladores, mapas visuales y experimentos— publicadas con GitHub Pages. Cada archivo funciona por sí solo: se abre en el navegador o se embebe donde haga falta.
 
-**Índice:** 34 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
+**Índice:** 36 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
 
 ## Cómo usarlas
 
@@ -57,6 +57,8 @@ Marco de trabajo sobre cómo una organización piensa, mide y decide con IA.
 | [Sistema de Identidad Visual · DavidHurtado.ai](https://davidhurtadoai.github.io/Explorations/DavidHurtado-Brand-System.html) | Manual de marca v1.2: personalidad, símbolo, lockup, tipografía y color |
 | [Mesa editorial visual 2026](https://davidhurtadoai.github.io/Explorations/web-2026.html) | Las publicaciones del año dispuestas sobre una mesa editorial |
 | [Ciudad de publicaciones 2026](https://davidhurtadoai.github.io/Explorations/ciudad-publicaciones-2026.html) | Las mismas publicaciones como una ciudad 3D navegable |
+| [Evolución de davidhurtado.ai · Pixel art](https://davidhurtadoai.github.io/Explorations/evolucion-web-pixel-45.html) | Animación de 45 segundos, con música y efectos, sobre la evolución de la web entre 2024 y 2026 |
+| [Evolución de davidhurtado.ai · Cuaderno de Vermeer](https://davidhurtadoai.github.io/Explorations/evolucion-web-vermeer.html) | La evolución de la web entre 2024 y 2026 en una animación de 45 segundos con estética de tinta y acuarela sobre papel cuadriculado y sonido |
 
 ## «Todos vosotros, zombis» · un relato, tres modelos
 
