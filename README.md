@@ -4,7 +4,7 @@ Explorations on AI, nothing too techie.
 
 Colección de páginas HTML autocontenidas —guías, simuladores, mapas visuales y experimentos— publicadas con GitHub Pages. Cada archivo funciona por sí solo: se abre en el navegador o se embebe donde haga falta.
 
-**Índice:** 38 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
+**Índice:** 39 páginas · [ver el sitio](https://davidhurtadoai.github.io/Explorations/)
 
 ## Cómo usarlas
 
@@ -76,6 +76,7 @@ Cosas complicadas explicadas moviendo cosas por la pantalla.
 
 | Página | De qué va |
 |---|---|
+| [Guía de montaje SINAMICS S200](https://davidhurtadoai.github.io/Explorations/guia-montaje-s200.html) | Guía interactiva del bastidor Sonepar, con identificación de componentes, fases de instalación, mapa de conexiones y documentación Siemens |
 | [Energía offshore](https://davidhurtadoai.github.io/Explorations/offshore-explainer.html) | Cómo funciona la eólica marina, de la turbina a la red |
 | [Qué pasa cuando das gas](https://davidhurtadoai.github.io/Explorations/Motos-guia-acelerador.html) | El recorrido del acelerador de una moto, del puño a la rueda |
 | [Simulación del Big Bang](https://davidhurtadoai.github.io/Explorations/BigBang.html) | Expansión de partículas con velocidad y densidad ajustables |
